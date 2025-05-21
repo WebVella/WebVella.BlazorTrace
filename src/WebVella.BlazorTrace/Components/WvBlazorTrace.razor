@@ -6,7 +6,7 @@
 </style>
 <div class="@_buttonClasses">
 	<button type="button" @onclick=_show title="WebVella Blazor Trace modal" style="@_buttonStyles">
-		<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart-pulse" viewBox="0 0 16 16">
+		<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
 			<path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053.918 3.995.78 5.323 1.508 7H.43c-2.128-5.697 4.165-8.83 7.394-5.857q.09.083.176.171a3 3 0 0 1 .176-.17c3.23-2.974 9.522.159 7.394 5.856h-1.078c.728-1.677.59-3.005.108-3.947C13.486.878 10.4.28 8.717 2.01zM2.212 10h1.315C4.593 11.183 6.05 12.458 8 13.795c1.949-1.337 3.407-2.612 4.473-3.795h1.315c-1.265 1.566-3.14 3.25-5.788 5-2.648-1.75-4.523-3.434-5.788-5" />
 			<path d="M10.464 3.314a.5.5 0 0 0-.945.049L7.921 8.956 6.464 5.314a.5.5 0 0 0-.88-.091L3.732 8H.5a.5.5 0 0 0 0 1H4a.5.5 0 0 0 .416-.223l1.473-2.209 1.647 4.118a.5.5 0 0 0 .945-.049l1.598-5.593 1.457 3.642A.5.5 0 0 0 12 9h3.5a.5.5 0 0 0 0-1h-3.162z" />
 		</svg>
@@ -19,23 +19,42 @@
 	<div class="wv-trace-modal">
 		<div class="wv-trace-modal__header">
 			<div class="wv-trace-modal__header__left">
-				<a href="https://blazor-trace.webvella.com">WebVella BlazorTrace</a>
+				<span class="wv-trace-modal__header__left__icon">
+					<span>
+						<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+							<path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053.918 3.995.78 5.323 1.508 7H.43c-2.128-5.697 4.165-8.83 7.394-5.857q.09.083.176.171a3 3 0 0 1 .176-.17c3.23-2.974 9.522.159 7.394 5.856h-1.078c.728-1.677.59-3.005.108-3.947C13.486.878 10.4.28 8.717 2.01zM2.212 10h1.315C4.593 11.183 6.05 12.458 8 13.795c1.949-1.337 3.407-2.612 4.473-3.795h1.315c-1.265 1.566-3.14 3.25-5.788 5-2.648-1.75-4.523-3.434-5.788-5" />
+							<path d="M10.464 3.314a.5.5 0 0 0-.945.049L7.921 8.956 6.464 5.314a.5.5 0 0 0-.88-.091L3.732 8H.5a.5.5 0 0 0 0 1H4a.5.5 0 0 0 .416-.223l1.473-2.209 1.647 4.118a.5.5 0 0 0 .945-.049l1.598-5.593 1.457 3.642A.5.5 0 0 0 12 9h3.5a.5.5 0 0 0 0-1h-3.162z" />
+						</svg>
+					</span>
+				</span>
+				<span class="wv-trace-modal__header__left__title">WebVella BlazorTrace</span>
 			</div>
 			<div class="wv-trace-modal__header__center">
+				<div class="wv-trace-modal__header__center__text">Compare: </div>
 				<div class="wv-trace-modal__header__center__primary">
 					<select>
 						<option>memory</option>
 					</select>
 				</div>
-				<div class="wv-trace-modal__header__center__text">compared to</div>
+				<div class="wv-trace-modal__header__center__text">to</div>
 				<div class="wv-trace-modal__header__center__secondary">
 					<select>
 						<option>memory</option>
 					</select>
 				</div>
+				<div class="wv-trace-modal__header__center__divider"></div>
+				<div class="wv-trace-modal__header__center__save">
+					<button class="green" type="button" title="saves the current state as snapshot">
+						New Snapshot
+					</button>
+				</div>
 			</div>
 			<div class="wv-trace-modal__header__right">
-				<button @onclick=_hide>x</button>
+				<button class="circle icon" @onclick=_hide>
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+						<path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+					</svg>
+				</button>
 			</div>
 		</div>
 		@if (_data is null)
@@ -45,24 +64,66 @@
 		else
 		{
 			<div class="wv-trace-modal__subheader">
-				Methods: Name, Call, Memory, Duration, Limits hit | Signals: Name
+				<div class="wv-trace-modal__subheader__left">
+					<ul class="wv-trace-nav">
+						<li>
+							<span>Methods:</span>
+						</li>
+						<li class="active">
+							<a href="#">Name</a>
+						</li>
+						<li>
+							<a href="#">Call</a>
+						</li>
+						<li>
+							<a href="#">Memory</a>
+						</li>
+						<li>
+							<a href="#">Duration</a>
+						</li>
+						<li>
+							<a href="#">Limits</a>
+						</li>
+					</ul>
+					<ul class="wv-trace-nav" style="margin-left:30px;">
+						<li>
+							<span>Signals:</span>
+						</li>
+						<li>
+							<a href="#">Name</a>
+						</li>
+					</ul>
+				</div>
+				<div class="wv-trace-modal__subheader__right">
+					<ul class="wv-trace-nav">
+						<li>
+							<a href="https://blazor-trace.webvella.com" target="_blank" title="Saved snapshots">Snapshots</a>
+						</li>
+						<li>
+							<a href="https://blazor-trace.webvella.com" target="_blank" title="Documentation website">Help</a>
+						</li>
+					</ul>
+
+				</div>
 			</div>
 			<div class="wv-trace-modal__body">
 				<table>
 					<thead>
 						<tr>
 							<th>
-								<input placeholder="module" />
+								<input placeholder="module" autocomplete="new-password"/>
 							</th>
 							<th>
-								<input placeholder="component" />
+								<input placeholder="component" autocomplete="new-password" />
 							</th>
 							<th>
-								<input placeholder="method" />
+								<input placeholder="method" autocomplete="new-password" />
 							</th>
 							<th>
 								<select>
-									<option>calls</option>
+									<option class="line0">calls</option>
+									<option class="line1">calls1</option>
+									<option class="line2">calls2</option>
 								</select>
 							</th>
 							<th>

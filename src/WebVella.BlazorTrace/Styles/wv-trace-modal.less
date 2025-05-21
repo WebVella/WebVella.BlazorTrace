@@ -17,14 +17,29 @@
 	left: 5vw;
 	top: 5vh;
 	width: 90vw;
+	min-width: 1024px;
 	height: 90vh;
+	min-height: 320px;
 	border-radius: 10px;
 	font-family: Arial, Helvetica, sans-serif;
-	@color: #cbd5e1;
+	@color-dark: #374151;
+	@color: #9ca3af;
+	@color-light: #e5e7eb;
 	@backround: oklch(13% 0.028 261.692);
 	@backround-dark: #020617;
 	@backround-light: #1f2937;
 	@color-stroke: #1f2937;
+	@color-accent: #be123c;
+	@color-accent-hover: rgba(@color-accent-dark,0.35);
+	@color-accent-active: rgba(@color-accent-dark,0.75);
+	@color-accent-dark: #4c0519;
+	@input-background: color-mix(in srgb, @backround 90%, #cbd5e1 10%);
+	@input-stroke: color-mix(in srgb, @backround 80%, #cbd5e1 20%);
+	@input-placeholder: color-mix(in srgb, @backround 60%, #cbd5e1 40%);
+
+	@accent-input-background: color-mix(in srgb, @color-accent 25%, @backround 75%);
+	@accent-input-stroke: color-mix(in srgb, @color-accent 35%, @backround 65%);
+	@accent-placeholder: color-mix(in srgb, @color-accent 50%, @backround 50%);
 
 	&__header {
 		display: flex;
@@ -36,7 +51,81 @@
 		padding: 0 10px;
 		font-size: 16px;
 
+
+		&__left {
+			flex: 0 0 200px;
+			color: @color;
+			display: flex;
+			justify-items: center;
+
+			a {
+				color: white;
+				text-decoration: none;
+			}
+
+			&__icon {
+				flex: 0 0 32px;
+				display: flex;
+				justify-content: start;
+				align-items: center;
+
+				span {
+					display: inline-flex;
+					justify-content: center;
+					align-items: center;
+					width: 24px;
+					height: 24px;
+					border-radius: 5px;
+					background: @color-accent;
+					color: white;
+
+					svg {
+						width: 16px;
+						position: relative;
+						top: 1px;
+					}
+				}
+			}
+
+			&__title {
+				display: flex;
+				align-items: center;
+			}
+		}
+
+		&__center {
+			flex: 1 1 auto;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			font-size: 14px;
+
+			&__divider {
+				flex: 0 0 auto;
+				padding-left: 20px;
+				margin-right: 20px;
+				position: relative;
+
+				&:after {
+					content: "";
+					display: block;
+					position: absolute;
+					right: 0;
+					width: 1px;
+					height: 10px;
+					margin-top: -5px;
+					top: 50%;
+					background: @input-stroke;
+				}
+			}
+		}
+
 		&__right {
+			flex: 0 0 200px;
+			display: flex;
+			justify-content: end;
+			align-items: center;
+
 			button {
 				cursor: pointer;
 				color: @backround-dark;
@@ -51,17 +140,59 @@
 	}
 
 	&__subheader {
-		height: 30px;
+		height: 39px;
 		background: @backround-light;
 		display: flex;
 		align-items: center;
-		padding: 0 10px;
+		justify-content: space-between;
+		padding: 0 15px;
 		color: @color;
+		border-bottom: 1px solid @color-accent-dark;
+		font-size: 14px;
+
+		&__left, &__right {
+			flex: 0 0 auto;
+			display: flex;
+			align-items: center;
+		}
+
+		&__right {
+			justify-content: end;
+		}
+
+		.wv-trace-nav {
+			a, span {
+				height: 40px;
+			}
+
+			span {
+				color: @color;
+				padding: 0;
+				padding-right: 5px;
+			}
+
+			a {
+				color: @color-light;
+				border-left: 1px solid transparent;
+				border-right: 1px solid transparent;
+
+				&:hover {
+					background-color: @color-accent-hover;
+				}
+			}
+
+			li.active {
+				a {
+					background-color: @color-accent-active;
+					border-color: @color-accent-dark;
+				}
+			}
+		}
 	}
 
 	&__body {
 		background: @backround;
-		height: calc(90vh - 70px);
+		height: calc(90vh - 80px);
 		padding: 10px;
 
 		table {
@@ -73,7 +204,21 @@
 
 			th, td {
 				border: 1px solid @color-stroke;
+				padding: 10px 5px;
+			}
+
+			thead th {
+				background: @color-accent-hover;
 				padding: 5px;
+
+				input, select {
+					background: @accent-input-background;
+					border-color: @accent-input-stroke;
+				}
+
+				input::placeholder {
+					color: @accent-placeholder;
+				}
 			}
 		}
 	}
@@ -86,5 +231,50 @@
 		justify-content: center;
 		align-items: center;
 		color: @color;
+	}
+
+	input, select {
+		width: 100%;
+		background: @input-background;
+		border: 1px solid transparent;
+		border-radius: 5px;
+		height: 32px;
+		box-sizing: border-box;
+		padding: 2px 5px;
+		color: @color-light;
+		outline: none;
+
+		&:active, &:focus, &:hover {
+			border-color: @input-stroke;
+		}
+	}
+
+	input {
+		&::placeholder {
+			color: @input-placeholder;
+		}
+	}
+
+	button {
+		border-radius: 5px;
+		padding: 5px 10px;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+
+		&.green {
+			background: transparent;
+			color: #15803d;
+			border: 2px solid #14532d;
+
+			&:hover {
+				background: #052e16;
+				cursor: pointer;
+			}
+		}
+
+		.circle {
+			padding: 0;
+		}
 	}
 }

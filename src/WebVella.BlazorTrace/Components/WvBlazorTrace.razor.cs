@@ -6,7 +6,7 @@ public partial class WvBlazorTrace : ComponentBase
 {
 	[Inject] public IWvBlazorTraceService WvBlazorTraceService { get; set; } = default!;
 	[Parameter] public WvButtonPosition Position { get; set; } = WvButtonPosition.RightTop;
-	[Parameter] public string ButtonColor { get; set; } = "#e11d48";
+	[Parameter] public string ButtonColor { get; set; } = "#be123c";
 
 #if !DEBUG
 private bool _visible = false;
