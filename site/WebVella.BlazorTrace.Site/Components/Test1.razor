@@ -1,0 +1,53 @@
+﻿@inject IWvBlazorTraceService WvBlazorTraceService
+<div style="padding-top:15px">
+	Counter 1: @_counter
+</div>
+<div style="padding-top:5px">
+	<button @onclick=_count>Count</button>
+</div>
+
+<Test2 ParentCounter="_counter" />
+
+
+@code {
+
+	private int _counter = 0;
+	protected override void OnInitialized()
+	{
+		base.OnInitialized();
+		WvBlazorTraceService.OnEnter(component: this);
+
+		WvBlazorTraceService.OnExit(component: this);
+	}
+
+	protected override void OnAfterRender(bool firstRender)
+	{
+		base.OnAfterRender(firstRender);
+		WvBlazorTraceService.OnEnter(component: this, firstRender: firstRender);
+
+		WvBlazorTraceService.OnExit(component: this, firstRender: firstRender);
+	}
+
+	protected override void OnParametersSet()
+	{
+		base.OnParametersSet();
+		WvBlazorTraceService.OnEnter(component: this);
+
+		WvBlazorTraceService.OnExit(component: this);
+	}
+
+	protected override bool ShouldRender()
+	{
+		WvBlazorTraceService.OnEnter(component: this);
+
+		WvBlazorTraceService.OnExit(component: this);
+		return base.ShouldRender();
+	}
+
+
+
+	private void _count()
+	{
+		_counter++;
+	}
+}

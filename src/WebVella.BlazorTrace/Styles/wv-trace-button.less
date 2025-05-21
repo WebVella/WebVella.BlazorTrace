@@ -1,0 +1,125 @@
+﻿.wv-trace-button {
+	position: fixed;
+	z-index: 900;
+	@button-offset: 50px;
+	@button-size: 36px;
+	@button-center-offset: calc(@button-size / -2);
+
+	button {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		width: @button-size;
+		height: @button-size;
+		/*background: #e11d48;*/
+		color: white;
+		border: 1px solid transparent;
+		box-shadow: 0 0 10px rgba(0,0,0,0.25);
+
+		&:hover {
+			cursor: pointer;
+			box-shadow: 0 0 10px rgba(0,0,0,0.5);
+		}
+
+		svg {
+			width: 19px;
+			height: 19px;
+		}
+	}
+
+	&.wv-trace-right-top {
+		right: 0;
+		top: @button-offset;
+	}
+
+	&.wv-trace-right-center {
+		right: 0;
+		top: 50%;
+		margin-top: @button-center-offset;
+	}
+
+	&.wv-trace-right-bottom {
+		right: 0;
+		bottom: @button-offset;
+	}
+
+	&.wv-trace-right-top,
+	&.wv-trace-right-center,
+	&.wv-trace-right-bottom {
+		button {
+			border-radius: 50% 0 0 50%;
+		}
+	}
+
+	&.wv-trace-bottom-right {
+		bottom: 0;
+		right: @button-offset;
+	}
+
+	&.wv-trace-bottom-center {
+		bottom: 0;
+		left: 50%;
+		margin-left: @button-center-offset;
+	}
+
+	&.wv-trace-bottom-left {
+		bottom: 0;
+		left: @button-offset;
+	}
+
+	&.wv-trace-bottom-right,
+	&.wv-trace-bottom-center,
+	&.wv-trace-bottom-left {
+		button {
+			border-radius: 50% 50% 0 0;
+		}
+	}
+
+
+	&.wv-trace-left-bottom {
+		left: 0;
+		bottom: @button-offset;
+	}
+
+	&.wv-trace-left-center {
+		left: 0;
+		top: 50%;
+		margin-top: @button-center-offset;
+	}
+
+	&.wv-trace-left-top {
+		left: 0;
+		top: @button-offset;
+	}
+
+	&.wv-trace-left-bottom,
+	&.wv-trace-left-center,
+	&.wv-trace-left-top {
+		button {
+			border-radius: 0 50% 50% 0;
+		}
+	}
+
+
+	&.wv-trace-top-left {
+		top: 0;
+	}
+
+	&.wv-trace-top-center {
+		top: 0;
+		left: 50%;
+		margin-left: @button-center-offset;
+	}
+
+	&.wv-trace-top-right {
+		top: 0;
+	}
+
+	&.wv-trace-top-left,
+	&.wv-trace-top-center,
+	&.wv-trace-top-right {
+		button {
+			border-radius: 0 0 50% 50%;
+		}
+	}
+}
