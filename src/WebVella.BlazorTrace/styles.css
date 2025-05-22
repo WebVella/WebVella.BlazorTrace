@@ -138,14 +138,14 @@
   justify-content: space-between;
   align-items: center;
   background: #020617;
-  color: #9ca3af;
+  color: #e5e7eb;
   height: 40px;
   padding: 0 10px;
   font-size: 16px;
 }
 .wv-trace-modal__header__left {
   flex: 0 0 200px;
-  color: #9ca3af;
+  color: #e5e7eb;
   display: flex;
   justify-items: center;
 }
@@ -185,22 +185,12 @@
   align-items: center;
   font-size: 14px;
 }
-.wv-trace-modal__header__center__divider {
-  flex: 0 0 auto;
-  padding-left: 20px;
-  margin-right: 20px;
-  position: relative;
+.wv-trace-modal__header__center__text {
+  padding: 0 10px;
+  color: #475569;
 }
-.wv-trace-modal__header__center__divider:after {
-  content: "";
-  display: block;
-  position: absolute;
-  right: 0;
-  width: 1px;
-  height: 10px;
-  margin-top: -5px;
-  top: 50%;
-  background: color-mix(in srgb, oklch(13% 0.028 261.692) 80%, #cbd5e1 20%);
+.wv-trace-modal__header__center__selector select {
+  width: 200px !important;
 }
 .wv-trace-modal__header__right {
   flex: 0 0 200px;
@@ -209,14 +199,15 @@
   align-items: center;
 }
 .wv-trace-modal__header__right button {
-  cursor: pointer;
-  color: #020617;
-  border-radius: 50%;
+  background: #1f2937;
   width: 24px;
   height: 24px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+}
+.wv-trace-modal__header__right button:hover {
+  background: #1f2937 !important;
+}
+.wv-trace-modal__header__right button svg {
+  width: 24px;
 }
 .wv-trace-modal__subheader {
   height: 39px;
@@ -225,7 +216,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 15px;
-  color: #9ca3af;
+  color: #e5e7eb;
   border-bottom: 1px solid #4c0519;
   font-size: 14px;
 }
@@ -237,27 +228,36 @@
 }
 .wv-trace-modal__subheader__right {
   justify-content: end;
+  display: flex;
 }
-.wv-trace-modal__subheader .wv-trace-nav a,
-.wv-trace-modal__subheader .wv-trace-nav span {
+.wv-trace-modal__subheader__right__button button {
+  width: 120px;
+}
+.wv-trace-modal__subheader .wv-trace-nav li > a,
+.wv-trace-modal__subheader .wv-trace-nav li > span {
   height: 40px;
+  display: flex;
+  align-items: center;
 }
-.wv-trace-modal__subheader .wv-trace-nav span {
-  color: #9ca3af;
+.wv-trace-modal__subheader .wv-trace-nav li > span {
+  color: #475569;
   padding: 0;
   padding-right: 5px;
 }
-.wv-trace-modal__subheader .wv-trace-nav a {
+.wv-trace-modal__subheader .wv-trace-nav li > a {
   color: #e5e7eb;
   border-left: 1px solid transparent;
   border-right: 1px solid transparent;
 }
-.wv-trace-modal__subheader .wv-trace-nav a:hover {
+.wv-trace-modal__subheader .wv-trace-nav li > a:hover {
   background-color: rgba(76, 5, 25, 0.35);
 }
-.wv-trace-modal__subheader .wv-trace-nav li.active a {
+.wv-trace-modal__subheader .wv-trace-nav li.active > a {
   background-color: rgba(76, 5, 25, 0.75);
   border-color: #4c0519;
+}
+.wv-trace-modal__subheader .wv-trace-nav li svg {
+  width: 14px;
 }
 .wv-trace-modal__body {
   background: oklch(13% 0.028 261.692);
@@ -266,7 +266,7 @@
 }
 .wv-trace-modal__body table {
   font-size: 14px;
-  color: #9ca3af;
+  color: #e5e7eb;
   width: 100%;
   border-collapse: collapse;
   border: 1px solid #1f2937;
@@ -275,6 +275,34 @@
 .wv-trace-modal__body table td {
   border: 1px solid #1f2937;
   padding: 10px 5px;
+}
+.wv-trace-modal__body table th button,
+.wv-trace-modal__body table td button {
+  border-color: #1f2937;
+  background: transparent;
+  color: #475569;
+}
+.wv-trace-modal__body table th .data,
+.wv-trace-modal__body table td .data {
+  display: flex;
+  justify-content: space-between;
+}
+.wv-trace-modal__body table th .data .positive,
+.wv-trace-modal__body table td .data .positive {
+  color: #15803d;
+}
+.wv-trace-modal__body table th .data .negative,
+.wv-trace-modal__body table td .data .negative {
+  color: #be123c;
+}
+.wv-trace-modal__body table th.button,
+.wv-trace-modal__body table td.button {
+  padding: 0 3px;
+  text-align: center;
+}
+.wv-trace-modal__body table thead tr:last-child th,
+.wv-trace-modal__body table thead tr:last-child td {
+  border-bottom: 2px solid color-mix(in srgb, #be123c 35%, oklch(13% 0.028 261.692) 65%);
 }
 .wv-trace-modal__body table thead th {
   background: rgba(76, 5, 25, 0.35);
@@ -286,7 +314,10 @@
   border-color: color-mix(in srgb, #be123c 35%, oklch(13% 0.028 261.692) 65%);
 }
 .wv-trace-modal__body table thead th input::placeholder {
-  color: color-mix(in srgb, #be123c 50%, oklch(13% 0.028 261.692) 50%);
+  color: color-mix(in srgb, #be123c 60%, oklch(13% 0.028 261.692) 40%);
+}
+.wv-trace-modal__body table tbody tr:hover td {
+  background-color: rgba(255, 255, 255, 0.05);
 }
 .wv-trace-modal__loading {
   background: oklch(13% 0.028 261.692);
@@ -295,7 +326,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  color: #9ca3af;
+  color: #e5e7eb;
 }
 .wv-trace-modal input,
 .wv-trace-modal select {
@@ -321,23 +352,69 @@
   color: color-mix(in srgb, oklch(13% 0.028 261.692) 60%, #cbd5e1 40%);
 }
 .wv-trace-modal button {
+  border: 1px solid transparent;
   border-radius: 5px;
   padding: 5px 10px;
   display: flex;
   justify-content: center;
   align-items: center;
+  cursor: pointer;
+  color: #e5e7eb;
+}
+.wv-trace-modal button:hover {
+  background: rgba(76, 5, 25, 0.35);
 }
 .wv-trace-modal button.green {
   background: transparent;
   color: #15803d;
-  border: 2px solid #14532d;
+  border: 2px solid #15803d;
 }
 .wv-trace-modal button.green:hover {
-  background: #052e16;
-  cursor: pointer;
+  background: rgba(21, 128, 61, 0.35);
 }
-.wv-trace-modal button .circle {
+.wv-trace-modal button.mute {
+  background: transparent;
+  color: #475569;
+  border: 2px solid #475569;
+}
+.wv-trace-modal button.mute:hover {
+  background: rgba(71, 85, 105, 0.35);
+}
+.wv-trace-modal button.cyan {
+  background: transparent;
+  color: #06b6d4;
+  border: 2px solid #06b6d4;
+}
+.wv-trace-modal button.cyan:hover {
+  background: rgba(6, 182, 212, 0.35);
+}
+.wv-trace-modal button.circle {
   padding: 0;
+  border: none;
+  border-radius: 50%;
+}
+.wv-trace-modal button.icon {
+  padding: 5px 10px;
+}
+.wv-trace-modal button.icon svg {
+  width: 16px;
+}
+.wv-trace-modal__divider {
+  flex: 0 0 auto;
+  padding-left: 20px;
+  margin-right: 20px;
+  position: relative;
+}
+.wv-trace-modal__divider:after {
+  content: "";
+  display: block;
+  position: absolute;
+  right: 0;
+  width: 1px;
+  height: 10px;
+  margin-top: -5px;
+  top: 50%;
+  background: rgba(255, 255, 255, 0.25);
 }
 .wv-trace-nav {
   list-style-type: none;

@@ -22,11 +22,22 @@ public class WvTraceModalRequest
 	public WvTraceModalMemoryFilter? MemoryFilter { get; set; } = null;
 	public WvTraceModalDurationFilter? DurationFilter { get; set; } = null;
 	public WvTraceModalCallsFilter? CallsFilter { get; set; } = null;
-	public List<WvTraceRow> PrimarySnapshotRows { get; set; } = new();
-
+	public bool IsAutoRefresh { get; set; } = false;
 	public bool IsEmpty
 	{
-		get => JsonSerializer.Serialize(this) == JsonSerializer.Serialize(new WvTraceModalRequest());
+		get => 
+		PrimarySnapshotId is null
+		&& SecondarySnapshotId is null
+		&& Sort is null
+		&& Menu == WvTraceModalMenu.MethodName
+		&& SortAscending
+		&& ModuleFilter is null
+		&& ComponentFilter is null
+		&& MethodFilter is null
+		&& MemoryFilter is null
+		&& DurationFilter is null
+		&& CallsFilter is null
+		&& !IsAutoRefresh;
 	}
 }
 
@@ -68,8 +79,6 @@ public class WvTraceModalData
 {
 	public WvTraceModalRequest Request { get; set; } = new();
 	public List<WvSelectOption> SnapshotOptions { get; set; } = new();
-	public WvSnapshot PrimarySnapshot { get; set; } = new();
-	public WvSnapshot? SecondarySnapshot { get; set; } = null;
 	public List<WvTraceRow> TraceRows { get; set; } = new();
 }
 

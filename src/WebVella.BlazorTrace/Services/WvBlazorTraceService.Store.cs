@@ -66,17 +66,32 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 
 		return store;
 	}
-
 	public async Task<WvSnapshot?> GetSnapshotAsync(Guid id)
 	{
 		var store = await GetSnapshotStoreAsync();
 		return store.Snapshots.FirstOrDefault(x => x.Id == id);
 	}
-
 	public async Task RemoveSnapshotAsync(Guid id)
 	{
 		var store = await GetSnapshotStoreAsync();
 		store.Snapshots = store.Snapshots.Where(x => x.Id != id).ToList();
+		await _setUnprotectedLocalStorageAsync(_snapshotStoreKey, JsonSerializer.Serialize(store));
+	}
+
+	public async Task AddBookmarkAsync(string id)
+	{
+		var store = await GetSnapshotStoreAsync();
+		if (!store.Bookmarked.Any(x => x == id))
+		{
+			store.Bookmarked.Add(id);
+		}
+		await _setUnprotectedLocalStorageAsync(_snapshotStoreKey, JsonSerializer.Serialize(store));
+	}
+
+	public async Task RemoveBookmarkAsync(string id)
+	{
+		var store = await GetSnapshotStoreAsync();
+		store.Bookmarked = store.Bookmarked.Where(x=> x != id).ToList();
 		await _setUnprotectedLocalStorageAsync(_snapshotStoreKey, JsonSerializer.Serialize(store));
 	}
 }

@@ -12,12 +12,16 @@
 @code {
 	[Parameter] public int ParentCounter { get; set; } = 0;
 	private int _counter = 0;
-
+	private List<Guid> _list = new();
 
 	protected override void OnInitialized()
 	{
 		base.OnInitialized();
 		WvBlazorTraceService.OnEnter(this);
+		for (int i = 0; i < 102; i++)
+		{
+			_list.Add(Guid.NewGuid());
+		}
 		WvBlazorTraceService.OnExit(this);
 	}
 
@@ -25,8 +29,11 @@
 	{
 		base.OnAfterRender(firstRender);
 		WvBlazorTraceService.OnEnter(this, firstRender: firstRender);
-		await Task.Delay(10);
-		await InternalMethod();
+		await Task.Delay(100);
+		if (firstRender)
+		{
+			await InternalMethod();
+		}
 		WvBlazorTraceService.OnExit(this, firstRender: firstRender);
 	}
 
@@ -49,9 +56,17 @@
 
 	private async Task InternalMethod()
 	{
-		WvBlazorTraceService.OnEnter(this);
-		await Task.Delay(10);
-		WvBlazorTraceService.OnExit(this);
+
+		for (int x = 0; x < 12; x++)
+		{
+			await Task.Delay(1 * 1000);
+			WvBlazorTraceService.OnEnter(this);
+			for (int i = 0; i < 100; i++)
+			{
+				_list.Add(Guid.NewGuid());
+			}
+			WvBlazorTraceService.OnExit(this);
+		}
 	}
 
 

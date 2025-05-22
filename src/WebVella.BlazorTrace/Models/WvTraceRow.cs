@@ -8,10 +8,11 @@ using WebVella.BlazorTrace.Utility;
 namespace WebVella.BlazorTrace.Models;
 public class WvTraceRow
 {
-	public string Id { get => $"{Module}-{Component}-{Method}"; }
+	public string Id { get => WvModalUtility.GenerateHash(Module,Component,Method); }
 	public string? Module { get; set; }
 	public string? Component { get; set; }
 	public string? Method { get; set; }
+	public bool IsBookmarked { get; set; } = false;
 	public double? AverageMemoryKB { get; set; }
 	public long? AverageDurationMS { get; set; }
 	public long? CallsCount { get; set; }

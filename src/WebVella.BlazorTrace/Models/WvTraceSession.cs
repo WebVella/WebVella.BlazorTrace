@@ -48,6 +48,8 @@ public class WvTraceSessionComponent
 public class WvTraceSessionMethod
 {
 	public string? Name { get; set; } = null;
+	public bool IsBookmarked { get; set; } = false;
+
 	[JsonIgnore]
 	public long? MinDurationMs { get => this.GetMinDuration(); }
 	[JsonIgnore]
@@ -80,7 +82,7 @@ public class WvTraceSessionMethod
 	public List<WvTraceSessionLimitHit> LimitHits { get; set; } = new();
 	public string GenerateHash(string moduleName, string componentFullname)
 	{
-		return $"{moduleName}$$${componentFullname}$$${Name}";
+		return WvModalUtility.GenerateHash(moduleName,componentFullname,Name);
 	}
 }
 

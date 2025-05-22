@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace WebVella.BlazorTrace.Models;
 public class WvSnapshotStore
 {
+	public List<string> Bookmarked { get; set; } = new();
 	public WvTraceModalRequest? LastModalRequest { get; set; } = null;
 	public List<WvSnapshot> Snapshots { get; set; } = new();
 }

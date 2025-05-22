@@ -25,9 +25,11 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 	private IJSRuntime _jSRuntime;
 	private const string _snapshotStoreKey = "wvbtstore";
 	private Dictionary<string, WvTraceSessionModule> _moduleDict = new();
-	public WvBlazorTraceService(IJSRuntime jSRuntime)
+	private WvBlazorTraceConfiguration _configuration = new();
+	public WvBlazorTraceService(IJSRuntime jSRuntime, IWvBlazorTraceConfigurationService configurationService)
 	{
 		this._jSRuntime = jSRuntime;
+		this._configuration = configurationService.GetOptions();
 	}
 
 	private WvTraceInfo? _getInfo(ComponentBase component, string methodName)

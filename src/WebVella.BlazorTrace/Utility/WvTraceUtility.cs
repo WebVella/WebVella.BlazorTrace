@@ -161,10 +161,18 @@ public static class WvTraceUtility
 	{
 		return method.TraceList.Count(x => x.EnteredOn is not null && x.ExitedOn is not null);
 	}
-	public static long GetSize(this ComponentBase obj)
+	public static long GetSize(this ComponentBase obj,
+		List<WvTraceMemoryInfo> memoryDetails,
+		WvBlazorTraceConfiguration configuration,
+		int maxDepth = 5)
 	{
 		if (obj == null) return 0;
-		return MemorySizeCalculator.CalculateComponentMemorySize(obj, maxDepth: 2);
+		return MemorySizeCalculator.CalculateComponentMemorySize(
+		component: obj,
+		memoryDetails: memoryDetails,
+		configuration: configuration,
+		maxDepth: maxDepth
+		);
 	}
 	public static double ToKilobytes(this long bytes)
 	{
@@ -175,4 +183,7 @@ public static class WvTraceUtility
 		const double kilobyteFactor = 1024.0;
 		return Math.Round((double)bytes / kilobyteFactor, 2, MidpointRounding.AwayFromZero);
 	}
+
+	public static string GetMemoryInfoId(string assemblyFullName, string fieldName)
+		=> $"{assemblyFullName}$$${fieldName}";
 }

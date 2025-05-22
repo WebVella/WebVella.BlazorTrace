@@ -68,10 +68,11 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		var timestamp = DateTimeOffset.Now;
 		var callerInfo = _getInfo(component, methodName);
 		var trace = _findOrInitMethodTrace(callerInfo, isOnEnter: true);
+		var memInfo = new List<WvTraceMemoryInfo>();
 		trace.EnteredOn = timestamp;
 		trace.FirstRender = firstRender;
 		trace.EnterPayload = payloadJson;
-		trace.OnEnterMemoryBytes = component is null ? null : component.GetSize();
+		trace.OnEnterMemoryBytes = component is null ? null : component.GetSize(memInfo, _configuration);
 	}
 	public void OnExit(
 		ComponentBase component,
@@ -87,10 +88,11 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		var timestamp = DateTimeOffset.Now;
 		var callerInfo = _getInfo(component, methodName);
 		var trace = _findOrInitMethodTrace(callerInfo, isOnEnter: false);
+		var memInfo = new List<WvTraceMemoryInfo>();
 		trace.ExitedOn = timestamp;
 		trace.FirstRender = firstRender;
 		trace.ExitPayload = payloadJson;
-		trace.OnExitMemoryBytes = component is null ? null : component.GetSize();
+		trace.OnExitMemoryBytes = component is null ? null : component.GetSize(memInfo,_configuration);
 	}
 }
 
