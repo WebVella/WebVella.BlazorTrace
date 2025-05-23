@@ -388,6 +388,14 @@
 .wv-trace-modal button.cyan:hover {
   background: rgba(6, 182, 212, 0.35);
 }
+.wv-trace-modal button.accent {
+  background: transparent;
+  color: #be123c;
+  border: 2px solid #be123c;
+}
+.wv-trace-modal button.accent:hover {
+  background: rgba(76, 5, 25, 0.35);
+}
 .wv-trace-modal button.circle {
   padding: 0;
   border: none;

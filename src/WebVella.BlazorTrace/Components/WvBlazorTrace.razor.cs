@@ -36,12 +36,11 @@ private bool _visible = false;
 	private string _buttonStyles = string.Empty;
 	private string _buttonClasses = string.Empty;
 	private int _infiniteLoopDelaySeconds = 1;
-	private Task _infiniteLoop;
-	private CancellationTokenSource _infiniteLoopCancellationTokenSource;
+	private Task? _infiniteLoop;
+	private CancellationTokenSource? _infiniteLoopCancellationTokenSource;
 	private Guid _currentRenderLock = Guid.Empty;
 	private Guid _oldRenderLock = Guid.Empty;
 	private WvBlazorTraceConfiguration _configuration = default!;
-
 
 	//LIFECYCLE
 	//////////////////////////////////////////////////
@@ -71,6 +70,9 @@ private bool _visible = false;
 		{
 			if (_configuration.EnableF1Shortcut)
 				await new JsService(JSRuntimeSrv).AddKeyEventListener(_objectRef, "OnShortcutKey", "F1");
+#if DEBUG
+			await _show();
+#endif
 		}
 	}
 	protected override bool ShouldRender()
@@ -115,7 +117,6 @@ private bool _visible = false;
 		_regenRenderLock();
 	}
 
-
 	[JSInvokable("OnShortcutKey")]
 	public async Task OnShortcutKey(string code)
 	{
@@ -130,6 +131,24 @@ private bool _visible = false;
 			await InvokeAsync(StateHasChanged);
 		}
 
+	}
+
+	private async Task _submitFilter()
+	{
+		_regenRenderLock();
+	}
+	private async Task _clearFilter()
+	{
+		if(_data is null) return;
+		_data.Request.ModuleFilter = null;
+		_data.Request.ComponentFilter = null;
+		_data.Request.MethodFilter = null;
+		_data.Request.MemoryFilter = null;
+		_data.Request.DurationFilter = null;
+		_data.Request.CallsFilter = null;
+		_data.Request.LimitsFilter = null;
+		_regenRenderLock();
+		await _submitFilter();
 	}
 
 	// LOGIC
@@ -218,5 +237,16 @@ private bool _visible = false;
 	{
 		_currentRenderLock = Guid.NewGuid();
 	}
+	private bool _hasFilter()
+	{
+		if(_data is null) return false;
+		return !String.IsNullOrWhiteSpace(_data.Request.ModuleFilter)
+		|| !String.IsNullOrWhiteSpace(_data.Request.ComponentFilter)
+		|| !String.IsNullOrWhiteSpace(_data.Request.MethodFilter)
+		|| _data.Request.MemoryFilter is not null
+		|| _data.Request.DurationFilter is not null
+		|| _data.Request.CallsFilter is not null;
+	}
+
 
 }

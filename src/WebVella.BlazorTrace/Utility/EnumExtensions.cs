@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Globalization;
+using WebVella.BlazorTrace.Models;
 
 namespace WebVella.BlazorTrace;
 
@@ -13,7 +14,7 @@ public static class EnumExtensions
 		{
 			Type type = e.GetType();
 			var name = type.GetEnumName(e.ToInt32(CultureInfo.InvariantCulture));
-			if(String.IsNullOrWhiteSpace(name)) return description;
+			if (String.IsNullOrWhiteSpace(name)) return description;
 
 			var memInfo = type.GetMember(name);
 			var soAttributes = memInfo[0].GetCustomAttributes(typeof(DescriptionAttribute), false);

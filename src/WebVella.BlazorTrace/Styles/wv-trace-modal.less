@@ -238,9 +238,10 @@
 						color: @color-accent;
 					}
 				}
-				&.button{
-					padding:0 3px;
-					text-align:center;
+
+				&.button {
+					padding: 0 3px;
+					text-align: center;
 				}
 			}
 
@@ -349,6 +350,16 @@
 
 			&:hover {
 				background: @cyan-hover;
+			}
+		}
+
+		&.accent {
+			background: transparent;
+			color: @color-accent;
+			border: 2px solid @color-accent;
+
+			&:hover {
+				background: @color-accent-hover;
 			}
 		}
 

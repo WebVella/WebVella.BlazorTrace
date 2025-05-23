@@ -13,7 +13,6 @@ public class WvTraceModalRequest
 {
 	public Guid? PrimarySnapshotId { get; set; } = null;
 	public Guid? SecondarySnapshotId { get; set; } = null;
-	public WvTraceModalSort? Sort { get; set; } = null;
 	public WvTraceModalMenu Menu { get; set; } = WvTraceModalMenu.MethodName;
 	public bool SortAscending { get; set; } = true;
 	public string? ModuleFilter { get; set; } = null;
@@ -22,13 +21,13 @@ public class WvTraceModalRequest
 	public WvTraceModalMemoryFilter? MemoryFilter { get; set; } = null;
 	public WvTraceModalDurationFilter? DurationFilter { get; set; } = null;
 	public WvTraceModalCallsFilter? CallsFilter { get; set; } = null;
+	public WvTraceModalLimitsFilter? LimitsFilter { get; set; } = null;
 	public bool IsAutoRefresh { get; set; } = false;
 	public bool IsEmpty
 	{
 		get => 
 		PrimarySnapshotId is null
 		&& SecondarySnapshotId is null
-		&& Sort is null
 		&& Menu == WvTraceModalMenu.MethodName
 		&& SortAscending
 		&& ModuleFilter is null
@@ -37,6 +36,7 @@ public class WvTraceModalRequest
 		&& MemoryFilter is null
 		&& DurationFilter is null
 		&& CallsFilter is null
+		&& LimitsFilter is null
 		&& !IsAutoRefresh;
 	}
 }
@@ -45,17 +45,6 @@ public enum WvTraceModalMenu
 {
 	MethodName = 0,
 }
-
-public enum WvTraceModalSort
-{
-	ByModule = 0,
-	ByComponent = 1,
-	ByMethod = 2,
-	ByCalls = 3,
-	ByDuration = 4,
-	ByMemory = 5
-}
-
 public enum WvTraceModalMemoryFilter
 {
 	[Description("option")]
@@ -70,10 +59,19 @@ public enum WvTraceModalDurationFilter
 
 public enum WvTraceModalCallsFilter
 {
+	[Description("<= 5 calls")]
+	LessThan5 = 0,
+	[Description("5 to 42 calls")]
+	FiveTo42calls = 1,
+	[Description("> 42 calls")]
+	MoreThan42calls = 2
+}
+
+public enum WvTraceModalLimitsFilter
+{
 	[Description("option")]
 	Option1 = 0,
 }
-
 
 public class WvTraceModalData
 {

@@ -18,7 +18,6 @@ using WebVella.BlazorTrace.Utility;
 namespace WebVella.BlazorTrace;
 public partial interface IWvBlazorTraceService
 {
-
 }
 public partial class WvBlazorTraceService : IWvBlazorTraceService
 {
@@ -31,7 +30,6 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		this._jSRuntime = jSRuntime;
 		this._configuration = configurationService.GetConfiguraion();
 	}
-
 	private WvTraceInfo? _getInfo(ComponentBase component, string methodName)
 	{
 		var componentType = component.GetType();
