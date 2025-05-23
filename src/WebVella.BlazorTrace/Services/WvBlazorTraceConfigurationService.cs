@@ -18,7 +18,7 @@ using WebVella.BlazorTrace.Utility;
 namespace WebVella.BlazorTrace;
 public partial interface IWvBlazorTraceConfigurationService
 {
-	WvBlazorTraceConfiguration GetOptions();
+	WvBlazorTraceConfiguration GetConfiguraion();
 }
 public partial class WvBlazorTraceConfigurationService : IWvBlazorTraceConfigurationService
 {
@@ -35,7 +35,7 @@ public partial class WvBlazorTraceConfigurationService : IWvBlazorTraceConfigura
 			_configuration.MemoryTraceExcludedAssemblyStartWithList.Add("WebVella.BlazorTrace");
 		}
 	}
-	public WvBlazorTraceConfiguration GetOptions()
+	public WvBlazorTraceConfiguration GetConfiguraion()
 	{
 		return _configuration;
 	}

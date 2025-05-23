@@ -17,7 +17,8 @@ public class WvTraceRow
 	public long? AverageDurationMS { get; set; }
 	public long? CallsCount { get; set; }
 	public List<WvTraceSessionLimitHit> LimitHits { get; set; } = new();
-	public WvSnapshotMethodComparisonData ComparisonData { get; set; } = new();
+	public WvSnapshotMethodComparisonData MethodComparison { get; set; } = new();
+	public WvSnapshotMemoryComparisonData MemoryComparison { get; set; } = new();
 	public List<WvTraceSessionLimitHit> MemoryTotalLimitHits { get => LimitHits.Where(x => x.Type == WvTraceSessionLimitType.MemoryTotal).ToList(); }
 	public List<WvTraceSessionLimitHit> MemoryDeltaLimitHits { get => LimitHits.Where(x => x.Type == WvTraceSessionLimitType.MemoryDelta).ToList(); }
 	public List<WvTraceSessionLimitHit> MethodCallsLimitHits { get => LimitHits.Where(x => x.Type == WvTraceSessionLimitType.MethodCalls).ToList(); }

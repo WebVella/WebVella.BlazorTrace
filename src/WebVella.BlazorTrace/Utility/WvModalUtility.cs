@@ -15,11 +15,12 @@ public static class WvModalUtility
 	public static List<WvTraceRow> GenerateTraceRows(this WvSnapshot primarySn,
 		WvSnapshot secondarySn)
 	{
-		var comparisonDict = new Dictionary<string, WvSnapshotMethodComparison>();
-		AddSnapshotToComparisonDictionary(comparisonDict, primarySn, true);
+		var methodComparisonDict = new Dictionary<string, WvSnapshotMethodComparison>();
+		var memoryComparisonDict = new Dictionary<string, WvSnapshotMemoryComparison>();
+		AddSnapshotToComparisonDictionary(methodComparisonDict,memoryComparisonDict, primarySn, true);
 		if (primarySn.Id != secondarySn.Id)
-			AddSnapshotToComparisonDictionary(comparisonDict, secondarySn, false);
-		ProcessComparisonDictionary(comparisonDict);
+			AddSnapshotToComparisonDictionary(methodComparisonDict,memoryComparisonDict, secondarySn, false);
+		ProcessComparisonDictionary(methodComparisonDict);
 		var result = new List<WvTraceRow>();
 		foreach (var moduleName in primarySn.ModuleDict.Keys)
 		{
@@ -38,7 +39,7 @@ public static class WvModalUtility
 						AverageDurationMS = tm.AvarageDurationMs,
 						CallsCount = tm.MaxCallsCount,
 						LimitHits = tm.LimitHits,
-						ComparisonData = comparisonDict[tm.GenerateHash(moduleName, componentFullName)].ComparisonData
+						MethodComparison = methodComparisonDict[tm.GenerateHash(moduleName, componentFullName)].ComparisonData
 					});
 				}
 			}
@@ -51,11 +52,12 @@ public static class WvModalUtility
 		=> $"{moduleName}$$${componentFullname}$$${methodName}";
 
 	public static void AddSnapshotToComparisonDictionary(
-		this Dictionary<string, WvSnapshotMethodComparison> dict,
+		Dictionary<string, WvSnapshotMethodComparison> methodComp,
+		Dictionary<string, WvSnapshotMemoryComparison> memoryComp,
 		WvSnapshot? snapshot,
 		bool isPrimary = true)
 	{
-		if (dict is null) dict = new();
+		if (methodComp is null) methodComp = new();
 		if (snapshot is null) return;
 		foreach (var moduleName in snapshot.ModuleDict.Keys)
 		{
@@ -66,13 +68,13 @@ public static class WvModalUtility
 				foreach (var method in component.MethodsTotal(includeNotCalled: true))
 				{
 					var methodHash = method.GenerateHash(moduleName, componentFullName);
-					if (!dict.ContainsKey(methodHash))
-						dict[methodHash] = new();
+					if (!methodComp.ContainsKey(methodHash))
+						methodComp[methodHash] = new();
 
 					if (isPrimary)
-						dict[methodHash].PrimarySnapshotMethod = method;
+						methodComp[methodHash].PrimarySnapshotMethod = method;
 					else
-						dict[methodHash].SecondarySnapshotMethod = method;
+						methodComp[methodHash].SecondarySnapshotMethod = method;
 				}
 			}
 		}

@@ -93,7 +93,9 @@ public class WvTraceSessionTrace
 	public DateTimeOffset? ExitedOn { get; set; } = null;
 	public long? DurationMs { get => this.GetDurationMS(); }
 	public long? OnEnterMemoryBytes { get; set; } = null;
+	public List<WvTraceMemoryInfo>? OnEnterMemoryInfo { get; set; } = null;
 	public long? OnExitMemoryBytes { get; set; } = null;
+	public List<WvTraceMemoryInfo>? OnExitMemoryInfo { get; set; } = null;
 	public bool? FirstRender { get; set; } = null;
 	public string? EnterPayload { get; set; } = null;
 	public string? ExitPayload { get; set; } = null;

@@ -16,7 +16,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="scripts.js" />
+    <EmbeddedResource Include="scripts.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
@@ -37,7 +39,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.5" />
-    <PackageReference Include="Nito.AsyncEx" Version="5.1.2" />
   </ItemGroup>
 
 </Project>

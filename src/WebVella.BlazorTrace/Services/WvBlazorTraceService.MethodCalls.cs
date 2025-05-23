@@ -52,6 +52,8 @@ public partial interface IWvBlazorTraceService
 }
 public partial class WvBlazorTraceService : IWvBlazorTraceService
 {
+	private readonly Lock _onEnterLock = new Lock();
+	private readonly Lock _onExitLock = new Lock();
 	public void OnEnter(
 		ComponentBase component,
 		WvTraceMethodOptions? options = null,
@@ -63,16 +65,27 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 #if !DEBUG
 		return;
 #endif
-
-		if (component is null) return;
-		var timestamp = DateTimeOffset.Now;
-		var callerInfo = _getInfo(component, methodName);
-		var trace = _findOrInitMethodTrace(callerInfo, isOnEnter: true);
-		var memInfo = new List<WvTraceMemoryInfo>();
-		trace.EnteredOn = timestamp;
-		trace.FirstRender = firstRender;
-		trace.EnterPayload = payloadJson;
-		trace.OnEnterMemoryBytes = component is null ? null : component.GetSize(memInfo, _configuration);
+		if (!_configuration.EnableTracing) return;
+		WvTraceUtility.ConsoleLog($"OnEnter start");
+		Task task = Task.Run(() =>
+		{
+			lock (_onEnterLock)
+			{
+				WvTraceUtility.ConsoleLog($"OnEnter start in");
+				if (component is null) return;
+				var timestamp = DateTimeOffset.Now;
+				var callerInfo = _getInfo(component, methodName);
+				var trace = _findOrInitMethodTrace(callerInfo, isOnEnter: true);
+				trace.OnEnterMemoryInfo = new List<WvTraceMemoryInfo>();
+				trace.EnteredOn = timestamp;
+				trace.FirstRender = firstRender;
+				trace.EnterPayload = payloadJson;
+				WvTraceUtility.ConsoleLog($"OnEnter start in 2");
+				trace.OnEnterMemoryBytes = component is null ? null : component.GetSize(trace.OnEnterMemoryInfo, _configuration);
+				WvTraceUtility.ConsoleLog($"OnEnter end in");
+			}
+		});
+		WvTraceUtility.ConsoleLog($"OnEnter end");
 	}
 	public void OnExit(
 		ComponentBase component,
@@ -85,14 +98,27 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 #if !DEBUG
 		return;
 #endif
-		var timestamp = DateTimeOffset.Now;
-		var callerInfo = _getInfo(component, methodName);
-		var trace = _findOrInitMethodTrace(callerInfo, isOnEnter: false);
-		var memInfo = new List<WvTraceMemoryInfo>();
-		trace.ExitedOn = timestamp;
-		trace.FirstRender = firstRender;
-		trace.ExitPayload = payloadJson;
-		trace.OnExitMemoryBytes = component is null ? null : component.GetSize(memInfo,_configuration);
+
+		if (!_configuration.EnableTracing) return;
+		WvTraceUtility.ConsoleLog($"OnExit start");
+		Task task = Task.Run(() =>
+			{
+				lock (_onExitLock)
+				{
+					WvTraceUtility.ConsoleLog($"OnExit start in");
+					var timestamp = DateTimeOffset.Now;
+					var callerInfo = _getInfo(component, methodName);
+					var trace = _findOrInitMethodTrace(callerInfo, isOnEnter: false);
+					trace.OnExitMemoryInfo = new List<WvTraceMemoryInfo>();
+					trace.ExitedOn = timestamp;
+					trace.FirstRender = firstRender;
+					trace.ExitPayload = payloadJson;
+					WvTraceUtility.ConsoleLog($"OnExit start in 2");
+					trace.OnExitMemoryBytes = component is null ? null : component.GetSize(trace.OnExitMemoryInfo, _configuration);
+					WvTraceUtility.ConsoleLog($"OnExit end in");
+				}
+			});
+		WvTraceUtility.ConsoleLog($"OnExit end");
 	}
 }
 

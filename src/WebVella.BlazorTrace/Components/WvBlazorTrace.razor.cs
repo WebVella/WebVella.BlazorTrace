@@ -2,6 +2,7 @@
 using Microsoft.JSInterop;
 using WebVella.BlazorTrace.Models;
 using WebVella.BlazorTrace.Services;
+using WebVella.BlazorTrace.Utility;
 
 namespace WebVella.BlazorTrace;
 public partial class WvBlazorTrace : ComponentBase, IAsyncDisposable
@@ -9,6 +10,7 @@ public partial class WvBlazorTrace : ComponentBase, IAsyncDisposable
 	// INJECTS
 	//////////////////////////////////////////////////
 	[Inject] public IWvBlazorTraceService WvBlazorTraceService { get; set; } = default!;
+	[Inject] public IWvBlazorTraceConfigurationService WvBlazorTraceConfigurationService { get; set; } = default!;
 	[Inject] protected IJSRuntime JSRuntimeSrv { get; set; } = default!;
 
 	// PARAMS
@@ -36,45 +38,41 @@ private bool _visible = false;
 	private int _infiniteLoopDelaySeconds = 1;
 	private Task _infiniteLoop;
 	private CancellationTokenSource _infiniteLoopCancellationTokenSource;
-	public Guid _currentRenderLock { get; private set; } = Guid.Empty;
-	public Guid _oldRenderLock { get; private set; } = Guid.Empty;
+	private Guid _currentRenderLock = Guid.Empty;
+	private Guid _oldRenderLock = Guid.Empty;
+	private WvBlazorTraceConfiguration _configuration = default!;
+
 
 	//LIFECYCLE
 	//////////////////////////////////////////////////
 	public async ValueTask DisposeAsync()
 	{
-		WvBlazorTraceService.OnEnter(component: this);
-		await new JsService(JSRuntimeSrv).RemoveEscapeKeyEventListener(_componentId.ToString());
+		await new JsService(JSRuntimeSrv).RemoveKeyEventListener("Escape");
+		await new JsService(JSRuntimeSrv).RemoveKeyEventListener("F1");
 		_objectRef?.Dispose();
 		if (_infiniteLoopCancellationTokenSource is not null)
 			_infiniteLoopCancellationTokenSource.Cancel();
-		WvBlazorTraceService.OnExit(component: this);
 	}
 	protected override void OnInitialized()
 	{
-		WvBlazorTraceService.OnEnter(component: this);
 		base.OnInitialized();
 		_objectRef = DotNetObjectReference.Create(this);
 		_loadResource();
 		if (!String.IsNullOrWhiteSpace(ButtonColor))
 			_buttonStyles = $"background-color:{ButtonColor};";
-
 		_buttonClasses = $" wv-trace-button {Position.ToDescriptionString()} ";
-		WvBlazorTraceService.OnExit(component: this);
-	}
-	protected override void OnAfterRender(bool firstRender)
-	{ 
-		WvBlazorTraceService.OnEnter(component: this);
-		base.OnAfterRender(firstRender);
-		WvBlazorTraceService.OnExit(component: this);
-	}
-	protected override void OnParametersSet()
-	{
-		WvBlazorTraceService.OnEnter(component: this);
-		base.OnParametersSet();
-		WvBlazorTraceService.OnExit(component: this);
-	}
 
+		_configuration = WvBlazorTraceConfigurationService.GetConfiguraion();
+	}
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		base.OnAfterRender(firstRender);
+		if (firstRender)
+		{
+			if (_configuration.EnableF1Shortcut)
+				await new JsService(JSRuntimeSrv).AddKeyEventListener(_objectRef, "OnShortcutKey", "F1");
+		}
+	}
 	protected override bool ShouldRender()
 	{
 		if (_currentRenderLock == _oldRenderLock)
@@ -87,7 +85,8 @@ private bool _visible = false;
 	////////////////////////////////////////////////
 	private async Task _show()
 	{
-		await new JsService(JSRuntimeSrv).AddEscapeKeyEventListener(_objectRef, _componentId.ToString(), "OnEscapeKey");
+		await new JsService(JSRuntimeSrv).AddKeyEventListener(_objectRef, "OnShortcutKey", "Escape");
+		await new JsService(JSRuntimeSrv).RemoveKeyEventListener("F1");
 		_modalVisible = true;
 		await _getData();
 		_runLoop();
@@ -95,7 +94,11 @@ private bool _visible = false;
 	}
 	private async Task _hide()
 	{
-		await new JsService(JSRuntimeSrv).RemoveEscapeKeyEventListener(_componentId.ToString());
+		if (_configuration.EnableF1Shortcut)
+			await new JsService(JSRuntimeSrv).AddKeyEventListener(_objectRef, "OnShortcutKey", "F1");
+		await new JsService(JSRuntimeSrv).RemoveKeyEventListener("Escape");
+		if (_infiniteLoopCancellationTokenSource is not null)
+			_infiniteLoopCancellationTokenSource.Cancel();
 		_modalVisible = false;
 		_regenRenderLock();
 	}
@@ -113,11 +116,20 @@ private bool _visible = false;
 	}
 
 
-	[JSInvokable("OnEscapeKey")]
-	public async Task OnEscapeKey()
+	[JSInvokable("OnShortcutKey")]
+	public async Task OnShortcutKey(string code)
 	{
-		await _hide();
-		await InvokeAsync(StateHasChanged);
+		if (code == "Escape")
+		{
+			await _hide();
+			await InvokeAsync(StateHasChanged);
+		}
+		else if (code == "F1")
+		{
+			await _show();
+			await InvokeAsync(StateHasChanged);
+		}
+
 	}
 
 	// LOGIC

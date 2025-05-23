@@ -13,29 +13,37 @@ public class JsService
 	{
 		JSRuntime = jsRuntime;
 	}
-	public async ValueTask<bool> AddEscapeKeyEventListener(DotNetObjectReference<WvBlazorTrace> objectRef, string listenerId, string methodName)
+	public async ValueTask<bool> AddKeyEventListener(DotNetObjectReference<WvBlazorTrace> objectRef, string methodName, string keyCode)
 	{
 		try
 		{
-			return await JSRuntime.InvokeAsync<bool>(
-				 "WebVellaBlazorTrace.addEscapeKeyEventListener",
-				 objectRef, listenerId, methodName);
+			if (keyCode == "Escape")
+				return await JSRuntime.InvokeAsync<bool>(
+					 "WebVellaBlazorTrace.addEscapeKeyEventListener",
+					 objectRef, methodName);
+			else if (keyCode == "F1")
+				return await JSRuntime.InvokeAsync<bool>(
+					 "WebVellaBlazorTrace.addF1KeyEventListener",
+					 objectRef, methodName);
 		}
-		catch 
+		catch
 		{
 		}
 		return false;
 	}
 
-	public async ValueTask<bool> RemoveEscapeKeyEventListener(string listenerId)
+	public async ValueTask<bool> RemoveKeyEventListener(string keyCode)
 	{
 		try
 		{
-			return await JSRuntime.InvokeAsync<bool>(
-			 "WebVellaBlazorTrace.removeEscapeKeyEventListener",
-			 listenerId);
+			if (keyCode == "Escape")
+				return await JSRuntime.InvokeAsync<bool>(
+				 "WebVellaBlazorTrace.removeEscapeKeyEventListener");
+			else if (keyCode == "F1")
+				return await JSRuntime.InvokeAsync<bool>(
+				 "WebVellaBlazorTrace.removeF1KeyEventListener");
 		}
-		catch 
+		catch
 		{
 		}
 		return false;

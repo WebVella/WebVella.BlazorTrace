@@ -183,7 +183,13 @@ public static class WvTraceUtility
 		const double kilobyteFactor = 1024.0;
 		return Math.Round((double)bytes / kilobyteFactor, 2, MidpointRounding.AwayFromZero);
 	}
-
 	public static string GetMemoryInfoId(string assemblyFullName, string fieldName)
 		=> $"{assemblyFullName}$$${fieldName}";
+
+	public static void ConsoleLog(string message)
+	{
+#if DEBUG
+		Console.WriteLine($"$$$$$$ [{DateTime.Now.ToString("HH:mm:ss:ffff")}] =>{message} ");
+#endif
+	}
 }

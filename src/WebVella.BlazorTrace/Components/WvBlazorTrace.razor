@@ -8,7 +8,7 @@
 	@((MarkupString)_cssContent)
 </style>
 <div class="@_buttonClasses">
-	<button type="button" @onclick=_show title="WebVella Blazor Trace modal" style="@_buttonStyles">
+	<button type="button" @onclick=_show title="WebVella BlazorTrace (F1)" style="@_buttonStyles">
 		<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
 			<path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053.918 3.995.78 5.323 1.508 7H.43c-2.128-5.697 4.165-8.83 7.394-5.857q.09.083.176.171a3 3 0 0 1 .176-.17c3.23-2.974 9.522.159 7.394 5.856h-1.078c.728-1.677.59-3.005.108-3.947C13.486.878 10.4.28 8.717 2.01zM2.212 10h1.315C4.593 11.183 6.05 12.458 8 13.795c1.949-1.337 3.407-2.612 4.473-3.795h1.315c-1.265 1.566-3.14 3.25-5.788 5-2.648-1.75-4.523-3.434-5.788-5" />
 			<path d="M10.464 3.314a.5.5 0 0 0-.945.049L7.921 8.956 6.464 5.314a.5.5 0 0 0-.88-.091L3.732 8H.5a.5.5 0 0 0 0 1H4a.5.5 0 0 0 .416-.223l1.473-2.209 1.647 4.118a.5.5 0 0 0 .945-.049l1.598-5.593 1.457 3.642A.5.5 0 0 0 12 9h3.5a.5.5 0 0 0 0-1h-3.162z" />
@@ -18,7 +18,7 @@
 
 @if (_modalVisible)
 {
-	<div class="wv-trace-overlay" @onclick=_hide></div>
+	<div title="click to close (Esc)" class="wv-trace-overlay" @onclick=_hide></div>
 	<div class="wv-trace-modal">
 		<div class="wv-trace-modal__header">
 			<div class="wv-trace-modal__header__left">
@@ -53,7 +53,7 @@
 				</div>
 			</div>
 			<div class="wv-trace-modal__header__right">
-				<button type="button" class="circle icon" @onclick=_hide>X</button>
+				<button title="Close (Esc)" type="button" class="circle icon" @onclick=_hide>X</button>
 			</div>
 		</div>
 		@if (_data is null)
@@ -99,14 +99,14 @@
 						@if (!_isAutorefresh)
 						{
 							<button class="mute" type="button" title="@($"data auto-reloading on {_infiniteLoopDelaySeconds} seconds is OFF")"
-									@onclick=@_enableAutoReload>
+							@onclick=@_enableAutoReload>
 								Refresh OFF
 							</button>
 						}
 						else
 						{
 							<button class="cyan" type="button" title="@($"data auto-reloading on {_infiniteLoopDelaySeconds} seconds is ON")"
-									@onclick=@_disableAutoReload>
+							@onclick=@_disableAutoReload>
 								Refresh ON
 							</button>
 						}
@@ -133,7 +133,13 @@
 				<table>
 					<thead>
 						<tr>
-							<th style="width:30px"></th>
+							<th style="width:30px">
+								<button type="button" class="icon bookmarked">
+									<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+										<path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+									</svg>
+								</button>
+							</th>
 							<th>
 								<input placeholder="module" autocomplete="new-password" />
 							</th>
@@ -165,12 +171,12 @@
 									<option>limit hit</option>
 								</select>
 							</th>
-						</tr> 
+						</tr>
 						@foreach (var item in _data.TraceRows.Where(x => x.IsBookmarked))
 						{
 							<tr @key=@item.Id>
 								<td class="button">
-									<button type="button" class="icon bookmarked">
+									<button type="button" class="icon bookmarked" title="clear filters">
 										<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
 											<path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z" />
 										</svg>
@@ -183,14 +189,14 @@
 									<div class="data">
 										<div>@item.CallsCount</div>
 										<div>
-											@if (item.ComparisonData.MaxCallsCount is null || item.ComparisonData.MaxCallsCount.Value == 0) { }
-											else if (item.ComparisonData.MaxCallsCount < 0)
+											@if (item.MethodComparison.MaxCallsCount is null || item.MethodComparison.MaxCallsCount.Value == 0) { }
+											else if (item.MethodComparison.MaxCallsCount < 0)
 											{
-												<span class="negative">@item.ComparisonData.MaxCallsCount</span>
+												<span class="negative">@item.MethodComparison.MaxCallsCount</span>
 											}
 											else
 											{
-												<span class="positive">+@item.ComparisonData.MaxCallsCount</span>
+												<span class="positive">+@item.MethodComparison.MaxCallsCount</span>
 											}
 										</div>
 									</div>
@@ -199,14 +205,14 @@
 									<div class="data">
 										<div>@(item.AverageMemoryKB is not null ? $"{item.AverageMemoryKB} KB" : "n/a")</div>
 										<div>
-											@if (item.ComparisonData.AverageMemoryKB is null || item.ComparisonData.AverageMemoryKB.Value == 0) { }
-											else if (item.ComparisonData.AverageMemoryKB < 0)
+											@if (item.MethodComparison.AverageMemoryKB is null || item.MethodComparison.AverageMemoryKB.Value == 0) { }
+											else if (item.MethodComparison.AverageMemoryKB < 0)
 											{
-												<span class="negative">@item.ComparisonData.AverageMemoryKB</span>
+												<span class="negative">@item.MethodComparison.AverageMemoryKB</span>
 											}
 											else
 											{
-												<span class="positive">+@item.ComparisonData.AverageMemoryKB</span>
+												<span class="positive">+@item.MethodComparison.AverageMemoryKB</span>
 											}
 										</div>
 									</div>
@@ -215,14 +221,14 @@
 									<div class="data">
 										<div>@(item.AverageDurationMS is not null ? $"{item.AverageDurationMS} ms" : "n/a")</div>
 										<div>
-											@if (item.ComparisonData.AverageDurationMS is null || item.ComparisonData.AverageDurationMS.Value == 0) { }
-											else if (item.ComparisonData.AverageDurationMS < 0)
+											@if (item.MethodComparison.AverageDurationMS is null || item.MethodComparison.AverageDurationMS.Value == 0) { }
+											else if (item.MethodComparison.AverageDurationMS < 0)
 											{
-												<span class="negative">@item.ComparisonData.AverageDurationMS</span>
+												<span class="negative">@item.MethodComparison.AverageDurationMS</span>
 											}
 											else
 											{
-												<span class="positive">+@item.ComparisonData.AverageDurationMS</span>
+												<span class="positive">+@item.MethodComparison.AverageDurationMS</span>
 											}
 										</div>
 									</div>
@@ -230,6 +236,7 @@
 								<td></td>
 							</tr>
 						}
+
 					</thead>
 					<tbody>
 						@foreach (var item in _data.TraceRows.Where(x => !x.IsBookmarked))
@@ -249,14 +256,14 @@
 									<div class="data">
 										<div>@item.CallsCount</div>
 										<div>
-											@if (item.ComparisonData.MaxCallsCount is null || item.ComparisonData.MaxCallsCount.Value == 0) { }
-											else if (item.ComparisonData.MaxCallsCount < 0)
+											@if (item.MethodComparison.MaxCallsCount is null || item.MethodComparison.MaxCallsCount.Value == 0) { }
+											else if (item.MethodComparison.MaxCallsCount < 0)
 											{
-												<span class="negative">@item.ComparisonData.MaxCallsCount</span>
+												<span class="negative">@item.MethodComparison.MaxCallsCount</span>
 											}
 											else
 											{
-												<span class="positive">+@item.ComparisonData.MaxCallsCount</span>
+												<span class="positive">+@item.MethodComparison.MaxCallsCount</span>
 											}
 										</div>
 									</div>
@@ -265,14 +272,14 @@
 									<div class="data">
 										<div>@(item.AverageMemoryKB is not null ? $"{item.AverageMemoryKB} KB" : "n/a")</div>
 										<div>
-											@if (item.ComparisonData.AverageMemoryKB is null || item.ComparisonData.AverageMemoryKB.Value == 0) { }
-											else if (item.ComparisonData.AverageMemoryKB < 0)
+											@if (item.MethodComparison.AverageMemoryKB is null || item.MethodComparison.AverageMemoryKB.Value == 0) { }
+											else if (item.MethodComparison.AverageMemoryKB < 0)
 											{
-												<span class="negative">@item.ComparisonData.AverageMemoryKB</span>
+												<span class="negative">@item.MethodComparison.AverageMemoryKB</span>
 											}
 											else
 											{
-												<span class="positive">+@item.ComparisonData.AverageMemoryKB</span>
+												<span class="positive">+@item.MethodComparison.AverageMemoryKB</span>
 											}
 										</div>
 									</div>
@@ -281,19 +288,26 @@
 									<div class="data">
 										<div>@(item.AverageDurationMS is not null ? $"{item.AverageDurationMS} ms" : "n/a")</div>
 										<div>
-											@if (item.ComparisonData.AverageDurationMS is null || item.ComparisonData.AverageDurationMS.Value == 0) { }
-											else if (item.ComparisonData.AverageDurationMS < 0)
+											@if (item.MethodComparison.AverageDurationMS is null || item.MethodComparison.AverageDurationMS.Value == 0) { }
+											else if (item.MethodComparison.AverageDurationMS < 0)
 											{
-												<span class="negative">@item.ComparisonData.AverageDurationMS</span>
+												<span class="negative">@item.MethodComparison.AverageDurationMS</span>
 											}
 											else
 											{
-												<span class="positive">+@item.ComparisonData.AverageDurationMS</span>
+												<span class="positive">+@item.MethodComparison.AverageDurationMS</span>
 											}
 										</div>
 									</div>
 								</td>
 								<td></td>
+							</tr>
+						}
+
+						@if (_data.TraceRows.Count == 0)
+						{
+							<tr>
+								<td colspan="8" style="padding:30px;text-align:center;">No tracers are logged yet</td>
 							</tr>
 						}
 					</tbody>

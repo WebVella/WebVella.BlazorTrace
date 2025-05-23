@@ -29,7 +29,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 	public WvBlazorTraceService(IJSRuntime jSRuntime, IWvBlazorTraceConfigurationService configurationService)
 	{
 		this._jSRuntime = jSRuntime;
-		this._configuration = configurationService.GetOptions();
+		this._configuration = configurationService.GetConfiguraion();
 	}
 
 	private WvTraceInfo? _getInfo(ComponentBase component, string methodName)
