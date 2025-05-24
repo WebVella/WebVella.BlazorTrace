@@ -1,79 +1,83 @@
 ﻿@using System.Diagnostics
 @inject IWvBlazorTraceService WvBlazorTraceService
-<div style="padding-top:15px">
-	Counter 2: @_counter
-</div>
-<div style="padding-top:15px">
-	Parent: @ParentCounter
-</div>
-<div style="padding-top:5px">
-	<button @onclick=_count>Count</button>
+<div style="padding:10px;border:1px solid #7e22ce; background:#d8b4fe;">
+	<div style="padding-top:15px">
+		Test 1 Parent: @ParentCounter
+	</div>
+	<div style="padding-top:15px">
+		Test 2 Instance 1 Counter: @_counter
+	</div>
+	<div style="padding-top:5px">
+		<button @onclick=_countTest2>Count Test 2</button>
+	</div>
 </div>
 
 @code {
 	[Parameter] public int ParentCounter { get; set; } = 0;
+
+	private bool _enableTrace = true;
 	private int _counter = 0;
 	private List<Guid> _list = new();
+	private string? _instanceTag = null;
 
-	// protected override void OnInitialized()
-	// {
-	// 	base.OnInitialized();
-	// 	WvBlazorTraceService.OnEnter(this);
-	// 	for (int i = 0; i < 102; i++)
-	// 	{
-	// 		_list.Add(Guid.NewGuid());
-	// 	}
-	// 	WvBlazorTraceService.OnExit(this);
-	// }
-
-	// protected override async Task OnAfterRenderAsync(bool firstRender)
-	// {
-	// 	base.OnAfterRender(firstRender);
-	// 	WvBlazorTraceService.OnEnter(this, firstRender: firstRender);
-	// 	await Task.Delay(100);
-	// 	if (firstRender)
-	// 	{
-	// 		await InternalMethod();
-	// 	}
-	// 	WvBlazorTraceService.OnExit(this, firstRender: firstRender);
-	// }
-
-	// protected override void OnParametersSet()
-	// {
-	// 	base.OnParametersSet();
-	// 	WvBlazorTraceService.OnEnter(this);
-
-	// 	WvBlazorTraceService.OnExit(this);
-	// }
-
-	// protected override bool ShouldRender()
-	// {
-	// 	WvBlazorTraceService.OnEnter(this);
-
-	// 	WvBlazorTraceService.OnExit(this);
-	// 	return base.ShouldRender();
-	// }
-
-
-	// private async Task InternalMethod()
-	// {
-	// 	// WvBlazorTraceService.OnEnter(this);
-	// 	// for (int x = 0; x < 12; x++)
-	// 	// {
-	// 	// 	await Task.Delay(1 * 1000);
-	// 	// 	for (int i = 0; i < 10; i++)
-	// 	// 	{
-	// 	// 		_list.Add(Guid.NewGuid());
-	// 	// 	}
-	// 	// 	WvBlazorTraceService.OnExit(this);
-	// 	// }
-	// }
-
-
-	private async Task _count()
+	protected override void OnInitialized()
 	{
-		WvBlazorTraceService.OnEnter(component: this);
+		_instanceTag = this.GetHashCode().ToString();
+
+		if (_enableTrace)
+			WvBlazorTraceService.OnEnter(this, instanceTag: _instanceTag);
+
+		base.OnInitialized();
+		for (int i = 0; i < 5; i++)
+		{
+			_list.Add(Guid.NewGuid());
+		}
+
+		if (_enableTrace)
+			WvBlazorTraceService.OnExit(this, instanceTag: _instanceTag);
+	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (_enableTrace)
+			WvBlazorTraceService.OnEnter(this, firstRender: firstRender, instanceTag: _instanceTag);
+
+		base.OnAfterRender(firstRender);
+		await Task.Delay(50);
+
+		if (_enableTrace)
+			WvBlazorTraceService.OnExit(this, firstRender: firstRender, instanceTag: _instanceTag);
+	}
+
+	protected override void OnParametersSet()
+	{
+		if (_enableTrace)
+			WvBlazorTraceService.OnEnter(this, instanceTag: _instanceTag);
+
+		base.OnParametersSet();
+
+		if (_enableTrace)
+			WvBlazorTraceService.OnExit(this, instanceTag: _instanceTag);
+	}
+
+	protected override bool ShouldRender()
+	{
+		if (_enableTrace)
+			WvBlazorTraceService.OnEnter(this, instanceTag: _instanceTag);
+
+		if (_enableTrace)
+			WvBlazorTraceService.OnExit(this, instanceTag: _instanceTag);
+		return base.ShouldRender();
+	}
+
+	private void _countTest2()
+	{
+		if (_enableTrace)
+			WvBlazorTraceService.OnEnter(component: this, instanceTag: _instanceTag);
+
 		_counter++;
-		WvBlazorTraceService.OnExit(component: this);
+
+		if (_enableTrace)
+			WvBlazorTraceService.OnExit(component: this, instanceTag: _instanceTag);
 	}
 }

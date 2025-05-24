@@ -10,6 +10,7 @@ public class WvTraceInfo
 	public string? MethodName { get; set; }
 	public string? ComponentFullName { get; set; }
 	public string? ComponentName { get; set; }
+	public string? Tag { get; set; }
 	public string? ModuleName { get; set; }
 	public bool CanGetMemory { get => IsOnAfterRender; }
 	public bool IsOnInitialized { get => (MethodName ?? string.Empty).StartsWith("OnInitialized"); }

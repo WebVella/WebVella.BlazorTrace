@@ -17,9 +17,9 @@ public static class WvModalUtility
 	{
 		var methodComparisonDict = new Dictionary<string, WvSnapshotMethodComparison>();
 		var memoryComparisonDict = new Dictionary<string, WvSnapshotMemoryComparison>();
-		AddSnapshotToComparisonDictionary(methodComparisonDict,memoryComparisonDict, primarySn, true);
+		AddSnapshotToComparisonDictionary(methodComparisonDict, memoryComparisonDict, primarySn, true);
 		if (primarySn.Id != secondarySn.Id)
-			AddSnapshotToComparisonDictionary(methodComparisonDict,memoryComparisonDict, secondarySn, false);
+			AddSnapshotToComparisonDictionary(methodComparisonDict, memoryComparisonDict, secondarySn, false);
 		ProcessComparisonDictionary(methodComparisonDict);
 		var result = new List<WvTraceRow>();
 		foreach (var moduleName in primarySn.ModuleDict.Keys)
@@ -28,19 +28,23 @@ public static class WvModalUtility
 			foreach (var componentFullName in module.ComponentDict.Keys)
 			{
 				var component = module.ComponentDict[componentFullName];
-				foreach (var tm in component.MethodsTotal(includeNotCalled: false))
+				foreach (var componentTaggedInstance in component.TaggedInstances)
 				{
-					result.Add(new WvTraceRow
+					foreach (var tm in componentTaggedInstance.MethodsTotal(includeNotCalled: false))
 					{
-						Module = moduleName,
-						Component = component.Name,
-						Method = tm.Name,
-						AverageMemoryKB = tm.AverageMemoryBytes is null ? null : tm.AverageMemoryBytes.Value.ToKilobytes(),
-						AverageDurationMS = tm.AvarageDurationMs,
-						CallsCount = tm.MaxCallsCount,
-						LimitHits = tm.LimitHits,
-						MethodComparison = methodComparisonDict[tm.GenerateHash(moduleName, componentFullName)].ComparisonData
-					});
+						result.Add(new WvTraceRow
+						{
+							Module = moduleName,
+							Component = component.Name,
+							Tag = componentTaggedInstance.Tag,
+							Method = tm.Name,
+							AverageMemoryKB = tm.AverageMemoryBytes.ToKilobytes(),
+							AverageDurationMS = tm.AvarageDurationMs,
+							TraceList = tm.TraceList,
+							LimitHits = tm.LimitHits,
+							MethodComparison = methodComparisonDict[tm.GenerateHash(moduleName, componentFullName, componentTaggedInstance.Tag)].ComparisonData
+						});
+					}
 				}
 			}
 		}
@@ -48,8 +52,8 @@ public static class WvModalUtility
 		return result;
 	}
 
-	public static string GenerateHash(string? moduleName, string? componentFullname, string? methodName)
-		=> $"{moduleName}$$${componentFullname}$$${methodName}";
+	public static string GenerateHash(string? moduleName, string? componentFullname, string? tag, string? methodName)
+		=> $"{moduleName}$$${componentFullname}$$${tag}$$${methodName}";
 
 	public static void AddSnapshotToComparisonDictionary(
 		Dictionary<string, WvSnapshotMethodComparison> methodComp,
@@ -65,16 +69,19 @@ public static class WvModalUtility
 			foreach (var componentFullName in module.ComponentDict.Keys)
 			{
 				var component = module.ComponentDict[componentFullName];
-				foreach (var method in component.MethodsTotal(includeNotCalled: true))
+				foreach (var componentTaggedInstance in component.TaggedInstances)
 				{
-					var methodHash = method.GenerateHash(moduleName, componentFullName);
-					if (!methodComp.ContainsKey(methodHash))
-						methodComp[methodHash] = new();
+					foreach (var method in componentTaggedInstance.MethodsTotal(includeNotCalled: true))
+					{
+						var methodHash = method.GenerateHash(moduleName, componentFullName, componentTaggedInstance.Tag);
+						if (!methodComp.ContainsKey(methodHash))
+							methodComp[methodHash] = new();
 
-					if (isPrimary)
-						methodComp[methodHash].PrimarySnapshotMethod = method;
-					else
-						methodComp[methodHash].SecondarySnapshotMethod = method;
+						if (isPrimary)
+							methodComp[methodHash].PrimarySnapshotMethod = method;
+						else
+							methodComp[methodHash].SecondarySnapshotMethod = method;
+					}
 				}
 			}
 		}
@@ -103,7 +110,6 @@ public static class WvModalUtility
 			dictData.ComparisonData.MaxMemoryDeltaKB = GetValueAsKB(GetValueChange(pr.MaxMemoryDeltaBytes, sc?.MaxMemoryDeltaBytes));
 			dictData.ComparisonData.OnEnterCallsCount = GetValueChange(pr.OnEnterCallsCount, sc?.OnEnterCallsCount);
 			dictData.ComparisonData.OnExitCallsCount = GetValueChange(pr.OnExitCallsCount, sc?.OnExitCallsCount);
-			dictData.ComparisonData.MaxCallsCount = GetValueChange(pr.MaxCallsCount, sc?.MaxCallsCount);
 			dictData.ComparisonData.CompletedCallsCount = GetValueChange(pr.CompletedCallsCount, sc?.CompletedCallsCount);
 			dictData.ComparisonData.TraceCount = GetValueChange((long)pr.TraceList.Count, (long?)sc?.TraceList.Count);
 			dictData.ComparisonData.LimitHits = GetValueChange((long)pr.LimitHits.Count, (long?)sc?.LimitHits.Count);
@@ -116,8 +122,5 @@ public static class WvModalUtility
 		return secondary.Value - primary;
 	}
 
-	public static double? GetValueAsKB(this long? value){ 
-		if(value is null) return null;
-		return value.Value.ToKilobytes();
-	}
+	public static double? GetValueAsKB(this long? value) => value.ToKilobytes();
 }

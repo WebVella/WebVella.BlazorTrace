@@ -1,5 +1,5 @@
 ﻿@namespace WebVella.BlazorTrace
-@inherits ComponentBase
+@inherits WvBlazorTraceComponentBase
 
 <script defer>
 	@((MarkupString)_jsContent)
@@ -69,10 +69,7 @@
 							<span>Methods:</span>
 						</li>
 						<li class="active">
-							<a href="#">Name</a>
-						</li>
-						<li>
-							<a href="#">Call</a>
+							<a href="#">Calls</a>
 						</li>
 						<li>
 							<a href="#">Memory</a>
@@ -83,11 +80,22 @@
 						<li>
 							<a href="#">Limits</a>
 						</li>
+						<li>
+							<a href="#">Name</a>
+						</li>
 					</ul>
-					<div class="wv-trace-modal__divider"></div>
-					<ul class="wv-trace-nav">
+					<ul class="wv-trace-nav" style="margin-left:20px;">
 						<li>
 							<span>Signals:</span>
+						</li>
+						<li>
+							<a href="#">Calls</a>
+						</li>
+						<li>
+							<a href="#">Memory</a>
+						</li>
+						<li>
+							<a href="#">Limits</a>
 						</li>
 						<li>
 							<a href="#">Name</a>
@@ -96,7 +104,7 @@
 				</div>
 				<div class="wv-trace-modal__subheader__right">
 					<div class="wv-trace-modal__subheader__right__button">
-						@if (!_isAutorefresh)
+						@if (!_data!.Request.IsAutoRefresh)
 						{
 							<button class="mute" type="button" title="@($"data auto-reloading on {_infiniteLoopDelaySeconds} seconds is OFF")"
 									@onclick=@_enableAutoReload>
@@ -111,8 +119,7 @@
 							</button>
 						}
 					</div>
-					<div class="wv-trace-modal__divider"></div>
-					<ul class="wv-trace-nav">
+					<ul class="wv-trace-nav" style="margin-left:20px;">
 						<li>
 							<a href="https://blazor-trace.webvella.com" target="_blank" title="Saved snapshots">Snapshots</a>
 						</li>
@@ -144,19 +151,19 @@
 								}
 							</th>
 							<th>
-								<InputText placeholder="method" autocomplete="new-password"
+								<InputText placeholder="module" autocomplete="new-password"
 										   @bind-Value=@_data.Request.ModuleFilter
 										   @bind-Value:after=_submitFilter />
 							</th>
 							<th>
-								<InputText placeholder="method" autocomplete="new-password"
+								<InputText placeholder="component" autocomplete="new-password"
 										   @bind-Value=@_data.Request.ComponentFilter
 										   @bind-Value:after=_submitFilter />
 							</th>
 							<th>
 								<InputText placeholder="method" autocomplete="new-password"
-									   @bind-Value=@_data.Request.MethodFilter
-									   @bind-Value:after=_submitFilter />
+										   @bind-Value=@_data.Request.MethodFilter
+										   @bind-Value:after=_submitFilter />
 							</th>
 							<th>
 								<InputSelect @bind-Value="@_data.Request.CallsFilter" @bind-Value:after="_submitFilter">
@@ -168,8 +175,8 @@
 								</InputSelect>
 							</th>
 							<th>
-								<InputSelect TValue="WvTraceModalMemoryFilter?" @bind-Value="@_data.Request.MemoryFilter" 
-									@bind-Value:after="_submitFilter">
+								<InputSelect TValue="WvTraceModalMemoryFilter?" @bind-Value="@_data.Request.MemoryFilter"
+											 @bind-Value:after="_submitFilter">
 									<option value="">no memory filter</option>
 									@foreach (var option in Enum.GetValues<WvTraceModalMemoryFilter>())
 									{
@@ -198,134 +205,13 @@
 						</tr>
 						@foreach (var item in _data.TraceRows.Where(x => x.IsBookmarked))
 						{
-							<tr @key=@item.Id>
-								<td class="button">
-									<button type="button" class="icon bookmarked" title="clear filters">
-										<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
-											<path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z" />
-										</svg>
-									</button>
-								</td>
-								<td>@item.Module</td>
-								<td>@item.Component</td>
-								<td>@item.Method</td>
-								<td>
-									<div class="data">
-										<div>@item.CallsCount</div>
-										<div>
-											@if (item.MethodComparison.MaxCallsCount is null || item.MethodComparison.MaxCallsCount.Value == 0) { }
-											else if (item.MethodComparison.MaxCallsCount < 0)
-											{
-												<span class="negative">@item.MethodComparison.MaxCallsCount</span>
-											}
-											else
-											{
-												<span class="positive">+@item.MethodComparison.MaxCallsCount</span>
-											}
-										</div>
-									</div>
-								</td>
-								<td>
-									<div class="data">
-										<div>@(item.AverageMemoryKB is not null ? $"{item.AverageMemoryKB} KB" : "n/a")</div>
-										<div>
-											@if (item.MethodComparison.AverageMemoryKB is null || item.MethodComparison.AverageMemoryKB.Value == 0) { }
-											else if (item.MethodComparison.AverageMemoryKB < 0)
-											{
-												<span class="negative">@item.MethodComparison.AverageMemoryKB</span>
-											}
-											else
-											{
-												<span class="positive">+@item.MethodComparison.AverageMemoryKB</span>
-											}
-										</div>
-									</div>
-								</td>
-								<td>
-									<div class="data">
-										<div>@(item.AverageDurationMS is not null ? $"{item.AverageDurationMS} ms" : "n/a")</div>
-										<div>
-											@if (item.MethodComparison.AverageDurationMS is null || item.MethodComparison.AverageDurationMS.Value == 0) { }
-											else if (item.MethodComparison.AverageDurationMS < 0)
-											{
-												<span class="negative">@item.MethodComparison.AverageDurationMS</span>
-											}
-											else
-											{
-												<span class="positive">+@item.MethodComparison.AverageDurationMS</span>
-											}
-										</div>
-									</div>
-								</td>
-								<td></td>
-							</tr>
+							<WvBlazorTraceRow Item="item" OnTraceListView="_showTraceListModal" />
 						}
-
 					</thead>
 					<tbody>
 						@foreach (var item in _data.TraceRows.Where(x => !x.IsBookmarked))
 						{
-							<tr @key=@item.Id>
-								<td class="button">
-									<button type="button" class="icon">
-										<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
-											<path d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.56.56 0 0 0-.163-.505L1.71 6.745l4.052-.576a.53.53 0 0 0 .393-.288L8 2.223l1.847 3.658a.53.53 0 0 0 .393.288l4.052.575-2.906 2.77a.56.56 0 0 0-.163.506l.694 3.957-3.686-1.894a.5.5 0 0 0-.461 0z" />
-										</svg>
-									</button>
-								</td>
-								<td>@item.Module</td>
-								<td>@item.Component</td>
-								<td>@item.Method</td>
-								<td>
-									<div class="data">
-										<div>@item.CallsCount</div>
-										<div>
-											@if (item.MethodComparison.MaxCallsCount is null || item.MethodComparison.MaxCallsCount.Value == 0) { }
-											else if (item.MethodComparison.MaxCallsCount < 0)
-											{
-												<span class="negative">@item.MethodComparison.MaxCallsCount</span>
-											}
-											else
-											{
-												<span class="positive">+@item.MethodComparison.MaxCallsCount</span>
-											}
-										</div>
-									</div>
-								</td>
-								<td>
-									<div class="data">
-										<div>@(item.AverageMemoryKB is not null ? $"{item.AverageMemoryKB} KB" : "n/a")</div>
-										<div>
-											@if (item.MethodComparison.AverageMemoryKB is null || item.MethodComparison.AverageMemoryKB.Value == 0) { }
-											else if (item.MethodComparison.AverageMemoryKB < 0)
-											{
-												<span class="negative">@item.MethodComparison.AverageMemoryKB</span>
-											}
-											else
-											{
-												<span class="positive">+@item.MethodComparison.AverageMemoryKB</span>
-											}
-										</div>
-									</div>
-								</td>
-								<td>
-									<div class="data">
-										<div>@(item.AverageDurationMS is not null ? $"{item.AverageDurationMS} ms" : "n/a")</div>
-										<div>
-											@if (item.MethodComparison.AverageDurationMS is null || item.MethodComparison.AverageDurationMS.Value == 0) { }
-											else if (item.MethodComparison.AverageDurationMS < 0)
-											{
-												<span class="negative">@item.MethodComparison.AverageDurationMS</span>
-											}
-											else
-											{
-												<span class="positive">+@item.MethodComparison.AverageDurationMS</span>
-											}
-										</div>
-									</div>
-								</td>
-								<td></td>
-							</tr>
+							<WvBlazorTraceRow Item="item" OnTraceListView="_showTraceListModal" />
 						}
 
 						@if (_data.TraceRows.Count == 0)
@@ -339,6 +225,8 @@
 			</div>
 		}
 	</div>
+
+	<WvBlazorTraceListModal Row="_traceListModalRow" OnHide="_hideTraceListModal" />
 }
 
 

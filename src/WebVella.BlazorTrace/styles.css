@@ -116,9 +116,12 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.75);
+  background: rgba(255, 255, 255, 0.05);
   cursor: pointer;
   backdrop-filter: blur(2px);
+}
+.wv-trace-overlay.secondary {
+  z-index: 1000;
 }
 .wv-trace-modal {
   position: fixed;
@@ -127,11 +130,20 @@
   left: 5vw;
   top: 5vh;
   width: 90vw;
-  min-width: 1024px;
   height: 90vh;
+  min-width: 1024px;
   min-height: 320px;
+  display: flex;
+  flex-flow: column;
   border-radius: 10px;
   font-family: Arial, Helvetica, sans-serif;
+}
+.wv-trace-modal.secondary {
+  z-index: 1002;
+  width: 50vw;
+  height: 50vh;
+  left: 25vw;
+  top: 25vh;
 }
 .wv-trace-modal__header {
   display: flex;
@@ -139,7 +151,7 @@
   align-items: center;
   background: #020617;
   color: #e5e7eb;
-  height: 40px;
+  flex: 0 0 40px;
   padding: 0 10px;
   font-size: 16px;
 }
@@ -187,7 +199,7 @@
 }
 .wv-trace-modal__header__center__text {
   padding: 0 10px;
-  color: #475569;
+  color: #64748b;
 }
 .wv-trace-modal__header__center__selector select {
   width: 200px !important;
@@ -210,7 +222,7 @@
   width: 24px;
 }
 .wv-trace-modal__subheader {
-  height: 39px;
+  flex: 0 0 40px;
   background: #1f2937;
   display: flex;
   align-items: center;
@@ -240,7 +252,7 @@
   align-items: center;
 }
 .wv-trace-modal__subheader .wv-trace-nav li > span {
-  color: #475569;
+  color: #64748b;
   padding: 0;
   padding-right: 5px;
 }
@@ -260,8 +272,9 @@
   width: 14px;
 }
 .wv-trace-modal__body {
-  background: oklch(13% 0.028 261.692);
-  height: calc(90vh - 80px);
+  background: #0f172a;
+  flex: 1 1 auto;
+  overflow: auto;
   padding: 10px;
 }
 .wv-trace-modal__body table {
@@ -280,47 +293,46 @@
 .wv-trace-modal__body table td button {
   border-color: #1f2937;
   background: transparent;
-  color: #475569;
+  color: #64748b;
 }
 .wv-trace-modal__body table th .data,
 .wv-trace-modal__body table td .data {
   display: flex;
   justify-content: space-between;
 }
-.wv-trace-modal__body table th .data .positive,
-.wv-trace-modal__body table td .data .positive {
-  color: #15803d;
-}
-.wv-trace-modal__body table th .data .negative,
-.wv-trace-modal__body table td .data .negative {
-  color: #be123c;
-}
 .wv-trace-modal__body table th.button,
 .wv-trace-modal__body table td.button {
   padding: 0 3px;
   text-align: center;
 }
+.wv-trace-modal__body table th.clickable:hover,
+.wv-trace-modal__body table td.clickable:hover {
+  cursor: pointer;
+  background: rgba(59, 130, 246, 0.25);
+}
 .wv-trace-modal__body table thead tr:last-child th,
 .wv-trace-modal__body table thead tr:last-child td {
-  border-bottom: 2px solid color-mix(in srgb, #be123c 35%, oklch(13% 0.028 261.692) 65%);
+  border-bottom: 2px solid color-mix(in srgb, #be123c 35%, #0f172a 65%);
 }
 .wv-trace-modal__body table thead th {
   background: rgba(76, 5, 25, 0.35);
   padding: 5px;
+  color: #64748b;
+  font-weight: normal;
 }
 .wv-trace-modal__body table thead th input,
 .wv-trace-modal__body table thead th select {
-  background: color-mix(in srgb, #be123c 25%, oklch(13% 0.028 261.692) 75%);
-  border-color: color-mix(in srgb, #be123c 35%, oklch(13% 0.028 261.692) 65%);
+  background: color-mix(in srgb, #be123c 25%, #0f172a 75%);
+  border-color: color-mix(in srgb, #be123c 35%, #0f172a 65%);
 }
 .wv-trace-modal__body table thead th input::placeholder {
-  color: color-mix(in srgb, #be123c 60%, oklch(13% 0.028 261.692) 40%);
+  color: #64748b;
 }
 .wv-trace-modal__body table tbody tr:hover td {
   background-color: rgba(255, 255, 255, 0.05);
 }
 .wv-trace-modal__loading {
-  background: oklch(13% 0.028 261.692);
+  background: #0f172a;
   height: calc(90vh - 40px);
   padding: 10px;
   display: flex;
@@ -331,7 +343,7 @@
 .wv-trace-modal input,
 .wv-trace-modal select {
   width: 100%;
-  background: color-mix(in srgb, oklch(13% 0.028 261.692) 90%, #cbd5e1 10%);
+  background: color-mix(in srgb, #0f172a 90%, #cbd5e1 10%);
   border: 1px solid transparent;
   border-radius: 5px;
   height: 32px;
@@ -346,10 +358,10 @@
 .wv-trace-modal select:focus,
 .wv-trace-modal input:hover,
 .wv-trace-modal select:hover {
-  border-color: color-mix(in srgb, oklch(13% 0.028 261.692) 80%, #cbd5e1 20%);
+  border-color: color-mix(in srgb, #0f172a 80%, #cbd5e1 20%);
 }
 .wv-trace-modal input::placeholder {
-  color: color-mix(in srgb, oklch(13% 0.028 261.692) 60%, #cbd5e1 40%);
+  color: color-mix(in srgb, #0f172a 60%, #cbd5e1 40%);
 }
 .wv-trace-modal button {
   border: 1px solid transparent;
@@ -374,11 +386,11 @@
 }
 .wv-trace-modal button.mute {
   background: transparent;
-  color: #475569;
-  border: 2px solid #475569;
+  color: #64748b;
+  border: 2px solid #64748b;
 }
 .wv-trace-modal button.mute:hover {
-  background: rgba(71, 85, 105, 0.35);
+  background: rgba(100, 116, 139, 0.35);
 }
 .wv-trace-modal button.cyan {
   background: transparent;
@@ -409,8 +421,8 @@
 }
 .wv-trace-modal__divider {
   flex: 0 0 auto;
-  padding-left: 20px;
-  margin-right: 20px;
+  padding-left: 10px;
+  margin-right: 10px;
   position: relative;
 }
 .wv-trace-modal__divider:after {
@@ -422,7 +434,19 @@
   height: 10px;
   margin-top: -5px;
   top: 50%;
-  background: rgba(255, 255, 255, 0.25);
+  background: #64748b;
+}
+.wv-trace-modal .positive {
+  color: #15803d;
+}
+.wv-trace-modal .negative {
+  color: #be123c;
+}
+.wv-trace-modal .tag {
+  color: #06b6d4;
+}
+.wv-trace-modal .number {
+  text-align: right;
 }
 .wv-trace-nav {
   list-style-type: none;

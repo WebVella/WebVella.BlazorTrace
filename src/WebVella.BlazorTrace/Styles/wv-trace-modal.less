@@ -5,9 +5,13 @@
 	left: 0;
 	right: 0;
 	bottom: 0;
-	background: rgba(0,0,0,0.75);
+	background: rgba(255, 255, 255, 0.05);
 	cursor: pointer;
 	backdrop-filter: blur(2px);
+
+	&.secondary {
+		z-index: 1000;
+	}
 }
 
 .wv-trace-modal {
@@ -17,15 +21,19 @@
 	left: 5vw;
 	top: 5vh;
 	width: 90vw;
-	min-width: 1024px;
 	height: 90vh;
+	min-width: 1024px;
 	min-height: 320px;
+	display: flex;
+	flex-flow: column;
 	border-radius: 10px;
 	font-family: Arial, Helvetica, sans-serif;
-	@color-dark: #475569;
 	@color: #e5e7eb;
 	@color-link: #3b82f6;
-	@backround: oklch(13% 0.028 261.692);
+	@color-link-hover: rgba(@color-link,0.25);
+	@color-mute: #64748b;
+	@color-mute-hover: rgba(@color-mute,0.35);
+	@backround: #0f172a;
 	@backround-dark: #020617;
 	@backround-light: #1f2937;
 	@color-stroke: #1f2937;
@@ -36,16 +44,23 @@
 	@input-background: color-mix(in srgb, @backround 90%, #cbd5e1 10%);
 	@input-stroke: color-mix(in srgb, @backround 80%, #cbd5e1 20%);
 	@input-placeholder: color-mix(in srgb, @backround 60%, #cbd5e1 40%);
-
 	@accent-input-background: color-mix(in srgb, @color-accent 25%, @backround 75%);
 	@accent-input-stroke: color-mix(in srgb, @color-accent 35%, @backround 65%);
-	@accent-placeholder: color-mix(in srgb, @color-accent 60%, @backround 40%);
+
 	@green: #15803d;
 	@green-hover: rgba(@green,0.35);
-	@mute: @color-dark;
-	@mute-hover: rgba(@mute,0.35);
 	@cyan: #06b6d4;
 	@cyan-hover: rgba(@cyan,0.35);
+	@purple: #581c87;
+	@purple-hover: rgba(@purple,0.35);
+
+	&.secondary {
+		z-index: 1002;
+		width: 50vw;
+		height: 50vh;
+		left: 25vw;
+		top: 25vh;
+	}
 
 	&__header {
 		display: flex;
@@ -53,7 +68,7 @@
 		align-items: center;
 		background: @backround-dark;
 		color: @color;
-		height: 40px;
+		flex: 0 0 40px;
 		padding: 0 10px;
 		font-size: 16px;
 
@@ -108,7 +123,7 @@
 
 			&__text {
 				padding: 0 10px;
-				color: @color-dark;
+				color: @color-mute;
 			}
 
 			&__selector {
@@ -141,7 +156,7 @@
 	}
 
 	&__subheader {
-		height: 39px;
+		flex: 0 0 40px;
 		background: @backround-light;
 		display: flex;
 		align-items: center;
@@ -175,7 +190,7 @@
 				}
 
 				& > span {
-					color: @color-dark;
+					color: @color-mute;
 					padding: 0;
 					padding-right: 5px;
 				}
@@ -206,7 +221,8 @@
 
 	&__body {
 		background: @backround;
-		height: calc(90vh - 80px);
+		flex: 1 1 auto;
+		overflow: auto;
 		padding: 10px;
 
 		table {
@@ -223,25 +239,22 @@
 				button {
 					border-color: @color-stroke;
 					background: transparent;
-					color: @color-dark;
+					color: @color-mute;
 				}
 
 				.data {
 					display: flex;
 					justify-content: space-between;
-
-					.positive {
-						color: @green;
-					}
-
-					.negative {
-						color: @color-accent;
-					}
 				}
 
 				&.button {
 					padding: 0 3px;
 					text-align: center;
+				}
+
+				&.clickable:hover {
+					cursor: pointer;
+					background: @color-link-hover;
 				}
 			}
 
@@ -255,6 +268,8 @@
 				th {
 					background: @color-accent-hover;
 					padding: 5px;
+					color: @color-mute;
+					font-weight: normal;
 
 					input, select {
 						background: @accent-input-background;
@@ -262,7 +277,7 @@
 					}
 
 					input::placeholder {
-						color: @accent-placeholder;
+						color: @color-mute;
 					}
 				}
 			}
@@ -335,11 +350,11 @@
 
 		&.mute {
 			background: transparent;
-			color: @mute;
-			border: 2px solid @mute;
+			color: @color-mute;
+			border: 2px solid @color-mute;
 
 			&:hover {
-				background: @mute-hover;
+				background: @color-mute-hover;
 			}
 		}
 
@@ -380,8 +395,8 @@
 
 	&__divider {
 		flex: 0 0 auto;
-		padding-left: 20px;
-		margin-right: 20px;
+		padding-left: 10px;
+		margin-right: 10px;
 		position: relative;
 
 		&:after {
@@ -393,7 +408,23 @@
 			height: 10px;
 			margin-top: -5px;
 			top: 50%;
-			background: rgba(255,255,255,0.25);
+			background: @color-mute;
 		}
+	}
+
+	.positive {
+		color: @green;
+	}
+
+	.negative {
+		color: @color-accent;
+	}
+
+	.tag {
+		color: @cyan;
+	}
+
+	.number {
+		text-align: right;
 	}
 }

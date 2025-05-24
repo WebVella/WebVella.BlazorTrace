@@ -27,7 +27,6 @@ public class WvSnapshotMethodComparisonData
 	public double? MaxMemoryDeltaKB { get; set; }
 	public long? OnEnterCallsCount { get; set; }
 	public long? OnExitCallsCount { get; set; }
-	public long? MaxCallsCount { get; set; }
 	public long? CompletedCallsCount { get; set; }
 	public long? TraceCount { get; set; }
 	public long? LimitHits { get; set; }

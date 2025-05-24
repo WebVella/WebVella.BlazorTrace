@@ -15,6 +15,12 @@ public class WvTraceSessionModule
 public class WvTraceSessionComponent
 {
 	public string? Name { get; set; }
+	public List<WvTraceSessionComponentTaggedInstance> TaggedInstances { get; set; } = new();
+}
+
+public class WvTraceSessionComponentTaggedInstance
+{
+	public string? Tag { get; set; }
 	public WvTraceSessionMethod OnInitialized { get; set; } = new() { Name = "OnInitialized" };
 	public WvTraceSessionMethod OnParameterSet { get; set; } = new() { Name = "OnParameterSet" };
 	public WvTraceSessionMethod OnAfterRender { get; set; } = new() { Name = "OnAfterRender" };
@@ -80,9 +86,9 @@ public class WvTraceSessionMethod
 	public long CompletedCallsCount { get => this.CompletedCallsCount(); }
 	public List<WvTraceSessionTrace> TraceList { get; set; } = new();
 	public List<WvTraceSessionLimitHit> LimitHits { get; set; } = new();
-	public string GenerateHash(string moduleName, string componentFullname)
+	public string GenerateHash(string moduleName, string componentFullname, string? tag)
 	{
-		return WvModalUtility.GenerateHash(moduleName,componentFullname,Name);
+		return WvModalUtility.GenerateHash(moduleName, componentFullname, tag, Name);
 	}
 }
 
@@ -96,9 +102,10 @@ public class WvTraceSessionTrace
 	public List<WvTraceMemoryInfo>? OnEnterMemoryInfo { get; set; } = null;
 	public long? OnExitMemoryBytes { get; set; } = null;
 	public List<WvTraceMemoryInfo>? OnExitMemoryInfo { get; set; } = null;
-	public bool? FirstRender { get; set; } = null;
-	public string? EnterPayload { get; set; } = null;
-	public string? ExitPayload { get; set; } = null;
+	public bool? OnEnterFirstRender { get; set; } = null;
+	public bool? OnExitFirstRender { get; set; } = null;
+	public string? OnEnterCallTag { get; set; } = null;
+	public string? OnExitCallTag { get; set; } = null;
 }
 
 public class WvTraceSessionSignal

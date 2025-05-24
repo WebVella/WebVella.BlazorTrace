@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -19,18 +20,34 @@ namespace WebVella.BlazorTrace;
 public partial interface IWvBlazorTraceService
 {
 }
-public partial class WvBlazorTraceService : IWvBlazorTraceService
+public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 {
 	private IJSRuntime _jSRuntime;
 	private const string _snapshotStoreKey = "wvbtstore";
 	private Dictionary<string, WvTraceSessionModule> _moduleDict = new();
 	private WvBlazorTraceConfiguration _configuration = new();
+	private readonly ConcurrentQueue<WvTraceQueueAction> _traceQueue = new();
+	private int _infiniteLoopDelaySeconds = 1;
+	private Task? _infiniteLoop;
+	private CancellationTokenSource? _infiniteLoopCancellationTokenSource;
+
+	/// <summary>
+	/// Needs to be implemented to destroy the infinite loop
+	/// </summary>
+	/// <exception cref="NotImplementedException"></exception>
+	public void Dispose()
+	{
+		if (_infiniteLoopCancellationTokenSource is not null)
+			_infiniteLoopCancellationTokenSource.Cancel();
+	}
+
 	public WvBlazorTraceService(IJSRuntime jSRuntime, IWvBlazorTraceConfigurationService configurationService)
 	{
 		this._jSRuntime = jSRuntime;
 		this._configuration = configurationService.GetConfiguraion();
+		_processQueue();
 	}
-	private WvTraceInfo? _getInfo(ComponentBase component, string methodName)
+	private WvTraceInfo? _getInfo(ComponentBase component, string? tag, string methodName)
 	{
 		var componentType = component.GetType();
 		return new WvTraceInfo
@@ -38,6 +55,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 			MethodName = methodName,
 			ComponentFullName = componentType.FullName,
 			ComponentName = (componentType.FullName ?? "").Split(".", StringSplitOptions.RemoveEmptyEntries).LastOrDefault(),
+			Tag = tag,
 			ModuleName = componentType?.Module.Name?.Replace(".dll", "")
 		};
 	}
@@ -66,70 +84,74 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 			};
 
 		var component = module.ComponentDict[traceInfo.ComponentFullName];
+		if(!component.TaggedInstances.Any(x=> x.Tag == traceInfo.Tag))
+			component.TaggedInstances.Add(new WvTraceSessionComponentTaggedInstance(){ Tag = traceInfo.Tag});
+
+		var componentTaggedInstance = component.TaggedInstances.Single(x=> x.Tag == traceInfo.Tag);
 
 		WvTraceSessionTrace? trace = null;
 		if (traceInfo.IsOnInitialized)
 		{
-			var firstNotExitedTrace = component.OnInitialized.TraceList.FirstOrDefault(x => x.ExitedOn is null);
+			var firstNotExitedTrace = componentTaggedInstance.OnInitialized.TraceList.FirstOrDefault(x => x.ExitedOn is null);
 			if (isOnEnter || firstNotExitedTrace is null)
 			{
 				trace = new WvTraceSessionTrace();
-				component.OnInitialized.TraceList.Add(trace);
+				componentTaggedInstance.OnInitialized.TraceList.Add(trace);
 			}
 			else
 				trace = firstNotExitedTrace;
 		}
 		else if (traceInfo.IsOnParameterSet)
 		{
-			var firstNotExitedTrace = component.OnParameterSet.TraceList.FirstOrDefault(x => x.ExitedOn is null);
+			var firstNotExitedTrace = componentTaggedInstance.OnParameterSet.TraceList.FirstOrDefault(x => x.ExitedOn is null);
 			if (isOnEnter || firstNotExitedTrace is null)
 			{
 				trace = new WvTraceSessionTrace();
-				component.OnParameterSet.TraceList.Add(trace);
+				componentTaggedInstance.OnParameterSet.TraceList.Add(trace);
 			}
 			else
 				trace = firstNotExitedTrace;
 		}
 		else if (traceInfo.IsOnAfterRender)
 		{
-			var firstNotExitedTrace = component.OnAfterRender.TraceList.FirstOrDefault(x => x.ExitedOn is null);
+			var firstNotExitedTrace = componentTaggedInstance.OnAfterRender.TraceList.FirstOrDefault(x => x.ExitedOn is null);
 			if (isOnEnter || firstNotExitedTrace is null)
 			{
 				trace = new WvTraceSessionTrace();
-				component.OnAfterRender.TraceList.Add(trace);
+				componentTaggedInstance.OnAfterRender.TraceList.Add(trace);
 			}
 			else
 				trace = firstNotExitedTrace;
 		}
 		else if (traceInfo.IsShouldRender)
 		{
-			var firstNotExitedTrace = component.ShouldRender.TraceList.FirstOrDefault(x => x.ExitedOn is null);
+			var firstNotExitedTrace = componentTaggedInstance.ShouldRender.TraceList.FirstOrDefault(x => x.ExitedOn is null);
 			if (isOnEnter || firstNotExitedTrace is null)
 			{
 				trace = new WvTraceSessionTrace();
-				component.ShouldRender.TraceList.Add(trace);
+				componentTaggedInstance.ShouldRender.TraceList.Add(trace);
 			}
 			else
 				trace = firstNotExitedTrace;
 		}
 		else if (traceInfo.IsDispose)
 		{
-			var firstNotExitedTrace = component.Dispose.TraceList.FirstOrDefault(x => x.ExitedOn is null);
+			var firstNotExitedTrace = componentTaggedInstance.Dispose.TraceList.FirstOrDefault(x => x.ExitedOn is null);
 			if (isOnEnter || firstNotExitedTrace is null)
 			{
 				trace = new WvTraceSessionTrace();
-				component.ShouldRender.TraceList.Add(trace);
+				componentTaggedInstance.ShouldRender.TraceList.Add(trace);
 			}
 			else
 				trace = firstNotExitedTrace;
 		}
 		else if (traceInfo.IsOther)
 		{
-			var otherMethod = component.OtherMethods.FirstOrDefault(x => x.Name == traceInfo.MethodName);
+			var otherMethod = componentTaggedInstance.OtherMethods.FirstOrDefault(x => x.Name == traceInfo.MethodName);
 			if (otherMethod is null)
 			{
 				otherMethod = new() { Name = traceInfo.MethodName };
-				component.OtherMethods.Add(otherMethod);
+				componentTaggedInstance.OtherMethods.Add(otherMethod);
 			}
 
 			var firstNotExitedTrace = otherMethod.TraceList.FirstOrDefault(x => x.ExitedOn is null);
@@ -230,5 +252,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 	{
 		return await _jSRuntime.InvokeAsync<string>("localStorage.getItem", key);
 	}
+
+
 }
 

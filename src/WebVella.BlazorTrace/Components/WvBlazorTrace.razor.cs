@@ -5,7 +5,7 @@ using WebVella.BlazorTrace.Services;
 using WebVella.BlazorTrace.Utility;
 
 namespace WebVella.BlazorTrace;
-public partial class WvBlazorTrace : ComponentBase, IAsyncDisposable
+public partial class WvBlazorTrace : WvBlazorTraceComponentBase, IAsyncDisposable
 {
 	// INJECTS
 	//////////////////////////////////////////////////
@@ -29,7 +29,6 @@ private bool _visible = false;
 	private DotNetObjectReference<WvBlazorTrace> _objectRef = default!;
 	private bool _modalVisible = false;
 	private bool _loadingData = false;
-	private bool _isAutorefresh = false;
 	private WvTraceModalData? _data = null;
 	private string _jsContent = string.Empty;
 	private string _cssContent = string.Empty;
@@ -38,10 +37,8 @@ private bool _visible = false;
 	private int _infiniteLoopDelaySeconds = 1;
 	private Task? _infiniteLoop;
 	private CancellationTokenSource? _infiniteLoopCancellationTokenSource;
-	private Guid _currentRenderLock = Guid.Empty;
-	private Guid _oldRenderLock = Guid.Empty;
 	private WvBlazorTraceConfiguration _configuration = default!;
-
+	private WvTraceRow? _traceListModalRow = null;
 	//LIFECYCLE
 	//////////////////////////////////////////////////
 	public async ValueTask DisposeAsync()
@@ -60,8 +57,8 @@ private bool _visible = false;
 		if (!String.IsNullOrWhiteSpace(ButtonColor))
 			_buttonStyles = $"background-color:{ButtonColor};";
 		_buttonClasses = $" wv-trace-button {Position.ToDescriptionString()} ";
-
 		_configuration = WvBlazorTraceConfigurationService.GetConfiguraion();
+		EnableRenderLock();
 	}
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
@@ -70,17 +67,13 @@ private bool _visible = false;
 		{
 			if (_configuration.EnableF1Shortcut)
 				await new JsService(JSRuntimeSrv).AddKeyEventListener(_objectRef, "OnShortcutKey", "F1");
+
 #if DEBUG
 			await _show();
+			_data!.Request.IsAutoRefresh = true;
+			await InvokeAsync(StateHasChanged);
 #endif
 		}
-	}
-	protected override bool ShouldRender()
-	{
-		if (_currentRenderLock == _oldRenderLock)
-			return false;
-		_oldRenderLock = _currentRenderLock;
-		return true;
 	}
 
 	// UI HANDLERS
@@ -92,7 +85,7 @@ private bool _visible = false;
 		_modalVisible = true;
 		await _getData();
 		_runLoop();
-		_regenRenderLock();
+		RegenRenderLock();
 	}
 	private async Task _hide()
 	{
@@ -102,19 +95,19 @@ private bool _visible = false;
 		if (_infiniteLoopCancellationTokenSource is not null)
 			_infiniteLoopCancellationTokenSource.Cancel();
 		_modalVisible = false;
-		_regenRenderLock();
+		RegenRenderLock();
 	}
 
 	private void _enableAutoReload()
 	{
-		_isAutorefresh = true;
-		_regenRenderLock();
+		_data!.Request.IsAutoRefresh = true;
+		RegenRenderLock();
 	}
 
 	private void _disableAutoReload()
 	{
-		_isAutorefresh = false;
-		_regenRenderLock();
+		_data!.Request.IsAutoRefresh = false;
+		RegenRenderLock();
 	}
 
 	[JSInvokable("OnShortcutKey")]
@@ -122,7 +115,14 @@ private bool _visible = false;
 	{
 		if (code == "Escape")
 		{
-			await _hide();
+			if (_traceListModalRow is not null)
+			{
+				_traceListModalRow = null;
+				RegenRenderLock();
+			}
+			else
+				await _hide();
+
 			await InvokeAsync(StateHasChanged);
 		}
 		else if (code == "F1")
@@ -135,11 +135,11 @@ private bool _visible = false;
 
 	private async Task _submitFilter()
 	{
-		_regenRenderLock();
+		RegenRenderLock();
 	}
 	private async Task _clearFilter()
 	{
-		if(_data is null) return;
+		if (_data is null) return;
 		_data.Request.ModuleFilter = null;
 		_data.Request.ComponentFilter = null;
 		_data.Request.MethodFilter = null;
@@ -147,7 +147,7 @@ private bool _visible = false;
 		_data.Request.DurationFilter = null;
 		_data.Request.CallsFilter = null;
 		_data.Request.LimitsFilter = null;
-		_regenRenderLock();
+		RegenRenderLock();
 		await _submitFilter();
 	}
 
@@ -162,7 +162,6 @@ private bool _visible = false;
 			if (_data is null || !fromLoop)
 			{
 				_data = await WvBlazorTraceService.GetModalData(_data?.Request);
-				_isAutorefresh = _data?.Request?.IsAutoRefresh ?? false;
 			}
 			else
 			{
@@ -170,7 +169,7 @@ private bool _visible = false;
 				_data!.TraceRows = data.TraceRows;
 			}
 			_loadingData = false;
-			_regenRenderLock();
+			RegenRenderLock();
 			await InvokeAsync(StateHasChanged);
 		}
 		catch (Exception ex)
@@ -227,19 +226,15 @@ private bool _visible = false;
 				await Task.Delay(_infiniteLoopDelaySeconds * 1000);
 				if (_infiniteLoopCancellationTokenSource.IsCancellationRequested)
 					return;
-				if (!_modalVisible || !_isAutorefresh)
+				if (!_modalVisible || !_data!.Request.IsAutoRefresh)
 					continue;
 				await _getData(fromLoop: true);
 			}
 		}, _infiniteLoopCancellationTokenSource.Token);
 	}
-	private void _regenRenderLock()
-	{
-		_currentRenderLock = Guid.NewGuid();
-	}
 	private bool _hasFilter()
 	{
-		if(_data is null) return false;
+		if (_data is null) return false;
 		return !String.IsNullOrWhiteSpace(_data.Request.ModuleFilter)
 		|| !String.IsNullOrWhiteSpace(_data.Request.ComponentFilter)
 		|| !String.IsNullOrWhiteSpace(_data.Request.MethodFilter)
@@ -248,5 +243,16 @@ private bool _visible = false;
 		|| _data.Request.CallsFilter is not null;
 	}
 
+	private void _showTraceListModal(WvTraceRow row)
+	{
+		_traceListModalRow = row;
+		RegenRenderLock();
+	}
+
+	private void _hideTraceListModal()
+	{
+		_traceListModalRow = null;
+		RegenRenderLock();
+	}
 
 }

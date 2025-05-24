@@ -19,7 +19,6 @@ namespace WebVella.BlazorTrace;
 public partial interface IWvBlazorTraceService
 {
 	Task<WvTraceModalData> GetModalData(WvTraceModalRequest? request);
-	void LogResult();
 }
 public partial class WvBlazorTraceService : IWvBlazorTraceService
 {
@@ -88,28 +87,5 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		);
 		return result;
 	}
-
-	public void LogResult()
-	{
-		foreach (var moduleName in _moduleDict.Keys)
-		{
-			var module = _moduleDict[moduleName];
-			Console.WriteLine("------------------------------------------------------");
-			Console.WriteLine($">>> {moduleName}");
-			Console.WriteLine("------------------------------------------------------");
-			foreach (var compFullName in module.ComponentDict.Keys.Order())
-			{
-				var component = module.ComponentDict[compFullName];
-				foreach (var method in component.MethodsTotal(includeNotCalled: false))
-				{
-					Console.WriteLine($@"::: {component.Name} > {method.Name} ::: 
-					enters/exits: {method.OnEnterCallsCount}/{method.OnExitCallsCount} 
-					duration min/max: {method.MinDurationMs}ms / {method.MaxDurationMs}ms
-					memory min/max: {(method.OnEnterMinMemoryBytes ?? 0).ToKilobytes()} KB / {(method.OnExitMaxMemoryBytes ?? 0).ToKilobytes()} KB");
-				}
-			}
-		}
-	}
-
 }
 

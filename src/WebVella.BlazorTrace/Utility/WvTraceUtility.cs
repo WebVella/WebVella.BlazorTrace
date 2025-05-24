@@ -174,8 +174,9 @@ public static class WvTraceUtility
 		maxDepth: maxDepth
 		);
 	}
-	public static double ToKilobytes(this long bytes)
+	public static double? ToKilobytes(this long? bytes)
 	{
+		if (bytes is null) return null;
 		if (bytes < 0)
 		{
 			return -1; // Handle invalid input
@@ -183,13 +184,38 @@ public static class WvTraceUtility
 		const double kilobyteFactor = 1024.0;
 		return Math.Round((double)bytes / kilobyteFactor, 2, MidpointRounding.AwayFromZero);
 	}
+	public static string ToKilobytesString(this long? bytes)
+	{
+		if (bytes == null)
+			return "n/a";
+		if (bytes < 0)
+		{
+			return "err"; // Handle invalid input
+		}
+		const double kilobyteFactor = 1024.0;
+		var kb = Math.Round((double)bytes / kilobyteFactor, 2, MidpointRounding.AwayFromZero);
+		return kb.ToString() + "KB";
+	}
 	public static string GetMemoryInfoId(string assemblyFullName, string fieldName)
 		=> $"{assemblyFullName}$$${fieldName}";
+
+	public static string GetFirstRenderString(this bool? firstRender)
+	{ 
+		if(firstRender == null) return "n/a";
+		if(!firstRender.Value) return "no";
+		return "yes";
+	}
+
+	public static string GetDurationMSString(this long? duration)
+	{ 
+		if(duration == null) return "n/a";
+		return $"{duration.Value} ms";
+	}
 
 	public static void ConsoleLog(string message)
 	{
 #if DEBUG
-		Console.WriteLine($"$$$$$$ [{DateTime.Now.ToString("HH:mm:ss:ffff")}] =>{message} ");
+		//Console.WriteLine($"$$$$$$ [{DateTime.Now.ToString("HH:mm:ss:ffff")}] =>{message} ");
 #endif
 	}
 }
