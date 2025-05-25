@@ -33,49 +33,19 @@
 		<td class="clickable" @onclick=_onTraceListView title="view details">
 			<div class="data">
 				<div>@Item.TraceList.Count</div>
-				<div>
-					@if (Item.MethodComparison.TraceCount is null || Item.MethodComparison.TraceCount.Value == 0) { }
-					else if (Item.MethodComparison.TraceCount < 0)
-					{
-						<span class="negative">@Item.MethodComparison.TraceCount</span>
-					}
-					else
-					{
-						<span class="positive">+@Item.MethodComparison.TraceCount</span>
-					}
-				</div>
+				<div>@((MarkupString)Item.MethodComparison.TraceListChangeHtml)</div>
+			</div>
+		</td>
+		<td class="clickable" @onclick=_onMemoryView title="view details">
+			<div class="data">
+				<div>@(Item.LastMemoryKB is not null ? $"{Item.LastMemoryKB} KB" : "n/a")</div>
+				<div>@((MarkupString)Item.MemoryComparison.LastMemoryChangeKBHtml)</div>
 			</div>
 		</td>
 		<td>
 			<div class="data">
-				<div>@(Item.AverageMemoryKB is not null ? $"{Item.AverageMemoryKB} KB" : "n/a")</div>
-				<div>
-					@if (Item.MethodComparison.AverageMemoryKB is null || Item.MethodComparison.AverageMemoryKB.Value == 0) { }
-					else if (Item.MethodComparison.AverageMemoryKB < 0)
-					{
-						<span class="negative">@Item.MethodComparison.AverageMemoryKB</span>
-					}
-					else
-					{
-						<span class="positive">+@Item.MethodComparison.AverageMemoryKB</span>
-					}
-				</div>
-			</div>
-		</td>
-		<td>
-			<div class="data">
-				<div>@(Item.AverageDurationMS is not null ? $"{Item.AverageDurationMS} ms" : "n/a")</div>
-				<div>
-					@if (Item.MethodComparison.AverageDurationMS is null || Item.MethodComparison.AverageDurationMS.Value == 0) { }
-					else if (Item.MethodComparison.AverageDurationMS < 0)
-					{
-						<span class="negative">@Item.MethodComparison.AverageDurationMS</span>
-					}
-					else
-					{
-						<span class="positive">+@Item.MethodComparison.AverageDurationMS</span>
-					}
-				</div>
+				<div>@(Item.LastDurationMS is not null ? $"{Item.LastDurationMS} ms" : "n/a")</div>
+				<div>@((MarkupString)Item.LastDurationChangeMSHtml)</div>
 			</div>
 		</td>
 		<td></td>
@@ -85,6 +55,9 @@
 @code {
 	[Parameter] public WvTraceRow? Item { get; set; }
 	[Parameter] public EventCallback<WvTraceRow> OnTraceListView { get; set; }
+	[Parameter] public EventCallback<WvTraceRow> OnMemoryView { get; set; }
 
 	private async Task _onTraceListView() => await OnTraceListView.InvokeAsync(Item);
+
+	private async Task _onMemoryView() => await OnMemoryView.InvokeAsync(Item);
 }

@@ -145,7 +145,7 @@ public class MemorySizeCalculator
 				memoryDetails.Add(new WvTraceMemoryInfo
 				{
 					FieldName = valueLabel,
-					AssemblyName = type.Assembly.FullName!,
+					AssemblyName = type.Assembly.GetName().Name ?? "unknown",
 					Size = size,
 				});
 			}

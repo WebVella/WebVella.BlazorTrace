@@ -125,22 +125,13 @@ public static class WvTraceUtility
 		}
 		return maxMemoryDelta == -1 ? null : maxMemoryDelta;
 	}
-	public static long? GetAverageMemory(this WvTraceSessionMethod method)
+	public static (long?,List<WvTraceMemoryInfo>?) GetLastMemory(this WvTraceSessionMethod method)
 	{
-		long memorySum = -1;
-		decimal count = 1;
-		foreach (var trace in method.TraceList)
-		{
-			if (trace.OnEnterMemoryBytes is null && trace.OnExitMemoryBytes is null) continue;
+		var lastExitedTrace = method.LastExitedTrace;
+		if(lastExitedTrace is null)
+			return (null,null);
 
-			var traceMax = trace.OnEnterMemoryBytes ?? 0;
-			if (traceMax < (trace.OnExitMemoryBytes ?? 0))
-				traceMax = (trace.OnExitMemoryBytes ?? 0);
-			memorySum += traceMax;
-			count++;
-		}
-		if (memorySum == -1) return null;
-		return (long)(memorySum / count);
+		return ((lastExitedTrace.OnExitMemoryBytes ?? 0),lastExitedTrace.OnExitMemoryInfo);
 	}
 	public static long GetOnEnterCallCount(this WvTraceSessionMethod method)
 	{
@@ -184,6 +175,16 @@ public static class WvTraceUtility
 		const double kilobyteFactor = 1024.0;
 		return Math.Round((double)bytes / kilobyteFactor, 2, MidpointRounding.AwayFromZero);
 	}
+	public static double ToKilobytes(this long bytes)
+	{
+		if (bytes < 0)
+		{
+			return -1; // Handle invalid input
+		}
+		const double kilobyteFactor = 1024.0;
+		return Math.Round((double)bytes / kilobyteFactor, 2, MidpointRounding.AwayFromZero);
+	}
+
 	public static string ToKilobytesString(this long? bytes)
 	{
 		if (bytes == null)
@@ -200,15 +201,15 @@ public static class WvTraceUtility
 		=> $"{assemblyFullName}$$${fieldName}";
 
 	public static string GetFirstRenderString(this bool? firstRender)
-	{ 
-		if(firstRender == null) return "n/a";
-		if(!firstRender.Value) return "no";
+	{
+		if (firstRender == null) return "n/a";
+		if (!firstRender.Value) return "no";
 		return "yes";
 	}
 
 	public static string GetDurationMSString(this long? duration)
-	{ 
-		if(duration == null) return "n/a";
+	{
+		if (duration == null) return "n/a";
 		return $"{duration.Value} ms";
 	}
 

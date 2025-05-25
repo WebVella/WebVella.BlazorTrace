@@ -442,6 +442,9 @@
 .wv-trace-modal .negative {
   color: #be123c;
 }
+.wv-trace-modal .mute {
+  color: #64748b;
+}
 .wv-trace-modal .tag {
   color: #06b6d4;
 }

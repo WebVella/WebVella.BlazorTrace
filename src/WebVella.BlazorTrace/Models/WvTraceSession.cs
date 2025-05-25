@@ -61,7 +61,7 @@ public class WvTraceSessionMethod
 	[JsonIgnore]
 	public long? MaxDurationMs { get => this.GetMaxDuration(); }
 	[JsonIgnore]
-	public long? AvarageDurationMs { get => this.GetAverageDuration(); }
+	public long? LastDurationMs { get => this.GetAverageDuration(); }
 	[JsonIgnore]
 	public long? OnEnterMinMemoryBytes { get => this.GetMinMemory(isOnEnter: true); }
 	[JsonIgnore]
@@ -71,7 +71,9 @@ public class WvTraceSessionMethod
 	[JsonIgnore]
 	public long? OnExitMaxMemoryBytes { get => this.GetMaxMemory(isOnEnter: false); }
 	[JsonIgnore]
-	public long? AverageMemoryBytes { get => this.GetAverageMemory(); }
+	public long? LastMemoryBytes { get => this.GetLastMemory().Item1; }
+	[JsonIgnore]
+	public List<WvTraceMemoryInfo>? LastMemoryInfo { get => this.GetLastMemory().Item2; }
 	[JsonIgnore]
 	public long? MinMemoryDeltaBytes { get => this.GetMinMemoryDelta(); }
 	[JsonIgnore]
@@ -85,6 +87,10 @@ public class WvTraceSessionMethod
 	[JsonIgnore]
 	public long CompletedCallsCount { get => this.CompletedCallsCount(); }
 	public List<WvTraceSessionTrace> TraceList { get; set; } = new();
+	public WvTraceSessionTrace? LastExitedTrace
+	{
+		get => TraceList.Where(x => x.ExitedOn is not null).OrderByDescending(x => x.ExitedOn).LastOrDefault();
+	}
 	public List<WvTraceSessionLimitHit> LimitHits { get; set; } = new();
 	public string GenerateHash(string moduleName, string componentFullname, string? tag)
 	{

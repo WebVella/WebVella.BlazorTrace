@@ -8,27 +8,49 @@ using WebVella.BlazorTrace.Utility;
 namespace WebVella.BlazorTrace.Models;
 public class WvSnapshotMemoryComparison
 {
-	public WvTraceSessionMethod PrimarySnapshotMethod { get; set; } = new();
-	public WvTraceSessionMethod? SecondarySnapshotMethod { get; set; } = null;
+	public WvTraceSessionMethod PrimarySnapshotMethod { get; set; } = default!;
+	public WvTraceSessionMethod SecondarySnapshotMethod { get; set; } = default!;
 	public WvSnapshotMemoryComparisonData ComparisonData { get; set; } = new();
 }
 
 public class WvSnapshotMemoryComparisonData
 {
-	public long? MinDurationMS { get; set; }
-	public long? MaxDurationMS { get; set; }
-	public long? AverageDurationMS { get; set; }
-	public double? OnEnterMinMemoryKB { get; set; }
-	public double? OnEnterMaxMemoryKB { get; set; }
-	public double? OnExitMinMemoryKB { get; set; }
-	public double? OnExitMaxMemoryKB { get; set; }
-	public double? AverageMemoryKB { get; set; }
-	public double? MinMemoryDeltaKB { get; set; }
-	public double? MaxMemoryDeltaKB { get; set; }
-	public long? OnEnterCallsCount { get; set; }
-	public long? OnExitCallsCount { get; set; }
-	public long? MaxCallsCount { get; set; }
-	public long? CompletedCallsCount { get; set; }
-	public long? TraceCount { get; set; }
-	public long? LimitHits { get; set; }
+	public long LastMemoryChangeBytes { get; set; }
+	public string LastMemoryChangeKBHtml
+	{
+		get
+		{
+			if (LastMemoryChangeBytes == 0) return $"<span class='mute'>=</span>";
+			else if (LastMemoryChangeBytes < 0)
+			{
+				return $"<span class='negative'>{LastMemoryChangeBytes.ToKilobytes()}KB</span>";
+			}
+			return $"<span class='positive'>+{LastMemoryChangeBytes.ToKilobytes()}KB</span>";
+		}
+	}
+	public List<WvSnapshotMemoryComparisonDataField> Fields { get; set; } = new();
+}
+
+
+public class WvSnapshotMemoryComparisonDataField
+{
+	public string Id { get => WvTraceUtility.GetMemoryInfoId(AssemblyName, FieldName); }
+	public string FieldName { get; set; } = String.Empty;
+	public string AssemblyName { get; set; } = String.Empty;
+	public long? PrimarySnapshotBytes { get; set; }
+	public long? SecondarySnapshotBytes { get; set; }
+	public long ChangeBytes => (SecondarySnapshotBytes ?? 0) - (PrimarySnapshotBytes ?? 0);
+	public string ChangeKBHtml
+	{
+		get
+		{
+			if (ChangeBytes == 0) return $"<span class='mute'>=</span>";
+			else if (ChangeBytes < 0)
+			{
+				return $"<span class='negative'>{ChangeBytes.ToKilobytes()}KB</span>";
+			}
+			return $"<span class='positive'>+{ChangeBytes.ToKilobytes()}KB</span>";
+		}
+	}
+
 }

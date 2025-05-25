@@ -39,6 +39,7 @@ private bool _visible = false;
 	private CancellationTokenSource? _infiniteLoopCancellationTokenSource;
 	private WvBlazorTraceConfiguration _configuration = default!;
 	private WvTraceRow? _traceListModalRow = null;
+	private WvTraceRow? _memoryModalRow = null;
 	//LIFECYCLE
 	//////////////////////////////////////////////////
 	public async ValueTask DisposeAsync()
@@ -118,6 +119,11 @@ private bool _visible = false;
 			if (_traceListModalRow is not null)
 			{
 				_traceListModalRow = null;
+				RegenRenderLock();
+			}
+			if (_memoryModalRow is not null)
+			{
+				_memoryModalRow = null;
 				RegenRenderLock();
 			}
 			else
@@ -252,6 +258,18 @@ private bool _visible = false;
 	private void _hideTraceListModal()
 	{
 		_traceListModalRow = null;
+		RegenRenderLock();
+	}
+
+	private void _showMemoryModal(WvTraceRow row)
+	{
+		_memoryModalRow = row;
+		RegenRenderLock();
+	}
+
+	private void _hideMemoryModal()
+	{
+		_memoryModalRow = null;
 		RegenRenderLock();
 	}
 

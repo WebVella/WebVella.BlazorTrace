@@ -205,13 +205,17 @@
 						</tr>
 						@foreach (var item in _data.TraceRows.Where(x => x.IsBookmarked))
 						{
-							<WvBlazorTraceRow Item="item" OnTraceListView="_showTraceListModal" />
+							<WvBlazorTraceRow Item="item"
+											  OnTraceListView="_showTraceListModal"
+											  OnMemoryView="_showMemoryModal" />
 						}
 					</thead>
 					<tbody>
 						@foreach (var item in _data.TraceRows.Where(x => !x.IsBookmarked))
 						{
-							<WvBlazorTraceRow Item="item" OnTraceListView="_showTraceListModal" />
+							<WvBlazorTraceRow Item="item"
+											  OnTraceListView="_showTraceListModal"
+											  OnMemoryView="_showMemoryModal" />
 						}
 
 						@if (_data.TraceRows.Count == 0)
@@ -227,6 +231,7 @@
 	</div>
 
 	<WvBlazorTraceListModal Row="_traceListModalRow" OnHide="_hideTraceListModal" />
+	<WvBlazorMemoryModal Row="_memoryModalRow" OnHide="_hideMemoryModal" />
 }
 
 

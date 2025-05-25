@@ -15,34 +15,37 @@ public static class WvModalUtility
 	public static List<WvTraceRow> GenerateTraceRows(this WvSnapshot primarySn,
 		WvSnapshot secondarySn)
 	{
+		//Generate data on secondarySN (which should be the newest in the default case
 		var methodComparisonDict = new Dictionary<string, WvSnapshotMethodComparison>();
 		var memoryComparisonDict = new Dictionary<string, WvSnapshotMemoryComparison>();
-		AddSnapshotToComparisonDictionary(methodComparisonDict, memoryComparisonDict, primarySn, true);
-		if (primarySn.Id != secondarySn.Id)
-			AddSnapshotToComparisonDictionary(methodComparisonDict, memoryComparisonDict, secondarySn, false);
-		ProcessComparisonDictionary(methodComparisonDict);
+		methodComparisonDict.AddSnapshotToComparisonDictionary(memoryComparisonDict, primarySn, true);
+		methodComparisonDict.AddSnapshotToComparisonDictionary(memoryComparisonDict, secondarySn, false);
+		methodComparisonDict.ProcessComparisonDictionary(memoryComparisonDict);
 		var result = new List<WvTraceRow>();
-		foreach (var moduleName in primarySn.ModuleDict.Keys)
+
+		foreach (var moduleName in secondarySn.ModuleDict.Keys)
 		{
-			var module = primarySn.ModuleDict[moduleName];
+			var module = secondarySn.ModuleDict[moduleName];
 			foreach (var componentFullName in module.ComponentDict.Keys)
 			{
 				var component = module.ComponentDict[componentFullName];
 				foreach (var componentTaggedInstance in component.TaggedInstances)
 				{
-					foreach (var tm in componentTaggedInstance.MethodsTotal(includeNotCalled: false))
+					foreach (WvTraceSessionMethod tm in componentTaggedInstance.MethodsTotal(includeNotCalled: false))
 					{
+						var methodHash = tm.GenerateHash(moduleName, componentFullName, componentTaggedInstance.Tag);
 						result.Add(new WvTraceRow
 						{
 							Module = moduleName,
 							Component = component.Name,
 							Tag = componentTaggedInstance.Tag,
 							Method = tm.Name,
-							AverageMemoryKB = tm.AverageMemoryBytes.ToKilobytes(),
-							AverageDurationMS = tm.AvarageDurationMs,
+							LastMemoryKB = tm.LastMemoryBytes.ToKilobytes(),
+							LastDurationMS = tm.LastDurationMs,
 							TraceList = tm.TraceList,
 							LimitHits = tm.LimitHits,
-							MethodComparison = methodComparisonDict[tm.GenerateHash(moduleName, componentFullName, componentTaggedInstance.Tag)].ComparisonData
+							MethodComparison = methodComparisonDict[methodHash].ComparisonData,
+							MemoryComparison = memoryComparisonDict[methodHash].ComparisonData,
 						});
 					}
 				}
@@ -55,13 +58,13 @@ public static class WvModalUtility
 	public static string GenerateHash(string? moduleName, string? componentFullname, string? tag, string? methodName)
 		=> $"{moduleName}$$${componentFullname}$$${tag}$$${methodName}";
 
-	public static void AddSnapshotToComparisonDictionary(
-		Dictionary<string, WvSnapshotMethodComparison> methodComp,
+	public static void AddSnapshotToComparisonDictionary(this Dictionary<string, WvSnapshotMethodComparison> methodComp,
 		Dictionary<string, WvSnapshotMemoryComparison> memoryComp,
 		WvSnapshot? snapshot,
 		bool isPrimary = true)
 	{
 		if (methodComp is null) methodComp = new();
+		if (memoryComp is null) memoryComp = new();
 		if (snapshot is null) return;
 		foreach (var moduleName in snapshot.ModuleDict.Keys)
 		{
@@ -74,45 +77,83 @@ public static class WvModalUtility
 					foreach (var method in componentTaggedInstance.MethodsTotal(includeNotCalled: true))
 					{
 						var methodHash = method.GenerateHash(moduleName, componentFullName, componentTaggedInstance.Tag);
+						//Method comparison
 						if (!methodComp.ContainsKey(methodHash))
 							methodComp[methodHash] = new();
-
 						if (isPrimary)
 							methodComp[methodHash].PrimarySnapshotMethod = method;
 						else
 							methodComp[methodHash].SecondarySnapshotMethod = method;
+
+						//Memory comparison
+						if (!memoryComp.ContainsKey(methodHash))
+							memoryComp[methodHash] = new();
+						if (isPrimary)
+							memoryComp[methodHash].PrimarySnapshotMethod = method;
+						else
+							memoryComp[methodHash].SecondarySnapshotMethod = method;
 					}
 				}
 			}
 		}
 	}
 
-	public static void ProcessComparisonDictionary(this Dictionary<string, WvSnapshotMethodComparison> dict)
+	public static void ProcessComparisonDictionary(this Dictionary<string, WvSnapshotMethodComparison> methodDict,
+		Dictionary<string, WvSnapshotMemoryComparison> memoryDict)
 	{
-		if (dict is null) dict = new();
-		foreach (var methodHash in dict.Keys)
+		if (methodDict is null) methodDict = new();
+		if (memoryDict is null) memoryDict = new();
+		foreach (var methodHash in methodDict.Keys)
 		{
-			var dictData = dict[methodHash];
-			if (dictData.SecondarySnapshotMethod is null) continue;
+			var methodComparison = methodDict[methodHash];
+			if (methodComparison.SecondarySnapshotMethod is null) continue;
+			//Method comparison
+			var pr = methodComparison.PrimarySnapshotMethod;
+			var sc = methodComparison.SecondarySnapshotMethod;
+			var compData = methodComparison.ComparisonData;
+			compData.TraceListChange = sc.TraceList.Count - pr.TraceList.Count;
+		}
 
-			var pr = dictData.PrimarySnapshotMethod;
-			var sc = dictData.SecondarySnapshotMethod;
+		foreach (var methodHash in memoryDict.Keys)
+		{
+			var memoryComparison = memoryDict[methodHash];
+			if (memoryComparison.SecondarySnapshotMethod is null) continue;
+			//Method comparison
+			var pr = memoryComparison.PrimarySnapshotMethod;
+			var sc = memoryComparison.SecondarySnapshotMethod;
+			var prLastExitedTrace = pr.LastExitedTrace;
+			var scLastExitedTrace = sc?.LastExitedTrace;
+			if (prLastExitedTrace is null || prLastExitedTrace.OnExitMemoryInfo is null
+			|| scLastExitedTrace is null || scLastExitedTrace.OnExitMemoryInfo is null) continue;
 
-			dictData.ComparisonData.MinDurationMS = GetValueChange(pr.MinDurationMs, sc?.MinDurationMs);
-			dictData.ComparisonData.MaxDurationMS = GetValueChange(pr.MaxDurationMs, sc?.MaxDurationMs);
-			dictData.ComparisonData.AverageDurationMS = GetValueChange(pr.AvarageDurationMs, sc?.AvarageDurationMs);
-			dictData.ComparisonData.OnEnterMinMemoryKB = GetValueAsKB(GetValueChange(pr.OnEnterMinMemoryBytes, sc?.OnEnterMinMemoryBytes));
-			dictData.ComparisonData.OnEnterMaxMemoryKB = GetValueAsKB(GetValueChange(pr.OnEnterMaxMemoryBytes, sc?.OnEnterMaxMemoryBytes));
-			dictData.ComparisonData.OnExitMinMemoryKB = GetValueAsKB(GetValueChange(pr.OnExitMinMemoryBytes, sc?.OnExitMinMemoryBytes));
-			dictData.ComparisonData.OnExitMaxMemoryKB = GetValueAsKB(GetValueChange(pr.OnExitMaxMemoryBytes, sc?.OnExitMaxMemoryBytes));
-			dictData.ComparisonData.AverageMemoryKB = GetValueAsKB(GetValueChange(pr.AverageMemoryBytes, sc?.AverageMemoryBytes));
-			dictData.ComparisonData.MinMemoryDeltaKB = GetValueAsKB(GetValueChange(pr.MinMemoryDeltaBytes, sc?.MinMemoryDeltaBytes));
-			dictData.ComparisonData.MaxMemoryDeltaKB = GetValueAsKB(GetValueChange(pr.MaxMemoryDeltaBytes, sc?.MaxMemoryDeltaBytes));
-			dictData.ComparisonData.OnEnterCallsCount = GetValueChange(pr.OnEnterCallsCount, sc?.OnEnterCallsCount);
-			dictData.ComparisonData.OnExitCallsCount = GetValueChange(pr.OnExitCallsCount, sc?.OnExitCallsCount);
-			dictData.ComparisonData.CompletedCallsCount = GetValueChange(pr.CompletedCallsCount, sc?.CompletedCallsCount);
-			dictData.ComparisonData.TraceCount = GetValueChange((long)pr.TraceList.Count, (long?)sc?.TraceList.Count);
-			dictData.ComparisonData.LimitHits = GetValueChange((long)pr.LimitHits.Count, (long?)sc?.LimitHits.Count);
+			var compData = memoryComparison.ComparisonData;
+			compData.LastMemoryChangeBytes = (sc.LastMemoryBytes ?? 0) - (pr.LastMemoryBytes ?? 0);
+			foreach (var memInfo in prLastExitedTrace.OnExitMemoryInfo)
+			{
+				memoryComparison.ComparisonData.Fields.Add(new WvSnapshotMemoryComparisonDataField
+				{
+					FieldName = memInfo.FieldName,
+					AssemblyName = memInfo.AssemblyName,
+					PrimarySnapshotBytes = memInfo.Size
+				});
+			}
+			foreach (var memInfo in scLastExitedTrace.OnExitMemoryInfo)
+			{
+				var match = memoryComparison.ComparisonData.Fields.FirstOrDefault(x => x.Id == WvTraceUtility.GetMemoryInfoId(memInfo.AssemblyName, memInfo.FieldName));
+				if (match is not null)
+				{
+					match.SecondarySnapshotBytes = memInfo.Size;
+				}
+				else
+				{
+					memoryComparison.ComparisonData.Fields.Add(new WvSnapshotMemoryComparisonDataField
+					{
+						FieldName = memInfo.FieldName,
+						AssemblyName = memInfo.AssemblyName,
+						SecondarySnapshotBytes = memInfo.Size
+					});
+				}
+			}
 		}
 	}
 	public static long? GetValueChange(this long? primary, long? secondary)

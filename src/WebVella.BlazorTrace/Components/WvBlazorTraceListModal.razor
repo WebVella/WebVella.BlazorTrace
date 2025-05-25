@@ -31,7 +31,7 @@
 					</tr>
 				</thead>
 				<tbody>
-					@foreach (var item in Row.TraceList)
+					@foreach (var item in Row.TraceList.OrderByDescending(x => x.DurationMs))
 					{
 						<tr @key="@Guid.NewGuid()">
 							<td class="number">@item.DurationMs.GetDurationMSString()</td>
