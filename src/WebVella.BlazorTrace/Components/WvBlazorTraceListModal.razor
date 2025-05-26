@@ -1,14 +1,14 @@
 ﻿@namespace WebVella.BlazorTrace
 @using WebVella.BlazorTrace.Utility
 @inherits WvBlazorTraceComponentBase
-@if (Row is not null)
+@if (_row is not null && _modalVisible)
 {
-	<div title="click to close (Esc)" class="wv-trace-overlay secondary" @onclick=_hide></div>
+	<div title="click to close (Esc)" class="wv-trace-overlay secondary" @onclick=@(()=> Hide(false))></div>
 	<div class="wv-trace-modal secondary">
 		<div class="wv-trace-modal__header">
 			<div class="wv-trace-modal__header__left" style="flex:1 1 auto;">@((MarkupString)_getTitle())</div>
 			<div class="wv-trace-modal__header__right">
-				<button title="Close (Esc)" type="button" class="circle icon" @onclick=_hide>X</button>
+				<button title="Close (Esc)" type="button" class="circle icon" @onclick=@(()=> Hide(false))>X</button>
 			</div>
 		</div>
 		<div class="wv-trace-modal__body">
@@ -31,22 +31,22 @@
 					</tr>
 				</thead>
 				<tbody>
-					@foreach (var item in Row.TraceList.OrderByDescending(x => x.DurationMs))
+					@foreach (var item in _row.TraceList.OrderByDescending(x => x.DurationMs))
 					{
 						<tr @key="@Guid.NewGuid()">
 							<td class="number">@item.DurationMs.GetDurationMSString()</td>
 							<td class="number">@item.EnteredOn?.ToString(WvConstants.TimestampFormat) ms</td>
-							<td class="number">@item.OnEnterMemoryBytes.ToKilobytesString()</td>
+							<td class="number clickable" @onclick=@(() => _showMemoryModal(item.OnEnterMemoryInfo))>@item.OnEnterMemoryBytes.ToKilobytesString()</td>
 							<td class="tag">@item.OnEnterCallTag</td>
 							<td>@item.OnEnterFirstRender.GetFirstRenderString()</td>
 							<td class="number">@item.ExitedOn?.ToString(WvConstants.TimestampFormat) ms</td>
-							<td class="number">@item.OnExitMemoryBytes.ToKilobytesString()</td>
+							<td class="number clickable" @onclick=@(() => _showMemoryModal(item.OnExitMemoryInfo))>@item.OnExitMemoryBytes.ToKilobytesString()</td>
 							<td class="tag">@item.OnExitCallTag</td>
 							<td>@item.OnExitFirstRender.GetFirstRenderString()</td>
 						</tr>
 					}
 
-					@if (Row.TraceList.Count == 0)
+					@if (_row.TraceList.Count == 0)
 					{
 						<tr>
 							<td colspan="8" style="padding:30px;text-align:center;">No tracers are logged yet for this method</td>
@@ -55,7 +55,11 @@
 				</tbody>
 			</table>
 		</div>
+		<div class="wv-trace-modal__footer">
+			<button title="Close [Esc]" type="button" @onclick=@(()=> Hide(false))>Close [Esc]</button>
+		</div>
 	</div>
+	<WvBlazorMemoryModal @ref=_memoryModal />
 }
 
 

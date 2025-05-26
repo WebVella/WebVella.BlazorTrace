@@ -1,14 +1,14 @@
 ﻿@namespace WebVella.BlazorTrace
 @using WebVella.BlazorTrace.Utility
 @inherits WvBlazorTraceComponentBase
-@if (Row is not null)
+@if (_modalVisible && _row is not null)
 {
-	<div title="click to close (Esc)" class="wv-trace-overlay secondary" @onclick=_hide></div>
+	<div title="click to close [Esc]" class="wv-trace-overlay secondary" @onclick=@(()=> Hide(false))></div>
 	<div class="wv-trace-modal secondary">
 		<div class="wv-trace-modal__header">
 			<div class="wv-trace-modal__header__left" style="flex:1 1 auto;">@((MarkupString)_getTitle())</div>
 			<div class="wv-trace-modal__header__right">
-				<button title="Close (Esc)" type="button" class="circle icon" @onclick=_hide>X</button>
+				<button title="Close [Esc]" type="button" class="circle icon" @onclick=@(()=> Hide(false))>X</button>
 			</div>
 		</div>
 		<div class="wv-trace-modal__body">
@@ -22,7 +22,7 @@
 					</tr>
 				</thead>
 				<tbody>
-					@foreach (var item in Row.MemoryComparison.Fields.OrderByDescending(x=> x.SecondarySnapshotBytes))
+					@foreach (var item in _items.OrderByDescending(x => x.SecondarySnapshotBytes))
 					{
 						<tr @key="@Guid.NewGuid()">
 							<td class="number">@item.SecondarySnapshotBytes.ToKilobytesString()</td>
@@ -32,7 +32,7 @@
 						</tr>
 					}
 
-					@if (Row.TraceList.Count == 0)
+					@if (_items.Count == 0)
 					{
 						<tr>
 							<td colspan="4" style="padding:30px;text-align:center;">No tracers are logged yet for this method</td>
@@ -41,9 +41,11 @@
 				</tbody>
 			</table>
 		</div>
+		<div class="wv-trace-modal__footer">
+			<button title="Close [Esc]" type="button" @onclick=@(()=> Hide(false))>Close [Esc]</button>
+		</div>
 	</div>
 }
-
 
 
 

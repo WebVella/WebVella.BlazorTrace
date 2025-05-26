@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WebVella.BlazorTrace.Models;
 
 namespace WebVella.BlazorTrace.Services;
 public class JsService
@@ -13,14 +14,14 @@ public class JsService
 	{
 		JSRuntime = jsRuntime;
 	}
-	public async ValueTask<bool> AddKeyEventListener(DotNetObjectReference<WvBlazorTrace> objectRef, string methodName, string keyCode)
+	public async ValueTask<bool> AddKeyEventListener(object objectRef, string methodName, string keyCode, string? listenerId = null)
 	{
 		try
 		{
 			if (keyCode == "Escape")
 				return await JSRuntime.InvokeAsync<bool>(
 					 "WebVellaBlazorTrace.addEscapeKeyEventListener",
-					 objectRef, methodName);
+					 objectRef,listenerId, methodName);
 			else if (keyCode == "F1")
 				return await JSRuntime.InvokeAsync<bool>(
 					 "WebVellaBlazorTrace.addF1KeyEventListener",
@@ -32,13 +33,13 @@ public class JsService
 		return false;
 	}
 
-	public async ValueTask<bool> RemoveKeyEventListener(string keyCode)
+	public async ValueTask<bool> RemoveKeyEventListener(string keyCode, string? listenerId = null)
 	{
 		try
 		{
 			if (keyCode == "Escape")
 				return await JSRuntime.InvokeAsync<bool>(
-				 "WebVellaBlazorTrace.removeEscapeKeyEventListener");
+				 "WebVellaBlazorTrace.removeEscapeKeyEventListener",listenerId);
 			else if (keyCode == "F1")
 				return await JSRuntime.InvokeAsync<bool>(
 				 "WebVellaBlazorTrace.removeF1KeyEventListener");

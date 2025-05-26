@@ -38,6 +38,7 @@ public static class WvModalUtility
 						{
 							Module = moduleName,
 							Component = component.Name,
+							ComponentFullName = componentFullName,
 							Tag = componentTaggedInstance.Tag,
 							Method = tm.Name,
 							LastMemoryKB = tm.LastMemoryBytes.ToKilobytes(),
@@ -164,4 +165,21 @@ public static class WvModalUtility
 	}
 
 	public static double? GetValueAsKB(this long? value) => value.ToKilobytes();
+
+	public static List<WvSnapshotMemoryComparisonDataField> ToMemoryDataFields(this List<WvTraceMemoryInfo>? memInfo)
+	{
+		var result = new List<WvSnapshotMemoryComparisonDataField>();
+		if(memInfo is null) return result;
+		foreach (var item in memInfo)
+		{
+			result.Add(new WvSnapshotMemoryComparisonDataField
+			{
+				AssemblyName = item.AssemblyName,
+				FieldName = item.FieldName,
+				PrimarySnapshotBytes = item.Size,
+				SecondarySnapshotBytes = item.Size
+			});
+		}
+		return result;
+	}
 }

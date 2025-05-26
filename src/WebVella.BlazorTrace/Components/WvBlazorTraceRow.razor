@@ -21,22 +21,22 @@
 				</button>
 			}
 		</td>
-		<td>@Item.Module</td>
-		<td>
+		<td title="module / assembly short name">@Item.Module</td>
+		<td title="@Item.ComponentFullName">
 			<span>@Item.Component</span>
 			@if (!String.IsNullOrWhiteSpace(Item.Tag))
 			{
 				<span class="wv-trace-modal__divider"></span><span class="tag" title="tag">@Item.Tag</span>
 			}
 		</td>
-		<td>@Item.Method</td>
-		<td class="clickable" @onclick=_onTraceListView title="view details">
+		<td title="method name">@Item.Method</td>
+		<td title="view details" class="clickable" @onclick=_onTraceListView>
 			<div class="data">
 				<div>@Item.TraceList.Count</div>
 				<div>@((MarkupString)Item.MethodComparison.TraceListChangeHtml)</div>
 			</div>
 		</td>
-		<td class="clickable" @onclick=_onMemoryView title="view details">
+		<td title="view details" class="clickable" @onclick=_onMemoryView>
 			<div class="data">
 				<div>@(Item.LastMemoryKB is not null ? $"{Item.LastMemoryKB} KB" : "n/a")</div>
 				<div>@((MarkupString)Item.MemoryComparison.LastMemoryChangeKBHtml)</div>

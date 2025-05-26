@@ -29,6 +29,7 @@
 	border-radius: 10px;
 	font-family: Arial, Helvetica, sans-serif;
 	@color: #e5e7eb;
+	@color-link-background: rgba(#172554,0.5);
 	@color-link: #3b82f6;
 	@color-link-hover: rgba(@color-link,0.25);
 	@color-mute: #64748b;
@@ -51,7 +52,7 @@
 	@green-hover: rgba(@green,0.35);
 	@cyan: #06b6d4;
 	@cyan-hover: rgba(@cyan,0.35);
-	@purple: #581c87;
+	@purple: #a855f7;
 	@purple-hover: rgba(@purple,0.35);
 
 	&.secondary {
@@ -252,9 +253,13 @@
 					text-align: center;
 				}
 
-				&.clickable:hover {
-					cursor: pointer;
-					background: @color-link-hover;
+				&.clickable {
+					background: @color-link-background;
+
+					&:hover {
+						cursor: pointer;
+						background: @color-link-hover;
+					}
 				}
 			}
 
@@ -288,6 +293,22 @@
 						background-color: rgba(255,255,255,0.05);
 					}
 				}
+			}
+		}
+	}
+
+	&__footer {
+		flex: 0 0 40px;
+		background: @backround-dark;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+
+		button {
+			background: @color-stroke;
+
+			&:hover {
+				background: @color-stroke !important;
 			}
 		}
 	}
@@ -420,12 +441,12 @@
 		color: @color-accent;
 	}
 
-	.mute { 
+	.mute {
 		color: @color-mute;
 	}
 
 	.tag {
-		color: @cyan;
+		color: @purple;
 	}
 
 	.number {

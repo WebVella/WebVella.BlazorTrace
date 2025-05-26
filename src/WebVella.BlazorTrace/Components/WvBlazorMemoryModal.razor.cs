@@ -8,34 +8,83 @@ using WebVella.BlazorTrace.Utility;
 namespace WebVella.BlazorTrace;
 public partial class WvBlazorMemoryModal : WvBlazorTraceComponentBase
 {
-	// PARAMS
+	// INJECTS
 	//////////////////////////////////////////////////
-	[Parameter] public WvTraceRow? Row { get; set; } = null;
-	[Parameter] public EventCallback OnHide { get; set; }
+	[Inject] protected IJSRuntime JSRuntimeSrv { get; set; } = default!;
 
 	// LOCAL VARIABLES
 	//////////////////////////////////////////////////
-	private Guid _currentRenderLock = Guid.Empty;
-	private Guid _oldRenderLock = Guid.Empty;
+	private Guid _componentId = Guid.NewGuid();
+	private DotNetObjectReference<WvBlazorMemoryModal> _objectRef = default!;
+	private bool _escapeListenerEnabled = false;
+	private bool _modalVisible = false;
+	private WvTraceRow? _row = null;
+	private List<WvSnapshotMemoryComparisonDataField> _items = new();
 
-	// UI HANDLERS
+	// LIFECYCLE
+	/// //////////////////////////////////////////////
+	public async ValueTask DisposeAsync()
+	{
+		if (_escapeListenerEnabled)
+			await new JsService(JSRuntimeSrv).RemoveKeyEventListener("Escape", _componentId.ToString());
+		_objectRef?.Dispose();
+	}
+	protected override void OnInitialized()
+	{
+		base.OnInitialized();
+		_objectRef = DotNetObjectReference.Create(this);
+		EnableRenderLock();
+	}
+
+	// PUBLIC
 	//////////////////////////////////////////////////
-	private async Task _hide(){ 
-		await OnHide.InvokeAsync();
+	public async Task Show(WvTraceRow row, List<WvSnapshotMemoryComparisonDataField>? items = null)
+	{
+		await new JsService(JSRuntimeSrv).AddKeyEventListener(_objectRef, "OnShortcutKey", "Escape", _componentId.ToString());
+		_escapeListenerEnabled = true;
+		_row = row;
+		if (items is not null)
+			_items = items;
+		else
+			_items = _row.MemoryComparison.Fields;
+		_modalVisible = true;
+		RegenRenderLock();
+		await InvokeAsync(StateHasChanged);
+	}
+	public async Task Hide(bool invokeStateChanged = true)
+	{
+		await new JsService(JSRuntimeSrv).RemoveKeyEventListener("Escape", _componentId.ToString());
+		_escapeListenerEnabled = false;
+		_row = null;
+		_items = new();
+		_modalVisible = false;
+		RegenRenderLock();
+		if (invokeStateChanged)
+		{
+			await InvokeAsync(StateHasChanged);
+		}
+	}
+
+	[JSInvokable("OnShortcutKey")]
+	public async Task OnShortcutKey(string code)
+	{
+		await Hide();
 	}
 
 	//PRIVATE
 	/////////////////////////////////////////////////
-	private string _getTitle(){ 
-		if(Row is null) return String.Empty;
+	private string _getTitle()
+	{
+		if (_row is null) return String.Empty;
 
 		var sb = new StringBuilder();
-		sb.Append($"<span>{Row.Component}</span>");
-		if(!String.IsNullOrWhiteSpace(Row.Tag)){ 
-			sb.Append($" <span class='tag' style='margin-left:5px'>{Row.Tag}</span>");
+		sb.Append($"<span>{_row.Component}</span>");
+		if (!String.IsNullOrWhiteSpace(_row.Tag))
+		{
+			sb.Append($" <span class='tag' style='margin-left:5px'>{_row.Tag}</span>");
 		}
 		sb.Append("<span class='wv-trace-modal__divider'></span>");
-		sb.Append($"<span>{Row.Method}</span>");
+		sb.Append($"<span>{_row.Method}</span>");
 
 		return sb.ToString();
 	}

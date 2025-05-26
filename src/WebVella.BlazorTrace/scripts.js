@@ -1,17 +1,18 @@
 ﻿window.WebVellaBlazorTrace = {
-	escapeKeyEventListener: null,
+	escapeKeyEventListeners: {},
+	escapeKeyEventListenerQueue: [],
 	f1KeyEventListener: null,
 	inited: false,
 	initKeyListeners: function () {
 		document.addEventListener("keydown", function (evtobj) {
 			if (evtobj.code === "Escape") {
-				if(!WebVellaBlazorTrace.escapeKeyEventListener) return;
+				if (!WebVellaBlazorTrace.escapeKeyEventListenerQueue || WebVellaBlazorTrace.escapeKeyEventListenerQueue.length == 0) return;
 				evtobj.preventDefault();
 				evtobj.stopPropagation();
 				WebVellaBlazorTrace.executeEscapeKeyEventCallbacks(evtobj);
 			}
 			if (evtobj.code === "F1") {
-				if(!WebVellaBlazorTrace.f1KeyEventListener) return;
+				if (!WebVellaBlazorTrace.f1KeyEventListener) return;
 				evtobj.preventDefault();
 				evtobj.stopPropagation();
 				WebVellaBlazorTrace.executeF1KeyEventCallbacks(evtobj);
@@ -19,29 +20,33 @@
 		});
 		WebVellaBlazorTrace.inited = true;
 	},
-	addEscapeKeyEventListener: function (dotNetHelper, methodName) {
+	addEscapeKeyEventListener: function (dotNetHelper, listenerId, methodName) {
 		if (!WebVellaBlazorTrace.inited) {
 			WebVellaBlazorTrace.initKeyListeners();
 		}
-		WebVellaBlazorTrace.escapeKeyEventListener = { dotNetHelper: dotNetHelper, methodName: methodName };
+		WebVellaBlazorTrace.escapeKeyEventListeners[listenerId] = { dotNetHelper: dotNetHelper, methodName: methodName };
+		WebVellaBlazorTrace.escapeKeyEventListenerQueue.push(listenerId);
 		return true;
 	},
 	executeEscapeKeyEventCallbacks: function (eventData) {
-		if (WebVellaBlazorTrace.escapeKeyEventListener) {
-			const dotNetHelper = WebVellaBlazorTrace.escapeKeyEventListener.dotNetHelper;
-			const methodName = WebVellaBlazorTrace.escapeKeyEventListener.methodName;
+		if (WebVellaBlazorTrace.escapeKeyEventListenerQueue && WebVellaBlazorTrace.escapeKeyEventListenerQueue.length > 0) {
+			var lastRegisteredListenerId = WebVellaBlazorTrace.escapeKeyEventListenerQueue[WebVellaBlazorTrace.escapeKeyEventListenerQueue.length - 1];
+			const dotNetHelper = WebVellaBlazorTrace.escapeKeyEventListeners[lastRegisteredListenerId].dotNetHelper;
+			const methodName = WebVellaBlazorTrace.escapeKeyEventListeners[lastRegisteredListenerId].methodName;
 			if (dotNetHelper && methodName) {
 				dotNetHelper.invokeMethodAsync(methodName, eventData.code);
 			}
 		}
 		return true;
 	},
-	removeEscapeKeyEventListener: function () {
-		if (WebVellaBlazorTrace.escapeKeyEventListener) {
-			WebVellaBlazorTrace.escapeKeyEventListener = null;
+	removeEscapeKeyEventListener: function (listenerId) {
+		if (WebVellaBlazorTrace.escapeKeyEventListeners && WebVellaBlazorTrace.escapeKeyEventListeners[listenerId]) {
+			delete WebVellaBlazorTrace.escapeKeyEventListeners[listenerId];
+			WebVellaBlazorTrace.escapeKeyEventListenerQueue = WebVellaBlazorTrace.escapeKeyEventListenerQueue.filter(x => x != listenerId);
 		}
 		return true;
 	},
+
 	addF1KeyEventListener: function (dotNetHelper, methodName) {
 		if (!WebVellaBlazorTrace.inited) {
 			WebVellaBlazorTrace.initKeyListeners();

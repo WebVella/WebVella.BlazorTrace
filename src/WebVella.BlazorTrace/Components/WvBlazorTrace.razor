@@ -228,10 +228,13 @@
 				</table>
 			</div>
 		}
+		<div class="wv-trace-modal__footer">
+			<button title="Close [Esc]" type="button" @onclick=_hide>Close [Esc]</button>
+		</div>
 	</div>
 
-	<WvBlazorTraceListModal Row="_traceListModalRow" OnHide="_hideTraceListModal" />
-	<WvBlazorMemoryModal Row="_memoryModalRow" OnHide="_hideMemoryModal" />
+	<WvBlazorTraceListModal @ref=_traceListModal />
+	<WvBlazorMemoryModal @ref=_memoryModal />
 }
 
 

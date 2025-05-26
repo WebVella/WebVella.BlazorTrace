@@ -25,8 +25,10 @@ private bool _visible = false;
 #else
 	private bool _visible = true;
 #endif
-	private Guid _componentId = new Guid("08e73835-f485-453f-ad9f-7c462cbbe70c");
+	private Guid _componentId = Guid.NewGuid();
 	private DotNetObjectReference<WvBlazorTrace> _objectRef = default!;
+	private bool _escapeListenerEnabled = false;
+	private bool _f1ListenerEnabled = false;
 	private bool _modalVisible = false;
 	private bool _loadingData = false;
 	private WvTraceModalData? _data = null;
@@ -38,14 +40,19 @@ private bool _visible = false;
 	private Task? _infiniteLoop;
 	private CancellationTokenSource? _infiniteLoopCancellationTokenSource;
 	private WvBlazorTraceConfiguration _configuration = default!;
-	private WvTraceRow? _traceListModalRow = null;
-	private WvTraceRow? _memoryModalRow = null;
+	private WvBlazorTraceListModal? _traceListModal = null;
+	private WvBlazorMemoryModal? _memoryModal = null;
+
+
+
 	//LIFECYCLE
 	//////////////////////////////////////////////////
 	public async ValueTask DisposeAsync()
 	{
-		await new JsService(JSRuntimeSrv).RemoveKeyEventListener("Escape");
-		await new JsService(JSRuntimeSrv).RemoveKeyEventListener("F1");
+		if (_escapeListenerEnabled)
+			await new JsService(JSRuntimeSrv).RemoveKeyEventListener("Escape", _componentId.ToString());
+		if (_f1ListenerEnabled)
+			await new JsService(JSRuntimeSrv).RemoveKeyEventListener("F1");
 		_objectRef?.Dispose();
 		if (_infiniteLoopCancellationTokenSource is not null)
 			_infiniteLoopCancellationTokenSource.Cancel();
@@ -67,7 +74,10 @@ private bool _visible = false;
 		if (firstRender)
 		{
 			if (_configuration.EnableF1Shortcut)
+			{
 				await new JsService(JSRuntimeSrv).AddKeyEventListener(_objectRef, "OnShortcutKey", "F1");
+				_f1ListenerEnabled = true;
+			}
 
 #if DEBUG
 			await _show();
@@ -81,8 +91,8 @@ private bool _visible = false;
 	////////////////////////////////////////////////
 	private async Task _show()
 	{
-		await new JsService(JSRuntimeSrv).AddKeyEventListener(_objectRef, "OnShortcutKey", "Escape");
-		await new JsService(JSRuntimeSrv).RemoveKeyEventListener("F1");
+		await new JsService(JSRuntimeSrv).AddKeyEventListener(_objectRef, "OnShortcutKey", "Escape", _componentId.ToString());
+		_escapeListenerEnabled = true;
 		_modalVisible = true;
 		await _getData();
 		_runLoop();
@@ -90,9 +100,8 @@ private bool _visible = false;
 	}
 	private async Task _hide()
 	{
-		if (_configuration.EnableF1Shortcut)
-			await new JsService(JSRuntimeSrv).AddKeyEventListener(_objectRef, "OnShortcutKey", "F1");
-		await new JsService(JSRuntimeSrv).RemoveKeyEventListener("Escape");
+		await new JsService(JSRuntimeSrv).RemoveKeyEventListener("Escape", _componentId.ToString());
+		_escapeListenerEnabled = false;
 		if (_infiniteLoopCancellationTokenSource is not null)
 			_infiniteLoopCancellationTokenSource.Cancel();
 		_modalVisible = false;
@@ -116,32 +125,22 @@ private bool _visible = false;
 	{
 		if (code == "Escape")
 		{
-			if (_traceListModalRow is not null)
-			{
-				_traceListModalRow = null;
-				RegenRenderLock();
-			}
-			if (_memoryModalRow is not null)
-			{
-				_memoryModalRow = null;
-				RegenRenderLock();
-			}
-			else
-				await _hide();
-
+			await _hide();
 			await InvokeAsync(StateHasChanged);
 		}
 		else if (code == "F1")
 		{
+			if (_modalVisible) return;
 			await _show();
 			await InvokeAsync(StateHasChanged);
 		}
 
 	}
 
-	private async Task _submitFilter()
+	private Task _submitFilter()
 	{
 		RegenRenderLock();
+		return Task.CompletedTask;
 	}
 	private async Task _clearFilter()
 	{
@@ -194,7 +193,7 @@ private bool _visible = false;
 			if (String.IsNullOrEmpty(resourceName))
 				throw new Exception("BlazorTrace styles not found as resources");
 			// Read the stream from the embedded resource
-			using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+			using (Stream stream = assembly.GetManifestResourceStream(resourceName)!)
 			{
 				if (stream != null)
 				{
@@ -210,7 +209,7 @@ private bool _visible = false;
 			if (String.IsNullOrEmpty(resourceName))
 				throw new Exception("BlazorTrace scripts not found as resources");
 			// Read the stream from the embedded resource
-			using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+			using (Stream stream = assembly.GetManifestResourceStream(resourceName)!)
 			{
 				if (stream != null)
 				{
@@ -249,28 +248,16 @@ private bool _visible = false;
 		|| _data.Request.CallsFilter is not null;
 	}
 
-	private void _showTraceListModal(WvTraceRow row)
+	private async Task _showTraceListModal(WvTraceRow row)
 	{
-		_traceListModalRow = row;
-		RegenRenderLock();
+		if (_traceListModal is null) return;
+		await _traceListModal.Show(row);
 	}
 
-	private void _hideTraceListModal()
+	private async Task _showMemoryModal(WvTraceRow row)
 	{
-		_traceListModalRow = null;
-		RegenRenderLock();
-	}
-
-	private void _showMemoryModal(WvTraceRow row)
-	{
-		_memoryModalRow = row;
-		RegenRenderLock();
-	}
-
-	private void _hideMemoryModal()
-	{
-		_memoryModalRow = null;
-		RegenRenderLock();
+		if (_memoryModal is null) return;
+		await _memoryModal.Show(row);
 	}
 
 }

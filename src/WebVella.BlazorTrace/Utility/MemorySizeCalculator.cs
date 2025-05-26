@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Components;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using WebVella.BlazorTrace;
@@ -22,14 +23,17 @@ public class MemorySizeCalculator
 			throw new ArgumentNullException(nameof(component));
 
 		return CalculateSize(
-		obj: component,
+		measuredObject: component,
+		component: component,
 		valueLabel: component.GetType().FullName!,
 		memoryDetails: memoryDetails,
 		configuration: configuration,
 		currentDepth: maxDepth);
 	}
 
-	private static long CalculateSize(object obj,
+	private static long CalculateSize(
+		object measuredObject,
+		object component,
 		string valueLabel,
 		List<WvTraceMemoryInfo> memoryDetails,
 		WvBlazorTraceConfiguration configuration,
@@ -38,10 +42,10 @@ public class MemorySizeCalculator
 		// Initialize the set on first call
 		visited ??= new HashSet<object>();
 
-		if (obj == null || currentDepth < 0)
+		if (measuredObject == null || currentDepth < 0)
 			return 0;
 
-		Type type = obj.GetType();
+		Type type = measuredObject.GetType();
 		if (type.Assembly is null) return 0;
 		if (configuration.MemoryTraceExcludedAssemblyStartWithList.Any(x => type.Assembly.FullName!.StartsWith(x))
 			&& !configuration.MemoryTraceIncludedAssemblyStartWithList.Any(x => type.Assembly.FullName!.StartsWith(x)))
@@ -50,19 +54,19 @@ public class MemorySizeCalculator
 		}
 
 		// Skip already processed reference types to prevent infinite loops
-		if (!type.IsValueType && visited.Contains(obj))
+		if (!type.IsValueType && visited.Contains(measuredObject))
 			return 0;
 
 		// Add ref-type objects to the visited set to avoid cycles
 		if (!type.IsValueType)
-			visited.Add(obj);
+			visited.Add(measuredObject);
 
 		long size = 0;
 
 		// Process arrays recursively
 		if (type.IsArray)
 		{
-			Array array = (Array)obj;
+			Array array = (Array)measuredObject;
 			for (int i = 0; i < array.Length; i++)
 			{
 				var element = array.GetValue(i);
@@ -70,7 +74,8 @@ public class MemorySizeCalculator
 
 				if (currentDepth > 0)
 					size += CalculateSize(
-							obj: element,
+							measuredObject: element,
+							component:component,
 							valueLabel: valueLabel,
 							memoryDetails: memoryDetails,
 							configuration: configuration,
@@ -85,19 +90,20 @@ public class MemorySizeCalculator
 		{
 			// Handle primitive value types directly
 			if (IsPrimitiveType(type))
-				size += GetPrimitiveSize(obj);
+				size += GetPrimitiveSize(measuredObject);
 			else
 			{
 				// Recursively calculate the size of complex struct fields
 				var fields = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 				foreach (var field in fields)
 				{
-					object fieldValue = field.GetValue(obj);
+					object fieldValue = field.GetValue(measuredObject);
 					if (fieldValue == null) continue;
 
 					if (currentDepth > 0)
 						size += CalculateSize(
-								obj: fieldValue,
+								measuredObject: fieldValue,
+								component:component,
 								valueLabel: field.Name,
 								memoryDetails: memoryDetails,
 								configuration: configuration,
@@ -115,12 +121,13 @@ public class MemorySizeCalculator
 
 			foreach (var field in fields)
 			{
-				object fieldValue = field.GetValue(obj);
+				object fieldValue = field.GetValue(measuredObject);
 				if (fieldValue == null) continue;
 
 				if (currentDepth > 0)
 					size += CalculateSize(
-							obj: fieldValue,
+							measuredObject: fieldValue,
+							component:component,
 							valueLabel: field.Name,
 							memoryDetails: memoryDetails,
 							configuration: configuration,
@@ -133,10 +140,11 @@ public class MemorySizeCalculator
 		}
 
 		// Remove ref-type objects from the set after processing
-		if (!type.IsValueType && obj != null)
-			visited.Remove(obj);
+		if (!type.IsValueType && measuredObject != null)
+			visited.Remove(measuredObject);
 
-		if (size > 0)
+		//Exclude the component itself from the log
+		if (size > 0 && type.FullName != component.GetType().FullName)
 		{
 			var memInfoId = WvTraceUtility.GetMemoryInfoId(type.Assembly.FullName!, valueLabel);
 			var memIndex = memoryDetails.FindIndex(x => x.Id == memInfoId);
