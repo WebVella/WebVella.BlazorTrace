@@ -1,4 +1,5 @@
 ﻿@using System.Diagnostics
+@using WebVella.BlazorTrace.Models
 @inject IWvBlazorTraceService WvBlazorTraceService
 <div style="padding:10px;border:1px solid #7e22ce; background:#d8b4fe;">
 	<div style="padding-top:15px">
@@ -34,7 +35,13 @@
 		}
 
 		if (_enableTrace)
-			WvBlazorTraceService.OnExit(this, instanceTag: _instanceTag);
+			WvBlazorTraceService.OnExit(this, instanceTag: _instanceTag, options: new WvTraceMethodOptions
+				{
+					MemoryLimitTotalBytes = 1,
+					MemoryLimitDeltaBytes = 1,
+					CallLimit = 1,
+					DurationLimit = 1
+				});
 	}
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)

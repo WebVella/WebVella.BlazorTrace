@@ -21,11 +21,11 @@ public class WvTraceSessionComponent
 public class WvTraceSessionComponentTaggedInstance
 {
 	public string? Tag { get; set; }
-	public WvTraceSessionMethod OnInitialized { get; set; } = new() { Name = "OnInitialized" };
-	public WvTraceSessionMethod OnParameterSet { get; set; } = new() { Name = "OnParameterSet" };
-	public WvTraceSessionMethod OnAfterRender { get; set; } = new() { Name = "OnAfterRender" };
-	public WvTraceSessionMethod ShouldRender { get; set; } = new() { Name = "ShouldRender" };
-	public WvTraceSessionMethod Dispose { get; set; } = new() { Name = "Dispose" };
+	public WvTraceSessionMethod OnInitialized { get; set; } = new();
+	public WvTraceSessionMethod OnParameterSet { get; set; } = new();
+	public WvTraceSessionMethod OnAfterRender { get; set; } = new();
+	public WvTraceSessionMethod ShouldRender { get; set; } = new();
+	public WvTraceSessionMethod Dispose { get; set; } = new();
 	public List<WvTraceSessionMethod> OtherMethods { get; set; } = new();
 	public List<WvTraceSessionSignal> Signals { get; set; } = new();
 
@@ -101,6 +101,7 @@ public class WvTraceSessionMethod
 
 public class WvTraceSessionTrace
 {
+	public Guid? TraceId { get; set; } = null;
 	public DateTimeOffset? EnteredOn { get; set; } = null;
 	public DateTimeOffset? ExitedOn { get; set; } = null;
 	public long? DurationMs { get => this.GetDurationMS(); }
@@ -112,6 +113,8 @@ public class WvTraceSessionTrace
 	public bool? OnExitFirstRender { get; set; } = null;
 	public string? OnEnterCallTag { get; set; } = null;
 	public string? OnExitCallTag { get; set; } = null;
+	public WvTraceMethodOptions OnEnterOptions { get; set; } = default!;
+	public WvTraceMethodOptions OnExitOptions { get; set; } = default!;
 }
 
 public class WvTraceSessionSignal

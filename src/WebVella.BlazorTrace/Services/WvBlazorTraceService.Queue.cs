@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -18,10 +19,12 @@ using WebVella.BlazorTrace.Utility;
 namespace WebVella.BlazorTrace;
 public partial interface IWvBlazorTraceService
 {
-
+	ConcurrentQueue<WvTraceQueueAction> GetQueue();
+	void ProcessQueueForTests();
 }
 public partial class WvBlazorTraceService : IWvBlazorTraceService
 {
+	public ConcurrentQueue<WvTraceQueueAction> GetQueue() => _traceQueue;
 	private void _addToQueue(WvTraceQueueAction trace)
 	{
 		_traceQueue.Enqueue(trace);
@@ -53,32 +56,22 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 			}
 		}, _infiniteLoopCancellationTokenSource.Token);
 	}
-
 	private void _processQueueTrace(WvTraceQueueAction action)
 	{
 		if (action is null) return;
 		if (action.Component is null) return;
-		var timestamp = DateTimeOffset.Now;
-		var callerInfo = _getInfo(action.Component, action.InstanceTag, action.MethodName);
-		if (callerInfo is null)
+		var traceInfo = action.Component.GetInfo(action.TraceId, action.InstanceTag, action.MethodName);
+		if (traceInfo is null)
 			throw new Exception("callerInfo cannot be evaluated");
-		var trace = _findOrInitMethodTrace(callerInfo, isOnEnter: action.MethodCalled == WvTraceQueueItemMethod.OnEnter);
+		_saveSessionTrace(traceInfo, action);
+	}
 
-		if (action.MethodCalled == WvTraceQueueItemMethod.OnEnter)
+	public void ProcessQueueForTests()
+	{
+		if (_traceQueue.IsEmpty) return;
+		if (_traceQueue.TryDequeue(out var trace))
 		{
-			trace.OnEnterMemoryInfo = new List<WvTraceMemoryInfo>();
-			trace.EnteredOn = timestamp;
-			trace.OnEnterFirstRender = action.FirstRender;
-			trace.OnEnterCallTag = action.CallTag;
-			trace.OnEnterMemoryBytes = action.Component is null ? null : action.Component.GetSize(trace.OnEnterMemoryInfo, _configuration);
-		}
-		else
-		{
-			trace.OnExitMemoryInfo = new List<WvTraceMemoryInfo>();
-			trace.ExitedOn = timestamp;
-			trace.OnExitFirstRender = action.FirstRender;
-			trace.OnExitCallTag = action.CallTag;
-			trace.OnExitMemoryBytes = action.Component is null ? null : action.Component.GetSize(trace.OnExitMemoryInfo, _configuration);
+			_processQueueTrace(trace);
 		}
 	}
 }

@@ -34,7 +34,7 @@ public static class WvModalUtility
 					foreach (WvTraceSessionMethod tm in componentTaggedInstance.MethodsTotal(includeNotCalled: false))
 					{
 						var methodHash = tm.GenerateHash(moduleName, componentFullName, componentTaggedInstance.Tag);
-						result.Add(new WvTraceRow
+						var row = new WvTraceRow
 						{
 							Module = moduleName,
 							Component = component.Name,
@@ -47,7 +47,8 @@ public static class WvModalUtility
 							LimitHits = tm.LimitHits,
 							MethodComparison = methodComparisonDict[methodHash].ComparisonData,
 							MemoryComparison = memoryComparisonDict[methodHash].ComparisonData,
-						});
+						};
+						result.Add(row);
 					}
 				}
 			}

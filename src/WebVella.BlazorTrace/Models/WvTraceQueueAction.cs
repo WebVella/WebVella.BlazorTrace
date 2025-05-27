@@ -12,7 +12,8 @@ public class WvTraceQueueAction
 {
 	public WvTraceQueueItemMethod MethodCalled { get; set; } = WvTraceQueueItemMethod.OnEnter;
 	public ComponentBase Component { get; set; } = default!;
-	public WvTraceMethodOptions? Options { get; set; } = null;
+	public Guid? TraceId { get; set; } = null;
+	public WvTraceMethodOptions Options { get; set; } = default!;
 	public bool? FirstRender { get; set; } = null;
 	public string? InstanceTag { get; set; } = null;
 	public string? CallTag { get; set; } = null;

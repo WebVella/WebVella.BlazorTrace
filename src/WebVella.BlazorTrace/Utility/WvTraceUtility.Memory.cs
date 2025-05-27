@@ -12,10 +12,18 @@ using WebVella.BlazorTrace.Models;
 namespace WebVella.BlazorTrace.Utility;
 public static partial class WvTraceUtility
 {
-	public static void ConsoleLog(string message)
+	public static long GetSize(this ComponentBase obj,
+		List<WvTraceMemoryInfo> memoryDetails,
+		WvBlazorTraceConfiguration configuration,
+		int maxDepth = 5)
 	{
-#if DEBUG
-		//Console.WriteLine($"$$$$$$ [{DateTime.Now.ToString("HH:mm:ss:ffff")}] =>{message} ");
-#endif
+		if (obj == null) return 0;
+		return MemorySizeCalculator.CalculateComponentMemorySize(
+		component: obj,
+		memoryDetails: memoryDetails,
+		configuration: configuration,
+		maxDepth: maxDepth
+		);
 	}
+
 }

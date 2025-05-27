@@ -16,18 +16,20 @@
 				<thead>
 					<tr>
 						<th rowspan="2">duration</th>
-						<th colspan="4">enter</th>
-						<th colspan="4">exit</th>
+						<th colspan="5">enter</th>
+						<th colspan="5">exit</th>
 					</tr>
 					<tr>
 						<th>timestamp</th>
 						<th>memory</th>
 						<th>call tag</th>
 						<th>first render</th>
+						<th>limits</th>
 						<th>timestamp</th>
 						<th>memory</th>
 						<th>call tag</th>
 						<th>first render</th>
+						<th>limits</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -39,17 +41,19 @@
 							<td class="number clickable" @onclick=@(() => _showMemoryModal(item.OnEnterMemoryInfo))>@item.OnEnterMemoryBytes.ToKilobytesString()</td>
 							<td class="tag">@item.OnEnterCallTag</td>
 							<td>@item.OnEnterFirstRender.GetFirstRenderString()</td>
+							<td></td>
 							<td class="number">@item.ExitedOn?.ToString(WvConstants.TimestampFormat) ms</td>
 							<td class="number clickable" @onclick=@(() => _showMemoryModal(item.OnExitMemoryInfo))>@item.OnExitMemoryBytes.ToKilobytesString()</td>
 							<td class="tag">@item.OnExitCallTag</td>
 							<td>@item.OnExitFirstRender.GetFirstRenderString()</td>
+							<td></td>
 						</tr>
 					}
 
 					@if (_row.TraceList.Count == 0)
 					{
 						<tr>
-							<td colspan="8" style="padding:30px;text-align:center;">No tracers are logged yet for this method</td>
+							<td colspan="11" style="padding:30px;text-align:center;">No tracers are logged yet for this method</td>
 						</tr>
 					}
 				</tbody>

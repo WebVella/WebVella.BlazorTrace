@@ -18,6 +18,7 @@ public partial interface IWvBlazorTraceService
 	/// <param name="methodName">automatically initialized in most cases by its attribute. Override only if you need to.</param>
 	void OnEnter(
 		ComponentBase component,
+		Guid? traceId = null,
 		WvTraceMethodOptions? options = null,
 		bool? firstRender = null,
 		string? instanceTag = null,
@@ -36,6 +37,7 @@ public partial interface IWvBlazorTraceService
 	/// <param name="methodName">automatically initialized in most cases by its attribute. Override only if you need to.</param>
 	void OnExit(
 		ComponentBase component,
+		Guid? traceId = null,
 		WvTraceMethodOptions? options = null,
 		bool? firstRender = null,
 		string? instanceTag = null,
@@ -49,6 +51,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 	private readonly Lock _onExitLock = new Lock();
 	public void OnEnter(
 		ComponentBase component,
+		Guid? traceId = null,
 		WvTraceMethodOptions? options = null,
 		bool? firstRender = null,
 		string? instanceTag = null,
@@ -60,26 +63,24 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		return;
 #endif
 		if (!_configuration.EnableTracing) return;
-		WvTraceUtility.ConsoleLog($"OnEnter start");
-		var sw = new Stopwatch();
-		sw.Start();
 		lock (_onEnterLock)
 		{
 			_addToQueue(new WvTraceQueueAction
 			{
 				MethodCalled = WvTraceQueueItemMethod.OnEnter,
 				Component = component,
+				TraceId = traceId,
 				CallTag = callTag,
 				FirstRender = firstRender,
 				InstanceTag = instanceTag,
 				MethodName = methodName,
-				Options = options
+				Options = options ?? new WvTraceMethodOptions()
 			});
 		}
-		WvTraceUtility.ConsoleLog($"OnEnter start: {sw.ElapsedMilliseconds}");
 	}
 	public void OnExit(
 		ComponentBase component,
+		Guid? traceId = null,
 		WvTraceMethodOptions? options = null,
 		bool? firstRender = null,
 		string? instanceTag = null,
@@ -92,23 +93,20 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 #endif
 
 		if (!_configuration.EnableTracing) return;
-		WvTraceUtility.ConsoleLog($"OnExit start");
-		var sw = new Stopwatch();
-		sw.Start();
 		lock (_onExitLock)
 		{
 			_addToQueue(new WvTraceQueueAction
 			{
 				MethodCalled = WvTraceQueueItemMethod.OnExit,
 				Component = component,
+				TraceId = traceId,
 				CallTag = callTag,
 				FirstRender = firstRender,
 				InstanceTag = instanceTag,
 				MethodName = methodName,
-				Options = options
+				Options = options ?? new WvTraceMethodOptions()
 			});
 		}
-		WvTraceUtility.ConsoleLog($"OnExit start: {sw.ElapsedMilliseconds}");
 	}
 }
 
