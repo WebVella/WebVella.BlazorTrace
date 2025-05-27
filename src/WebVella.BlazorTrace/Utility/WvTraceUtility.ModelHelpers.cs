@@ -43,18 +43,14 @@ public static partial class WvTraceUtility
 		}
 		return maxDuration == -1 ? null : maxDuration;
 	}
-	public static long? GetAverageDuration(this WvTraceSessionMethod method)
+	public static long? GetLastDuration(this WvTraceSessionMethod method)
 	{
-		long durationSum = -1;
-		decimal count = 1;
-		foreach (var trace in method.TraceList)
-		{
-			if (trace.DurationMs is null || trace.DurationMs.Value < 0) continue;
-			durationSum += trace.DurationMs.Value;
-			count++;
-		}
-		if (durationSum == -1) return null;
-		return (long)(durationSum / count);
+		var lastExitedTrace = method.LastExitedTrace;
+		if (lastExitedTrace is null
+		|| lastExitedTrace.EnteredOn is null || lastExitedTrace.ExitedOn is null)
+			return null;
+
+		return (lastExitedTrace.ExitedOn.Value - lastExitedTrace.EnteredOn.Value).Milliseconds;
 	}
 	public static long? GetMinMemory(this WvTraceSessionMethod method, bool isOnEnter)
 	{

@@ -79,9 +79,9 @@ public partial class WvBlazorMemoryModal : WvBlazorTraceComponentBase
 
 		var sb = new StringBuilder();
 		sb.Append($"<span>{_row.Component}</span>");
-		if (!String.IsNullOrWhiteSpace(_row.Tag))
+		if (!String.IsNullOrWhiteSpace(_row.InstanceTag))
 		{
-			sb.Append($" <span class='tag' style='margin-left:5px'>{_row.Tag}</span>");
+			sb.Append($" <span class='tag' style='margin-left:5px'>{_row.InstanceTag}</span>");
 		}
 		sb.Append("<span class='wv-trace-modal__divider'></span>");
 		sb.Append($"<span>{_row.Method}</span>");

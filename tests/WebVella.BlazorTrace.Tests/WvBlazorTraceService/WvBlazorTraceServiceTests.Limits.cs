@@ -2,11 +2,11 @@
 
 namespace WebVella.BlazorTrace.Tests;
 
-public class Limits : BaseTest
+public partial class WvBlazorTraceServiceTests : BaseTest
 {
 
 	[Fact]
-	public void OnEnterTestBaseCalls()
+	public void LimitDuration1()
 	{
 		lock (_locker)
 		{

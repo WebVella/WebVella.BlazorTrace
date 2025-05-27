@@ -28,4 +28,17 @@ public class WvSnapshotMethodComparisonData
 			return $"<span class='positive'>+{TraceListChange}</span>";
 		}
 	}
+	public long? LastDurationChangeMS { get; set; }
+	public string LastDurationChangeMSHtml
+	{
+		get
+		{
+			if (LastDurationChangeMS == 0) return $"<span class='mute'>=</span>";
+			else if (LastDurationChangeMS < 0)
+			{
+				return $"<span class='negative'>{LastDurationChangeMS}</span>";
+			}
+			return $"<span class='positive'>+{LastDurationChangeMS}</span>";
+		}
+	}
 }

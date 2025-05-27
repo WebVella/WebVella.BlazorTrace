@@ -2,7 +2,7 @@
 
 namespace WebVella.BlazorTrace.Tests;
 
-public class MethodCalls : BaseTest
+public partial class WvBlazorTraceServiceTests : BaseTest
 {
 
 	[Fact]

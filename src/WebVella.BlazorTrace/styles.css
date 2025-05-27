@@ -307,7 +307,25 @@
 }
 .wv-trace-modal__body table th.clickable,
 .wv-trace-modal__body table td.clickable {
-  background: rgba(23, 37, 84, 0.5);
+  position: relative;
+  padding-left: 30px;
+}
+.wv-trace-modal__body table th.clickable .icon,
+.wv-trace-modal__body table td.clickable .icon {
+  color: #64748b;
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 30px;
+  padding-top: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: start;
+}
+.wv-trace-modal__body table th.clickable .icon svg,
+.wv-trace-modal__body table td.clickable .icon svg {
+  width: 10px;
 }
 .wv-trace-modal__body table th.clickable:hover,
 .wv-trace-modal__body table td.clickable:hover {

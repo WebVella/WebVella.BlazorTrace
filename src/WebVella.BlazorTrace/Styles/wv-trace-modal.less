@@ -254,7 +254,23 @@
 				}
 
 				&.clickable {
-					background: @color-link-background;
+					position:relative;
+					padding-left:30px;
+					.icon {
+						color:@color-mute;
+						position:absolute;
+						left:0;
+						top:0;
+						bottom:0;
+						width:30px;
+						padding-top:12px;
+						display:flex;
+						justify-content:center;
+						align-items:start;
+						svg{
+							width:10px;
+						}
+					}
 
 					&:hover {
 						cursor: pointer;

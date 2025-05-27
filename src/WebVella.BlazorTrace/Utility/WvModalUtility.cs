@@ -39,10 +39,10 @@ public static class WvModalUtility
 							Module = moduleName,
 							Component = component.Name,
 							ComponentFullName = componentFullName,
-							Tag = componentTaggedInstance.Tag,
+							InstanceTag = componentTaggedInstance.Tag,
 							Method = tm.Name,
 							LastMemoryKB = tm.LastMemoryBytes.ToKilobytes(),
-							LastDurationMS = tm.LastDurationMs,
+							LastDurationMS = tm.LastDurationMS,
 							TraceList = tm.TraceList,
 							LimitHits = tm.LimitHits,
 							MethodComparison = methodComparisonDict[methodHash].ComparisonData,
@@ -114,6 +114,7 @@ public static class WvModalUtility
 			var sc = methodComparison.SecondarySnapshotMethod;
 			var compData = methodComparison.ComparisonData;
 			compData.TraceListChange = sc.TraceList.Count - pr.TraceList.Count;
+			compData.LastDurationChangeMS = sc.LastDurationMS - pr.LastDurationMS;
 		}
 
 		foreach (var methodHash in memoryDict.Keys)

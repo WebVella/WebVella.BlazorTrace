@@ -8,29 +8,16 @@ using WebVella.BlazorTrace.Utility;
 namespace WebVella.BlazorTrace.Models;
 public class WvTraceRow
 {
-	public string Id { get => WvModalUtility.GenerateHash(Module, ComponentFullName, Tag, Method); }
+	public string Id { get => WvModalUtility.GenerateHash(Module, ComponentFullName, InstanceTag, Method); }
 	public string? Module { get; set; }
 	public string? Component { get; set; }
 	public string? ComponentFullName { get; set; }
-	public string? Tag { get; set; }
+	public string? InstanceTag { get; set; }
 	public string? Method { get; set; }
 	public bool IsBookmarked { get; set; } = false;
 	public List<WvTraceSessionTrace> TraceList { get; set; } = new();
 	public double? LastMemoryKB { get; set; }
 	public long? LastDurationMS { get; set; }
-	public long? LastDurationChangeMS { get; set; }
-	public string LastDurationChangeMSHtml
-	{
-		get
-		{
-			if (LastDurationChangeMS == 0) return string.Empty;
-			else if (LastDurationChangeMS < 0)
-			{
-				return $"<span class='negative'>{LastDurationChangeMS}</span>";
-			}
-			return $"<span class='positive'>+{LastDurationChangeMS}</span>";
-		}
-	}
 	public List<WvTraceSessionLimitHit> LimitHits { get; set; } = new();
 	public WvSnapshotMethodComparisonData MethodComparison { get; set; } = new();
 	public WvSnapshotMemoryComparisonData MemoryComparison { get; set; } = new();

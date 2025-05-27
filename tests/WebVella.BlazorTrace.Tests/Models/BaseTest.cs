@@ -30,7 +30,7 @@ public class BaseTest
 		this.Component = new TestComponent();
 	}
 
-	public (WvTraceSessionMethod,WvTraceSessionTrace) CheckTraceExists(
+	public (WvTraceSessionMethod, WvTraceSessionTrace) CheckTraceExists(
 		Dictionary<string, WvTraceSessionModule> moduleDict,
 		string moduleName,
 		string componentFullName,
@@ -101,6 +101,28 @@ public class BaseTest
 		Assert.NotNull(traceList.SingleOrDefault(x => x.TraceId == traceId));
 		trace = traceList.Single();
 
-		return (method,trace);
+		return (method, trace);
+	}
+
+	public WvTraceRow CheckTraceRowExists(
+			List<WvTraceRow> traceRows,
+			string moduleName,
+			string componentFullName,
+			string componentName,
+			string instanceTag,
+			string methodName)
+	{
+		Assert.NotNull(traceRows);
+		Assert.NotNull(traceRows.SingleOrDefault(x => x.Module == moduleName
+			&& x.ComponentFullName == componentFullName
+			&& x.Component == componentName
+			&& x.InstanceTag == instanceTag
+			&& x.Method == methodName));
+
+		return traceRows.Single(x => x.Module == moduleName
+			&& x.ComponentFullName == componentFullName
+			&& x.Component == componentName
+			&& x.InstanceTag == instanceTag
+			&& x.Method == methodName);
 	}
 }
