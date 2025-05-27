@@ -36,9 +36,9 @@
 					@foreach (var item in _row.TraceList.OrderByDescending(x => x.DurationMs))
 					{
 						<tr @key="@Guid.NewGuid()">
-							<td class="number">@item.DurationMs.GetDurationMSString()</td>
-							<td class="number">@item.EnteredOn?.ToString(WvConstants.TimestampFormat) ms</td>
-							<td class="number clickable" @onclick=@(() => _showMemoryModal(item.OnEnterMemoryInfo))>
+							<td class="wv-number">@item.DurationMs.GetDurationMSString()</td>
+							<td class="wv-number">@item.EnteredOn?.ToString(WvConstants.TimestampFormat) ms</td>
+							<td class="wv-number clickable" @onclick=@(() => _showMemoryModal(item.OnEnterMemoryInfo))>
 								<div class="icon">
 									<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-box-arrow-up-right" viewBox="0 0 16 16">
 										<path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5" />
@@ -49,11 +49,11 @@
 									@item.OnEnterMemoryBytes.ToKilobytesString()
 								</div>
 							</td>
-							<td class="tag">@item.OnEnterCallTag</td>
+							<td class="wv-tag">@item.OnEnterCallTag</td>
 							<td>@item.OnEnterFirstRender.GetFirstRenderString()</td>
 							<td></td>
-							<td class="number">@item.ExitedOn?.ToString(WvConstants.TimestampFormat) ms</td>
-							<td class="number clickable" @onclick=@(() => _showMemoryModal(item.OnExitMemoryInfo))>
+							<td class="wv-number">@item.ExitedOn?.ToString(WvConstants.TimestampFormat) ms</td>
+							<td class="wv-number clickable" @onclick=@(() => _showMemoryModal(item.OnExitMemoryInfo))>
 								<div class="icon">
 									<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-box-arrow-up-right" viewBox="0 0 16 16">
 										<path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5" />
@@ -64,7 +64,7 @@
 									@item.OnExitMemoryBytes.ToKilobytesString()
 								</div>
 							</td>
-							<td class="tag">@item.OnExitCallTag</td>
+							<td class="wv-tag">@item.OnExitCallTag</td>
 							<td>@item.OnExitFirstRender.GetFirstRenderString()</td>
 							<td></td>
 						</tr>

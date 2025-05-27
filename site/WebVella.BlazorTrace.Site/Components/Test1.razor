@@ -8,60 +8,59 @@
 	</div>
 	<div style="display:flex;">
 		<div style="flex:1 1 50%;padding:10px;">
-			<Test2 ParentCounter="_counter" />
+			<Test2 ParentCounter="_counter" InstanceTag="left"/>
 		</div>
 		<div style="flex:1 1 50%;padding:10px;">
-			<Test2 ParentCounter="_counter" />
+			<Test2 ParentCounter="_counter" InstanceTag="right" />
 		</div>
 	</div>
 </div>
 
 @code {
+	[Parameter] public string? InstanceTag { get; set; }
 	private bool _enableTrace = true;
 	private int _counter = 0;
-	private string? _instanceTag = null;
 
 	protected override void OnInitialized()
 	{
-		_instanceTag = this.GetHashCode().ToString();
 		if (_enableTrace)
-			WvBlazorTraceService.OnEnter(component: this, instanceTag: _instanceTag);
+			WvBlazorTraceService.OnEnter(component: this, instanceTag: InstanceTag);
 
 		base.OnInitialized();
 		if (_enableTrace)
-			WvBlazorTraceService.OnExit(component: this, instanceTag: _instanceTag);
+			WvBlazorTraceService.OnExit(component: this, instanceTag: InstanceTag);
 	}
 
 	protected override void OnAfterRender(bool firstRender)
 	{
 
 		if (_enableTrace)
-			WvBlazorTraceService.OnEnter(component: this, firstRender: firstRender, instanceTag: _instanceTag);
+			WvBlazorTraceService.OnEnter(component: this, firstRender: firstRender, instanceTag: InstanceTag);
 
 		base.OnAfterRender(firstRender);
 
 		if (_enableTrace)
-			WvBlazorTraceService.OnExit(component: this, firstRender: firstRender, instanceTag: _instanceTag);
+			WvBlazorTraceService.OnExit(component: this, firstRender: firstRender, instanceTag: InstanceTag);
 	}
 
 	protected override void OnParametersSet()
 	{
 		if (_enableTrace)
-			WvBlazorTraceService.OnEnter(component: this, instanceTag: _instanceTag);
+			WvBlazorTraceService.OnEnter(component: this, instanceTag: InstanceTag);
 
 		base.OnParametersSet();
 
 		if (_enableTrace)
-			WvBlazorTraceService.OnExit(component: this, instanceTag: _instanceTag);
+			WvBlazorTraceService.OnExit(component: this, instanceTag: InstanceTag);
 	}
 
 	protected override bool ShouldRender()
 	{
 		if (_enableTrace)
-			WvBlazorTraceService.OnEnter(component: this, instanceTag: _instanceTag);
+			WvBlazorTraceService.OnEnter(component: this, instanceTag: InstanceTag);
 
 		if (_enableTrace)
-			WvBlazorTraceService.OnExit(component: this, instanceTag: _instanceTag);
+			WvBlazorTraceService.OnExit(component: this, instanceTag: InstanceTag);
 		return base.ShouldRender();
 	}
 
@@ -70,11 +69,11 @@
 	private void _countTest1()
 	{
 		if (_enableTrace)
-			WvBlazorTraceService.OnEnter(component: this, instanceTag: _instanceTag);
+			WvBlazorTraceService.OnEnter(component: this, instanceTag: InstanceTag);
 
 		_counter++;
 
 		if (_enableTrace)
-			WvBlazorTraceService.OnExit(component: this, instanceTag: _instanceTag);
+			WvBlazorTraceService.OnExit(component: this, instanceTag: InstanceTag);
 	}
 }

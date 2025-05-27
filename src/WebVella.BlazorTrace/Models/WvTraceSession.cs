@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -133,8 +134,12 @@ public class WvTraceSessionLimitHit
 
 public enum WvTraceSessionLimitType
 {
-	MethodCalls = 0,
+	[Description("calls count")]
+	CallCount = 0,
+	[Description("duration")]
 	Duration = 1,
+	[Description("total memory")]
 	MemoryTotal = 2,
+	[Description("memory delta")]
 	MemoryDelta = 3
 }

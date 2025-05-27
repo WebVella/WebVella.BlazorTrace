@@ -15,24 +15,24 @@
 			<table>
 				<thead>
 					<tr>
-						<th>memory</th>
-						<th>change</th>
-						<th>assembly</th>
-						<th>field</th>
+						<th>limit type</th>
+						<th>stage</th>
+						<th class="wv-number">limit</th>
+						<th class="wv-number">actual</th>
 					</tr>
 				</thead>
 				<tbody>
-					@foreach (var item in _items.OrderByDescending(x => x.SecondarySnapshotBytes))
+					@foreach (var item in _row.LimitHits)
 					{
 						<tr @key="@Guid.NewGuid()">
-							<td class="wv-number">@item.SecondarySnapshotBytes.ToKilobytesString()</td>
-							<td class="wv-number">@((MarkupString)item.ChangeKBHtml)</td>
-							<td>@item.AssemblyName</td>
-							<td>@item.FieldName</td>
+							<td>@item.Type.ToDescriptionString()</td>
+							<td>@(item.IsOnEnter ? "onEnter" : "OnExit")</td>
+							<td class="wv-number">@item.Limit</td>
+							<td class="wv-number">@item.Actual</td>
 						</tr>
 					}
 
-					@if (_items.Count == 0)
+					@if (_row.LimitHits.Count == 0)
 					{
 						<tr>
 							<td colspan="4" style="padding:30px;text-align:center;">No tracers are logged yet for this method</td>

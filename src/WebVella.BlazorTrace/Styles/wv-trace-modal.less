@@ -52,8 +52,22 @@
 	@green-hover: rgba(@green,0.35);
 	@cyan: #06b6d4;
 	@cyan-hover: rgba(@cyan,0.35);
-	@purple: #a855f7;
+	@purple: #5b21b6;
 	@purple-hover: rgba(@purple,0.35);
+
+	@keyframes highlight {
+		0% {
+			background-color: transparent;
+		}
+
+		50% {
+			background-color: #fed7aa;
+		}
+
+		100% {
+			background-color: transparent;
+		}
+	}
 
 	&.secondary {
 		z-index: 1002;
@@ -128,7 +142,32 @@
 			}
 
 			&__selector {
+				position: relative;
+
+				&:after {
+					z-index: 2;
+					position: absolute;
+					top: 0;
+					bottom: 0;
+					left: 0;
+					right: 0;
+					border-radius: 5px;
+					display: block;
+					content: "";
+					background: transparent;
+					overflow: hidden;
+					pointer-events: none;
+					opacity: 0.25;
+				}
+
+				&.wv-highlight:after {
+					animation-name: highlight;
+					animation-duration: 0.5s;
+					animation-iteration-count: 1;
+				}
+
 				select {
+					z-index: 1;
 					width: 200px !important;
 				}
 			}
@@ -243,9 +282,13 @@
 					color: @color-mute;
 				}
 
-				.data {
+				.wv-data {
 					display: flex;
 					justify-content: space-between;
+				}
+
+				.wv-limits {
+					white-space: nowrap;
 				}
 
 				&.button {
@@ -254,35 +297,43 @@
 				}
 
 				&.clickable {
-					position:relative;
-					padding-left:30px;
+					position: relative;
+					padding-left: 30px;
+
 					.icon {
-						color:@color-mute;
-						position:absolute;
-						left:0;
-						top:0;
-						bottom:0;
-						width:30px;
-						padding-top:12px;
-						display:flex;
-						justify-content:center;
-						align-items:start;
-						svg{
-							width:10px;
+						color: @color-mute;
+						position: absolute;
+						left: 0;
+						top: 0;
+						bottom: 0;
+						width: 30px;
+						padding-top: 12px;
+						display: flex;
+						justify-content: center;
+						align-items: start;
+
+						svg {
+							width: 10px;
 						}
 					}
 
 					&:hover {
 						cursor: pointer;
-						background: @color-link-hover;
+						background: @color-link-hover !important;
 					}
 				}
 			}
 
 			thead {
-				tr:last-child {
+				tr.bookmark-row {
+					button.bookmarked {
+						color: @cyan;
+					}
+				}
+
+				tr.bookmark-row:last-child {
 					th, td {
-						border-bottom: 2px solid @accent-input-stroke;
+						border-bottom: 2px solid rgba(@cyan,0.5);
 					}
 				}
 
@@ -303,11 +354,10 @@
 				}
 			}
 
-			tbody {
-				tr:hover {
-					td {
-						background-color: rgba(255,255,255,0.05);
-					}
+			tbody tr:hover,
+			thead tr.bookmark-row:hover {
+				td {
+					background-color: rgba(255,255,255,0.05);
 				}
 			}
 		}
@@ -375,7 +425,7 @@
 			background: @color-accent-hover;
 		}
 
-		&.green {
+		&.wv-green {
 			background: transparent;
 			color: @green;
 			border: 2px solid @green;
@@ -385,7 +435,7 @@
 			}
 		}
 
-		&.mute {
+		&.wv-mute {
 			background: transparent;
 			color: @color-mute;
 			border: 2px solid @color-mute;
@@ -395,7 +445,7 @@
 			}
 		}
 
-		&.cyan {
+		&.wv-cyan {
 			background: transparent;
 			color: @cyan;
 			border: 2px solid @cyan;
@@ -405,7 +455,7 @@
 			}
 		}
 
-		&.accent {
+		&.wv-accent {
 			background: transparent;
 			color: @color-accent;
 			border: 2px solid @color-accent;
@@ -449,23 +499,23 @@
 		}
 	}
 
-	.positive {
+	.wv-positive {
 		color: @green;
 	}
 
-	.negative {
+	.wv-negative {
 		color: @color-accent;
 	}
 
-	.mute {
+	.wv-mute {
 		color: @color-mute;
 	}
 
-	.tag {
+	.wv-tag {
 		color: @purple;
 	}
 
-	.number {
+	.wv-number {
 		text-align: right;
 	}
 }

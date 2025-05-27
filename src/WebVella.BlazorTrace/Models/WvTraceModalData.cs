@@ -13,7 +13,7 @@ public class WvTraceModalRequest
 {
 	public Guid? PrimarySnapshotId { get; set; } = null;
 	public Guid? SecondarySnapshotId { get; set; } = null;
-	public WvTraceModalMenu Menu { get; set; } = WvTraceModalMenu.MethodName;
+	public WvTraceModalMenu? Menu { get; set; } = null;
 	public bool SortAscending { get; set; } = true;
 	public string? ModuleFilter { get; set; } = null;
 	public string? ComponentFilter { get; set; } = null;
@@ -28,7 +28,7 @@ public class WvTraceModalRequest
 		get => 
 		PrimarySnapshotId is null
 		&& SecondarySnapshotId is null
-		&& Menu == WvTraceModalMenu.MethodName
+		&& Menu == null
 		&& SortAscending
 		&& ModuleFilter is null
 		&& ComponentFilter is null
@@ -39,22 +39,55 @@ public class WvTraceModalRequest
 		&& LimitsFilter is null
 		&& !IsAutoRefresh;
 	}
+	public bool HasFilter{ 
+		get => !String.IsNullOrWhiteSpace(ModuleFilter)
+		|| !String.IsNullOrWhiteSpace(ComponentFilter)
+		|| !String.IsNullOrWhiteSpace(MethodFilter)
+		|| MemoryFilter is not null
+		|| DurationFilter is not null
+		|| CallsFilter is not null;
+	}
 }
 
 public enum WvTraceModalMenu
 {
-	MethodName = 0,
+	[Description("Calls")]
+	MethodCalls = 0,
+	[Description("Memory")]
+	MethodMemory = 1,
+	[Description("Duration")]
+	MethodDuration = 2,
+	[Description("Limits")]
+	MethodLimits = 3,
+	[Description("Name")]
+	MethodName = 4,
+	[Description("Calls")]
+	SignalCalls = 5,
+	[Description("Memory")]
+	SignalMemory = 6,
+	[Description("Limits")]
+	SignalLimits = 7,
+	[Description("Name")]
+	SignalName = 8,
 }
 public enum WvTraceModalMemoryFilter
 {
-	[Description("option")]
-	Option1 = 0,
+	[Description("<= 5 KB")]
+	LessThan5 = 0,
+	[Description("5 to 42 KB")]
+	FiveTo42= 1,
+	[Description("> 42 KB")]
+	MoreThan42 = 2
 }
 
 public enum WvTraceModalDurationFilter
 {
-	[Description("option")]
-	Option1 = 0,
+	[Description("<= 5 ms")]
+	LessThan5 = 0,
+	[Description("5 to 42 ms")]
+	FiveTo42= 1,
+	[Description("> 42 ms")]
+	MoreThan42 = 2
 }
 
 public enum WvTraceModalCallsFilter
@@ -62,15 +95,23 @@ public enum WvTraceModalCallsFilter
 	[Description("<= 5 calls")]
 	LessThan5 = 0,
 	[Description("5 to 42 calls")]
-	FiveTo42calls = 1,
+	FiveTo42 = 1,
 	[Description("> 42 calls")]
-	MoreThan42calls = 2
+	MoreThan42 = 2
 }
 
 public enum WvTraceModalLimitsFilter
 {
-	[Description("option")]
-	Option1 = 0,
+	[Description("0 limits exceeded")]
+	ZeroLimitHits = 0,
+	[Description("exceeds calls limit")]
+	ExceedCallLimit= 1,
+	[Description("exceeds total memory limit")]
+	ExceedTotalMemory= 2,
+	[Description("exceeds memory delta limit")]
+	ExceedMemoryDelta= 3,
+	[Description("exceeds duration limit")]
+	ExceedDuration= 4,
 }
 
 public class WvTraceModalData

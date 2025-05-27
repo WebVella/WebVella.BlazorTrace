@@ -138,6 +138,17 @@
   border-radius: 10px;
   font-family: Arial, Helvetica, sans-serif;
 }
+@keyframes highlight {
+  0% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: #fed7aa;
+  }
+  100% {
+    background-color: transparent;
+  }
+}
 .wv-trace-modal.secondary {
   z-index: 1002;
   width: 50vw;
@@ -201,7 +212,31 @@
   padding: 0 10px;
   color: #64748b;
 }
+.wv-trace-modal__header__center__selector {
+  position: relative;
+}
+.wv-trace-modal__header__center__selector:after {
+  z-index: 2;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-radius: 5px;
+  display: block;
+  content: "";
+  background: transparent;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0.25;
+}
+.wv-trace-modal__header__center__selector.wv-highlight:after {
+  animation-name: highlight;
+  animation-duration: 0.5s;
+  animation-iteration-count: 1;
+}
 .wv-trace-modal__header__center__selector select {
+  z-index: 1;
   width: 200px !important;
 }
 .wv-trace-modal__header__right {
@@ -295,10 +330,14 @@
   background: transparent;
   color: #64748b;
 }
-.wv-trace-modal__body table th .data,
-.wv-trace-modal__body table td .data {
+.wv-trace-modal__body table th .wv-data,
+.wv-trace-modal__body table td .wv-data {
   display: flex;
   justify-content: space-between;
+}
+.wv-trace-modal__body table th .wv-limits,
+.wv-trace-modal__body table td .wv-limits {
+  white-space: nowrap;
 }
 .wv-trace-modal__body table th.button,
 .wv-trace-modal__body table td.button {
@@ -330,11 +369,14 @@
 .wv-trace-modal__body table th.clickable:hover,
 .wv-trace-modal__body table td.clickable:hover {
   cursor: pointer;
-  background: rgba(59, 130, 246, 0.25);
+  background: rgba(59, 130, 246, 0.25) !important;
 }
-.wv-trace-modal__body table thead tr:last-child th,
-.wv-trace-modal__body table thead tr:last-child td {
-  border-bottom: 2px solid color-mix(in srgb, #be123c 35%, #0f172a 65%);
+.wv-trace-modal__body table thead tr.bookmark-row button.bookmarked {
+  color: #06b6d4;
+}
+.wv-trace-modal__body table thead tr.bookmark-row:last-child th,
+.wv-trace-modal__body table thead tr.bookmark-row:last-child td {
+  border-bottom: 2px solid rgba(6, 182, 212, 0.5);
 }
 .wv-trace-modal__body table thead th {
   background: rgba(76, 5, 25, 0.35);
@@ -350,7 +392,8 @@
 .wv-trace-modal__body table thead th input::placeholder {
   color: #64748b;
 }
-.wv-trace-modal__body table tbody tr:hover td {
+.wv-trace-modal__body table tbody tr:hover td,
+.wv-trace-modal__body table thead tr.bookmark-row:hover td {
   background-color: rgba(255, 255, 255, 0.05);
 }
 .wv-trace-modal__footer {
@@ -411,36 +454,36 @@
 .wv-trace-modal button:hover {
   background: rgba(76, 5, 25, 0.35);
 }
-.wv-trace-modal button.green {
+.wv-trace-modal button.wv-green {
   background: transparent;
   color: #15803d;
   border: 2px solid #15803d;
 }
-.wv-trace-modal button.green:hover {
+.wv-trace-modal button.wv-green:hover {
   background: rgba(21, 128, 61, 0.35);
 }
-.wv-trace-modal button.mute {
+.wv-trace-modal button.wv-mute {
   background: transparent;
   color: #64748b;
   border: 2px solid #64748b;
 }
-.wv-trace-modal button.mute:hover {
+.wv-trace-modal button.wv-mute:hover {
   background: rgba(100, 116, 139, 0.35);
 }
-.wv-trace-modal button.cyan {
+.wv-trace-modal button.wv-cyan {
   background: transparent;
   color: #06b6d4;
   border: 2px solid #06b6d4;
 }
-.wv-trace-modal button.cyan:hover {
+.wv-trace-modal button.wv-cyan:hover {
   background: rgba(6, 182, 212, 0.35);
 }
-.wv-trace-modal button.accent {
+.wv-trace-modal button.wv-accent {
   background: transparent;
   color: #be123c;
   border: 2px solid #be123c;
 }
-.wv-trace-modal button.accent:hover {
+.wv-trace-modal button.wv-accent:hover {
   background: rgba(76, 5, 25, 0.35);
 }
 .wv-trace-modal button.circle {
@@ -471,19 +514,19 @@
   top: 50%;
   background: #64748b;
 }
-.wv-trace-modal .positive {
+.wv-trace-modal .wv-positive {
   color: #15803d;
 }
-.wv-trace-modal .negative {
+.wv-trace-modal .wv-negative {
   color: #be123c;
 }
-.wv-trace-modal .mute {
+.wv-trace-modal .wv-mute {
   color: #64748b;
 }
-.wv-trace-modal .tag {
-  color: #a855f7;
+.wv-trace-modal .wv-tag {
+  color: #5b21b6;
 }
-.wv-trace-modal .number {
+.wv-trace-modal .wv-number {
   text-align: right;
 }
 .wv-trace-nav {

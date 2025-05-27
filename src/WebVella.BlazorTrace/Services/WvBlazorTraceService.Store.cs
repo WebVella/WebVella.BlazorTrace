@@ -23,6 +23,8 @@ public partial interface IWvBlazorTraceService
 	Task<WvSnapshotStore> GetSnapshotStoreAsync();
 	Task<WvSnapshot?> GetSnapshotAsync(Guid id);
 	Task RemoveSnapshotAsync(Guid id);
+	Task AddBookmarkAsync(string id);
+	Task RemoveBookmarkAsync(string id);
 }
 public partial class WvBlazorTraceService : IWvBlazorTraceService
 {
@@ -94,5 +96,13 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		store.Bookmarked = store.Bookmarked.Where(x=> x != id).ToList();
 		await _setUnprotectedLocalStorageAsync(_snapshotStoreKey, JsonSerializer.Serialize(store));
 	}
+
+	public async Task SaveLastestRequestAsync(WvTraceModalRequest? request)
+	{
+		var store = await GetSnapshotStoreAsync();
+		store.LastModalRequest = request;
+		await _setUnprotectedLocalStorageAsync(_snapshotStoreKey, JsonSerializer.Serialize(store));
+	}
+
 }
 

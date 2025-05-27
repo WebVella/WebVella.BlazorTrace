@@ -6,7 +6,7 @@ using WebVella.BlazorTrace.Services;
 using WebVella.BlazorTrace.Utility;
 
 namespace WebVella.BlazorTrace;
-public partial class WvBlazorTraceListModal : WvBlazorTraceComponentBase, IAsyncDisposable
+public partial class WvBlazorLimitModal : WvBlazorTraceComponentBase
 {
 	// INJECTS
 	//////////////////////////////////////////////////
@@ -15,11 +15,10 @@ public partial class WvBlazorTraceListModal : WvBlazorTraceComponentBase, IAsync
 	// LOCAL VARIABLES
 	//////////////////////////////////////////////////
 	private Guid _componentId = Guid.NewGuid();
-	private DotNetObjectReference<WvBlazorTraceListModal> _objectRef = default!;
+	private DotNetObjectReference<WvBlazorLimitModal> _objectRef = default!;
 	private bool _escapeListenerEnabled = false;
 	private bool _modalVisible = false;
 	private WvTraceRow? _row = null;
-	private WvBlazorMemoryModal? _memoryModal = null;
 
 	// LIFECYCLE
 	/// //////////////////////////////////////////////
@@ -83,12 +82,5 @@ public partial class WvBlazorTraceListModal : WvBlazorTraceComponentBase, IAsync
 
 		return sb.ToString();
 	}
-
-	private async Task _showMemoryModal(List<WvTraceMemoryInfo>? memInfo)
-	{
-		if (_memoryModal is null || _row is null) return;
-		await _memoryModal.Show(_row, memInfo.ToMemoryDataFields());
-	}
-
 
 }

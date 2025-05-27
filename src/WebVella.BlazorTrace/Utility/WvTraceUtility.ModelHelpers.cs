@@ -178,7 +178,7 @@ public static partial class WvTraceUtility
 						result.Add(new WvTraceSessionLimitHit
 						{
 							IsOnEnter = true,
-							Type = WvTraceSessionLimitType.MethodCalls,
+							Type = WvTraceSessionLimitType.CallCount,
 							Actual = calls.Count,
 							Limit = trace.OnEnterOptions.CallLimit
 						});
@@ -222,7 +222,7 @@ public static partial class WvTraceUtility
 						result.Add(new WvTraceSessionLimitHit
 						{
 							IsOnEnter = false,
-							Type = WvTraceSessionLimitType.MethodCalls,
+							Type = WvTraceSessionLimitType.CallCount,
 							Actual = calls.Count,
 							Limit = trace.OnExitOptions.CallLimit
 						});

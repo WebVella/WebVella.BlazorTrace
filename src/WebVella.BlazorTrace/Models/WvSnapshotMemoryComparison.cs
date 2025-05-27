@@ -20,12 +20,12 @@ public class WvSnapshotMemoryComparisonData
 	{
 		get
 		{
-			if (LastMemoryChangeBytes == 0) return $"<span class='mute'>=</span>";
+			if (LastMemoryChangeBytes == 0) return $"<span class='wv-mute'>=</span>";
 			else if (LastMemoryChangeBytes < 0)
 			{
-				return $"<span class='negative'>{LastMemoryChangeBytes.ToKilobytes()}KB</span>";
+				return $"<span class='wv-negative'>{LastMemoryChangeBytes.ToKilobytes()}KB</span>";
 			}
-			return $"<span class='positive'>+{LastMemoryChangeBytes.ToKilobytes()}KB</span>";
+			return $"<span class='wv-positive'>+{LastMemoryChangeBytes.ToKilobytes()}KB</span>";
 		}
 	}
 	public List<WvSnapshotMemoryComparisonDataField> Fields { get; set; } = new();
@@ -44,12 +44,12 @@ public class WvSnapshotMemoryComparisonDataField
 	{
 		get
 		{
-			if (ChangeBytes == 0) return $"<span class='mute'>=</span>";
+			if (ChangeBytes == 0) return $"<span class='wv-mute'>=</span>";
 			else if (ChangeBytes < 0)
 			{
-				return $"<span class='negative'>{ChangeBytes.ToKilobytes()}KB</span>";
+				return $"<span class='wv-negative'>{ChangeBytes.ToKilobytes()}KB</span>";
 			}
-			return $"<span class='positive'>+{ChangeBytes.ToKilobytes()}KB</span>";
+			return $"<span class='wv-positive'>+{ChangeBytes.ToKilobytes()}KB</span>";
 		}
 	}
 

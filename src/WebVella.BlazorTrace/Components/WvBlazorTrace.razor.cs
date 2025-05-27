@@ -27,7 +27,6 @@ private bool _visible = false;
 #endif
 	private Guid _componentId = Guid.NewGuid();
 	private DotNetObjectReference<WvBlazorTrace> _objectRef = default!;
-	private bool _escapeListenerEnabled = false;
 	private bool _f1ListenerEnabled = false;
 	private bool _modalVisible = false;
 	private bool _loadingData = false;
@@ -42,15 +41,18 @@ private bool _visible = false;
 	private WvBlazorTraceConfiguration _configuration = default!;
 	private WvBlazorTraceListModal? _traceListModal = null;
 	private WvBlazorMemoryModal? _memoryModal = null;
+	private WvBlazorLimitModal? _limitModal = null;
+	private string? _primarySnHighlightClass = null;
 
+	private List<WvTraceModalMenuItem> _methodMenu = new();
+	private List<WvTraceModalMenuItem> _signalMenu = new();
 
 
 	//LIFECYCLE
 	//////////////////////////////////////////////////
 	public async ValueTask DisposeAsync()
 	{
-		if (_escapeListenerEnabled)
-			await new JsService(JSRuntimeSrv).RemoveKeyEventListener("Escape", _componentId.ToString());
+		await new JsService(JSRuntimeSrv).RemoveKeyEventListener("Escape", _componentId.ToString());
 		if (_f1ListenerEnabled)
 			await new JsService(JSRuntimeSrv).RemoveKeyEventListener("F1");
 		_objectRef?.Dispose();
@@ -66,6 +68,8 @@ private bool _visible = false;
 			_buttonStyles = $"background-color:{ButtonColor};";
 		_buttonClasses = $" wv-trace-button {Position.ToDescriptionString()} ";
 		_configuration = WvBlazorTraceConfigurationService.GetConfiguraion();
+		_initMenu();
+
 		EnableRenderLock();
 	}
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -78,12 +82,6 @@ private bool _visible = false;
 				await new JsService(JSRuntimeSrv).AddKeyEventListener(_objectRef, "OnShortcutKey", "F1");
 				_f1ListenerEnabled = true;
 			}
-
-#if DEBUG
-			await _show();
-			_data!.Request.IsAutoRefresh = true;
-			await InvokeAsync(StateHasChanged);
-#endif
 		}
 	}
 
@@ -92,19 +90,22 @@ private bool _visible = false;
 	private async Task _show()
 	{
 		await new JsService(JSRuntimeSrv).AddKeyEventListener(_objectRef, "OnShortcutKey", "Escape", _componentId.ToString());
-		_escapeListenerEnabled = true;
 		_modalVisible = true;
+		RegenRenderLock();
+		await InvokeAsync(StateHasChanged);
 		await _getData();
 		_runLoop();
 		RegenRenderLock();
+		await InvokeAsync(StateHasChanged);
+
 	}
 	private async Task _hide()
 	{
 		await new JsService(JSRuntimeSrv).RemoveKeyEventListener("Escape", _componentId.ToString());
-		_escapeListenerEnabled = false;
 		if (_infiniteLoopCancellationTokenSource is not null)
 			_infiniteLoopCancellationTokenSource.Cancel();
 		_modalVisible = false;
+		_loadingData = false;
 		RegenRenderLock();
 	}
 
@@ -134,13 +135,12 @@ private bool _visible = false;
 			await _show();
 			await InvokeAsync(StateHasChanged);
 		}
-
 	}
 
-	private Task _submitFilter()
+	private async Task _submitFilter()
 	{
 		RegenRenderLock();
-		return Task.CompletedTask;
+		await _getData();
 	}
 	private async Task _clearFilter()
 	{
@@ -156,15 +156,51 @@ private bool _visible = false;
 		await _submitFilter();
 	}
 
+	private async Task _menuClick(WvTraceModalMenuItem item)
+	{
+		if (_data?.Request is null) return;
+		_data.Request.Menu = item.Id;
+		await _getData();
+	}
+
 	// LOGIC
 	////////////////////////////////////////////////
+
+	private void _initMenu()
+	{
+		_methodMenu = new(){
+			new WvTraceModalMenuItem{ Id = WvTraceModalMenu.MethodCalls},
+			new WvTraceModalMenuItem{ Id = WvTraceModalMenu.MethodMemory},
+			new WvTraceModalMenuItem{ Id = WvTraceModalMenu.MethodDuration},
+			new WvTraceModalMenuItem{ Id = WvTraceModalMenu.MethodLimits},
+			new WvTraceModalMenuItem{ Id = WvTraceModalMenu.MethodName},
+		};
+		_signalMenu = new(){
+			new WvTraceModalMenuItem{ Id = WvTraceModalMenu.SignalCalls},
+			new WvTraceModalMenuItem{ Id = WvTraceModalMenu.SignalMemory},
+			new WvTraceModalMenuItem{ Id = WvTraceModalMenu.SignalLimits},
+			new WvTraceModalMenuItem{ Id = WvTraceModalMenu.SignalName}
+		};
+
+		foreach (var item in _methodMenu)
+		{
+			item.OnClick = async () => await _menuClick(item);
+		}
+
+		foreach (var item in _signalMenu)
+		{
+			item.OnClick = async () => await _menuClick(item);
+		}
+	}
 	private async Task _getData(bool fromLoop = false)
 	{
 		if (_loadingData) return;
 		_loadingData = true;
+		RegenRenderLock();
+		await InvokeAsync(StateHasChanged);
 		try
 		{
-			if (_data is null || !fromLoop)
+			if (!fromLoop)
 			{
 				_data = await WvBlazorTraceService.GetModalData(_data?.Request);
 			}
@@ -173,13 +209,16 @@ private bool _visible = false;
 				var data = await WvBlazorTraceService.GetModalData(_data?.Request);
 				_data!.TraceRows = data.TraceRows;
 			}
-			_loadingData = false;
-			RegenRenderLock();
-			await InvokeAsync(StateHasChanged);
 		}
 		catch (Exception ex)
 		{
 			Console.WriteLine(ex.ToString());
+		}
+		finally
+		{
+			_loadingData = false;
+			RegenRenderLock();
+			await InvokeAsync(StateHasChanged);
 		}
 	}
 	private void _loadResource()
@@ -237,27 +276,49 @@ private bool _visible = false;
 			}
 		}, _infiniteLoopCancellationTokenSource.Token);
 	}
-	private bool _hasFilter()
-	{
-		if (_data is null) return false;
-		return !String.IsNullOrWhiteSpace(_data.Request.ModuleFilter)
-		|| !String.IsNullOrWhiteSpace(_data.Request.ComponentFilter)
-		|| !String.IsNullOrWhiteSpace(_data.Request.MethodFilter)
-		|| _data.Request.MemoryFilter is not null
-		|| _data.Request.DurationFilter is not null
-		|| _data.Request.CallsFilter is not null;
-	}
-
 	private async Task _showTraceListModal(WvTraceRow row)
 	{
 		if (_traceListModal is null) return;
 		await _traceListModal.Show(row);
 	}
-
 	private async Task _showMemoryModal(WvTraceRow row)
 	{
 		if (_memoryModal is null) return;
 		await _memoryModal.Show(row);
 	}
+	private async Task _showLimitModal(WvTraceRow row)
+	{
+		if (_limitModal is null) return;
+		await _limitModal.Show(row);
+	}
 
+	private async Task _bookmarkClicked(WvTraceRow row)
+	{
+		if(row.IsBookmarked){
+			await WvBlazorTraceService.RemoveBookmarkAsync(row.Id);
+			row.IsBookmarked = false;
+		}
+		else { 
+			await WvBlazorTraceService.AddBookmarkAsync(row.Id);
+			row.IsBookmarked = true;		
+		}
+
+		RegenRenderLock();
+		await InvokeAsync(StateHasChanged);
+	}
+	private async Task _saveSnapshot()
+	{
+		await _highlightPrimarySnapshot();
+	}
+	private async Task _highlightPrimarySnapshot()
+	{
+		_primarySnHighlightClass = "wv-highlight";
+		RegenRenderLock();
+		await InvokeAsync(StateHasChanged);
+		await Task.Delay(500);
+		_primarySnHighlightClass = null;
+		RegenRenderLock();
+		await InvokeAsync(StateHasChanged);
+
+	}
 }

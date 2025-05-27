@@ -20,12 +20,12 @@ public class WvSnapshotMethodComparisonData
 	{
 		get
 		{
-			if (TraceListChange == 0) return $"<span class='mute'>=</span>";
+			if (TraceListChange == 0) return $"<span class='wv-mute'>=</span>";
 			else if (TraceListChange < 0)
 			{
-				return $"<span class='negative'>{TraceListChange}</span>";
+				return $"<span class='wv-negative'>{TraceListChange}</span>";
 			}
-			return $"<span class='positive'>+{TraceListChange}</span>";
+			return $"<span class='wv-positive'>+{TraceListChange}</span>";
 		}
 	}
 	public long? LastDurationChangeMS { get; set; }
@@ -33,12 +33,12 @@ public class WvSnapshotMethodComparisonData
 	{
 		get
 		{
-			if (LastDurationChangeMS == 0) return $"<span class='mute'>=</span>";
+			if (LastDurationChangeMS == 0) return $"<span class='wv-mute'>=</span>";
 			else if (LastDurationChangeMS < 0)
 			{
-				return $"<span class='negative'>{LastDurationChangeMS}</span>";
+				return $"<span class='wv-negative'>{LastDurationChangeMS}</span>";
 			}
-			return $"<span class='positive'>+{LastDurationChangeMS}</span>";
+			return $"<span class='wv-positive'>+{LastDurationChangeMS}</span>";
 		}
 	}
 }

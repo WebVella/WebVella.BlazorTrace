@@ -20,11 +20,13 @@ namespace WebVella.BlazorTrace;
 public partial interface IWvBlazorTraceService
 {
 	ConcurrentQueue<WvTraceQueueAction> GetQueue();
-	void ProcessQueueForTests();
+	void ForceProcessQueue();
 }
 public partial class WvBlazorTraceService : IWvBlazorTraceService
 {
 	public ConcurrentQueue<WvTraceQueueAction> GetQueue() => _traceQueue;
+	// Because of the force process the queue process could be triggered from two methods
+	public Lock _queueProcessLock = new();
 	private void _addToQueue(WvTraceQueueAction trace)
 	{
 		_traceQueue.Enqueue(trace);
@@ -37,19 +39,22 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 			while (!_infiniteLoopCancellationTokenSource.IsCancellationRequested)
 			{
 				await Task.Delay(_infiniteLoopDelaySeconds * 1000);
-				while (!_traceQueue.IsEmpty)
+				lock (_queueProcessLock)
 				{
-					try
+					while (!_traceQueue.IsEmpty)
 					{
-						if (_traceQueue.TryDequeue(out var trace))
+						try
 						{
-							_processQueueTrace(trace);
+							if (_traceQueue.TryDequeue(out var trace))
+							{
+								_processQueueTrace(trace);
+							}
 						}
-					}
-					catch (Exception ex)
-					{
-						Console.Error.WriteLine(ex.Message.ToString() + Environment.NewLine + ex.StackTrace);
-						break;
+						catch (Exception ex)
+						{
+							Console.Error.WriteLine(ex.Message.ToString() + Environment.NewLine + ex.StackTrace);
+							break;
+						}
 					}
 				}
 
@@ -66,21 +71,24 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		_saveSessionTrace(traceInfo, action);
 	}
 
-	public void ProcessQueueForTests()
+	public void ForceProcessQueue()
 	{
-		while (!_traceQueue.IsEmpty)
+		lock (_queueProcessLock)
 		{
-			try
+			while (!_traceQueue.IsEmpty)
 			{
-				if (_traceQueue.TryDequeue(out var trace))
+				try
 				{
-					_processQueueTrace(trace);
+					if (_traceQueue.TryDequeue(out var trace))
+					{
+						_processQueueTrace(trace);
+					}
 				}
-			}
-			catch (Exception ex)
-			{
-				Console.Error.WriteLine(ex.Message.ToString() + Environment.NewLine + ex.StackTrace);
-				break;
+				catch (Exception ex)
+				{
+					Console.Error.WriteLine(ex.Message.ToString() + Environment.NewLine + ex.StackTrace);
+					break;
+				}
 			}
 		}
 	}

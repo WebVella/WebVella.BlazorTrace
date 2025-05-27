@@ -45,7 +45,7 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 				//than
 				var queue = WvBlazorTraceServiceMock.Object.GetQueue();
 				Assert.NotEmpty(queue);
-				WvBlazorTraceServiceMock.Object.ProcessQueueForTests();
+				WvBlazorTraceServiceMock.Object.ForceProcessQueue();
 				var (method,trace) = CheckTraceExists(
 					moduleDict: WvBlazorTraceServiceMock.Object.GetModuleDict(),
 					moduleName: moduleName,
@@ -101,7 +101,7 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 				//than
 				var queue = WvBlazorTraceServiceMock.Object.GetQueue();
 				Assert.NotEmpty(queue);
-				WvBlazorTraceServiceMock.Object.ProcessQueueForTests();
+				WvBlazorTraceServiceMock.Object.ForceProcessQueue();
 				var (method,trace) = CheckTraceExists(
 					moduleDict: WvBlazorTraceServiceMock.Object.GetModuleDict(),
 					moduleName: moduleName,
