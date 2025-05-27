@@ -68,10 +68,20 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 
 	public void ProcessQueueForTests()
 	{
-		if (_traceQueue.IsEmpty) return;
-		if (_traceQueue.TryDequeue(out var trace))
+		while (!_traceQueue.IsEmpty)
 		{
-			_processQueueTrace(trace);
+			try
+			{
+				if (_traceQueue.TryDequeue(out var trace))
+				{
+					_processQueueTrace(trace);
+				}
+			}
+			catch (Exception ex)
+			{
+				Console.Error.WriteLine(ex.Message.ToString() + Environment.NewLine + ex.StackTrace);
+				break;
+			}
 		}
 	}
 }

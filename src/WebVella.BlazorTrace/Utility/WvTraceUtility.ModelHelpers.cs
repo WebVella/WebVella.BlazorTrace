@@ -153,69 +153,108 @@ public static partial class WvTraceUtility
 		return method.TraceList.Count(x => x.EnteredOn is not null && x.ExitedOn is not null);
 	}
 
-	private static void CalculateLimitsInfo(this WvTraceSessionMethod method, WvTraceMethodOptions options)
+	public static List<WvTraceSessionLimitHit> CalculateLimitsInfo(this WvTraceSessionMethod method)
 	{
-		method.LimitHits = new();
-
-		//memory total
+		var result = new List<WvTraceSessionLimitHit>();
+		foreach (var trace in method.TraceList)
 		{
-			var maxMemory = method.OnEnterMaxMemoryBytes ?? 0;
-			if (maxMemory < (method.OnExitMaxMemoryBytes ?? 0))
-				maxMemory = (method.OnExitMaxMemoryBytes ?? 0);
-			if (options.MemoryLimitTotalBytes < maxMemory)
+			#region << OnEnter >>
+			if (trace.OnEnterOptions is not null)
 			{
-				method.LimitHits.Add(new WvTraceSessionLimitHit
+				//memory total
 				{
-					Type = WvTraceSessionLimitType.MemoryTotal,
-					Actual = maxMemory,
-					Limit = options.MemoryLimitTotalBytes
-				});
+					if (trace.OnEnterOptions.MemoryLimitTotalBytes < (trace.OnEnterMemoryBytes ?? 0))
+					{
+						result.Add(new WvTraceSessionLimitHit
+						{
+							IsOnEnter = true,
+							Type = WvTraceSessionLimitType.MemoryTotal,
+							Actual = trace.OnEnterMemoryBytes ?? 0,
+							Limit = trace.OnEnterOptions.MemoryLimitTotalBytes
+						});
+					}
+				}
+				//calls
+				{
+					var calls = method.TraceList.Where(x => x.EnteredOn is not null).ToList();
+					if (trace.OnEnterOptions.CallLimit < calls.Count)
+					{
+						result.Add(new WvTraceSessionLimitHit
+						{
+							IsOnEnter = true,
+							Type = WvTraceSessionLimitType.MethodCalls,
+							Actual = calls.Count,
+							Limit = trace.OnEnterOptions.CallLimit
+						});
+					}
+				}
 			}
+			#endregion
+			#region << OnExit >>
+			if (trace.OnExitOptions is not null)
+			{
+				//memory total
+				if (trace.OnExitOptions.MemoryLimitTotalBytes < (trace.OnExitMemoryBytes ?? 0))
+				{
+					result.Add(new WvTraceSessionLimitHit
+					{
+						IsOnEnter = false,
+						Type = WvTraceSessionLimitType.MemoryTotal,
+						Actual = trace.OnExitMemoryBytes ?? 0,
+						Limit = trace.OnExitOptions.MemoryLimitTotalBytes
+					});
+				}
+				//memory delta
+				{
+					var delta = (trace.OnExitMemoryBytes ?? 0) - (trace.OnEnterMemoryBytes ?? 0);
+					if (trace.OnExitOptions.MemoryLimitDeltaBytes < delta)
+					{
+						result.Add(new WvTraceSessionLimitHit
+						{
+							IsOnEnter = false,
+							Type = WvTraceSessionLimitType.MemoryDelta,
+							Actual = delta,
+							Limit = trace.OnExitOptions.MemoryLimitDeltaBytes
+						});
+					}
+				}
+				//calls
+				{
+					var calls = method.TraceList.Where(x => x.ExitedOn is not null).ToList();
+					if (trace.OnExitOptions.CallLimit < calls.Count)
+					{
+						result.Add(new WvTraceSessionLimitHit
+						{
+							IsOnEnter = false,
+							Type = WvTraceSessionLimitType.MethodCalls,
+							Actual = calls.Count,
+							Limit = trace.OnExitOptions.CallLimit
+						});
+					}
+				}
+				//duration
+				{
+					if (trace.EnteredOn is not null && trace.ExitedOn is not null)
+					{
+						var delta = (trace.ExitedOn.Value - trace.EnteredOn.Value).Milliseconds;
+						if (trace.OnExitOptions.DurationLimitMS < delta)
+						{
+							result.Add(new WvTraceSessionLimitHit
+							{
+								IsOnEnter = false,
+								Type = WvTraceSessionLimitType.Duration,
+								Actual = delta,
+								Limit = trace.OnExitOptions.DurationLimitMS
+							});
+						}
+					}
+				}
+			}
+			#endregion
+
 		}
 
-		//memory delta
-		{
-			if (options.MemoryLimitDeltaBytes < (method.MaxMemoryDeltaBytes ?? 0))
-			{
-				method.LimitHits.Add(new WvTraceSessionLimitHit
-				{
-					Type = WvTraceSessionLimitType.MemoryDelta,
-					Actual = (method.MaxMemoryDeltaBytes ?? 0),
-					Limit = options.MemoryLimitDeltaBytes
-				});
-			}
-		}
 
-		//calls
-		{
-			var maxCalls = method.OnEnterCallsCount;
-			if (maxCalls < method.OnExitCallsCount)
-				maxCalls = method.OnExitCallsCount;
-			if (options.CallLimit < maxCalls)
-			{
-				method.LimitHits.Add(new WvTraceSessionLimitHit
-				{
-					Type = WvTraceSessionLimitType.MethodCalls,
-					Actual = maxCalls,
-					Limit = options.MemoryLimitDeltaBytes
-				});
-			}
-		}
-
-		//duration
-		{
-			var maxDuration = method.MinDurationMs ?? 0;
-			if (maxDuration < (method.MaxDurationMs ?? 0))
-				maxDuration = (method.MaxDurationMs ?? 0);
-			if (options.DurationLimit < maxDuration)
-			{
-				method.LimitHits.Add(new WvTraceSessionLimitHit
-				{
-					Type = WvTraceSessionLimitType.Duration,
-					Actual = maxDuration,
-					Limit = options.DurationLimit
-				});
-			}
-		}
+		return result;
 	}
 }

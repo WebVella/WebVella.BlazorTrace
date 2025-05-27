@@ -74,7 +74,8 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 				FirstRender = firstRender,
 				InstanceTag = instanceTag,
 				MethodName = methodName,
-				Options = options ?? new WvTraceMethodOptions()
+				Options = options ?? new WvTraceMethodOptions(),
+				Timestamp = DateTimeOffset.Now
 			});
 		}
 	}
@@ -104,7 +105,8 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 				FirstRender = firstRender,
 				InstanceTag = instanceTag,
 				MethodName = methodName,
-				Options = options ?? new WvTraceMethodOptions()
+				Options = options ?? new WvTraceMethodOptions(),
+				Timestamp = DateTimeOffset.Now
 			});
 		}
 	}

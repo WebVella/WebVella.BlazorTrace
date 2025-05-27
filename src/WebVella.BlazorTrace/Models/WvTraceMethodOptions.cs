@@ -10,7 +10,7 @@ public class WvTraceMethodOptions
 	/// <summary>
 	/// How many milliseconds is an OK for executing this method. Default is 1000.
 	/// </summary>
-	public long DurationLimit { get; set; } = 1000;
+	public long DurationLimitMS { get; set; } = 1000;
 
 	/// <summary>
 	/// How many calls is OK for this method. Default is 10.

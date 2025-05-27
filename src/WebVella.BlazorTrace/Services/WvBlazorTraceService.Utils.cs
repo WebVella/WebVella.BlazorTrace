@@ -57,7 +57,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 			{
 				TraceId = traceInfo.TraceId,
 				OnEnterMemoryInfo = new List<WvTraceMemoryInfo>(),
-				EnteredOn = DateTimeOffset.Now,
+				EnteredOn = action.Timestamp,
 				OnEnterFirstRender = action.FirstRender,
 				OnEnterCallTag = action.CallTag,
 				OnEnterMemoryBytes = null,
@@ -204,11 +204,11 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 
 			trace.TraceId = action.TraceId;
 			trace.OnExitMemoryInfo = new List<WvTraceMemoryInfo>();
-			trace.ExitedOn = DateTimeOffset.Now;
-			trace.OnExitFirstRender = action.FirstRender;
+			trace.ExitedOn = action.Timestamp;
 			trace.OnExitCallTag = action.CallTag;
+			trace.OnExitFirstRender = action.FirstRender;
 			trace.OnExitMemoryBytes = action.Component is null ? null : action.Component.GetSize(trace.OnExitMemoryInfo, _configuration);
-			trace.OnEnterOptions = action.Options;
+			trace.OnExitOptions = action.Options;
 
 		}
 	}

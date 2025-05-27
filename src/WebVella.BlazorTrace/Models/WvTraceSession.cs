@@ -91,7 +91,7 @@ public class WvTraceSessionMethod
 	{
 		get => TraceList.Where(x => x.ExitedOn is not null).OrderByDescending(x => x.ExitedOn).LastOrDefault();
 	}
-	public List<WvTraceSessionLimitHit> LimitHits { get; set; } = new();
+	public List<WvTraceSessionLimitHit> LimitHits { get => this.CalculateLimitsInfo(); }
 	public string GenerateHash(string moduleName, string componentFullname, string? tag)
 	{
 		return WvModalUtility.GenerateHash(moduleName, componentFullname, tag, Name);
@@ -125,6 +125,7 @@ public class WvTraceSessionSignal
 
 public class WvTraceSessionLimitHit
 {
+	public bool IsOnEnter { get; set; } = true;
 	public WvTraceSessionLimitType Type { get; set; }
 	public long Limit { get; set; } = 0;
 	public long Actual { get; set; } = 0;

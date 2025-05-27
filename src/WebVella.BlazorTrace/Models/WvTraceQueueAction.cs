@@ -18,6 +18,7 @@ public class WvTraceQueueAction
 	public string? InstanceTag { get; set; } = null;
 	public string? CallTag { get; set; } = null;
 	public string MethodName { get; set; } = default!;
+	public DateTimeOffset Timestamp { get; set; } = default!;
 }
 
 public enum WvTraceQueueItemMethod

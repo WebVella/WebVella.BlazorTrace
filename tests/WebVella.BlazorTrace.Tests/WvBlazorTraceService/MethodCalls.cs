@@ -4,7 +4,6 @@ namespace WebVella.BlazorTrace.Tests;
 
 public class MethodCalls : BaseTest
 {
-	#region << OnEnter >>
 
 	[Fact]
 	public void OnEnterTestBaseCalls()
@@ -47,7 +46,7 @@ public class MethodCalls : BaseTest
 				var queue = WvBlazorTraceServiceMock.Object.GetQueue();
 				Assert.NotEmpty(queue);
 				WvBlazorTraceServiceMock.Object.ProcessQueueForTests();
-				var trace = CheckTraceExists(
+				var (method,trace) = CheckTraceExists(
 					moduleDict: WvBlazorTraceServiceMock.Object.GetModuleDict(),
 					moduleName: moduleName,
 					componentFullName: componentFullName,
@@ -57,14 +56,12 @@ public class MethodCalls : BaseTest
 					traceId: traceId
 				);
 				Assert.NotNull(trace.EnteredOn);
+				Assert.NotNull(trace.OnEnterOptions);
 				Assert.Null(trace.ExitedOn);
 			}
 		}
 	}
 
-	#endregion
-
-	#region << OnExit >>
 	[Fact]
 	public void OnExitTestBaseCalls()
 	{
@@ -105,7 +102,7 @@ public class MethodCalls : BaseTest
 				var queue = WvBlazorTraceServiceMock.Object.GetQueue();
 				Assert.NotEmpty(queue);
 				WvBlazorTraceServiceMock.Object.ProcessQueueForTests();
-				var trace = CheckTraceExists(
+				var (method,trace) = CheckTraceExists(
 					moduleDict: WvBlazorTraceServiceMock.Object.GetModuleDict(),
 					moduleName: moduleName,
 					componentFullName: componentFullName,
@@ -116,9 +113,9 @@ public class MethodCalls : BaseTest
 				);
 				Assert.Null(trace.EnteredOn);
 				Assert.NotNull(trace.ExitedOn);
+				Assert.NotNull(trace.OnExitOptions);
 			}
 		}
 	}
 
-	#endregion
 }

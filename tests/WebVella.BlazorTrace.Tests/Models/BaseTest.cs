@@ -30,7 +30,7 @@ public class BaseTest
 		this.Component = new TestComponent();
 	}
 
-	public WvTraceSessionTrace CheckTraceExists(
+	public (WvTraceSessionMethod,WvTraceSessionTrace) CheckTraceExists(
 		Dictionary<string, WvTraceSessionModule> moduleDict,
 		string moduleName,
 		string componentFullName,
@@ -39,6 +39,9 @@ public class BaseTest
 		string methodName,
 		Guid? traceId)
 	{
+		WvTraceSessionMethod? method = null;
+		WvTraceSessionTrace? trace = null;
+
 		Assert.Single(moduleDict.Keys);
 		Assert.NotNull(moduleDict.Keys.SingleOrDefault(x => x == moduleName));
 		var module = moduleDict[moduleName];
@@ -59,37 +62,45 @@ public class BaseTest
 		var traceList = new List<WvTraceSessionTrace>();
 		if (traceInfo.IsOnInitialized)
 		{
-			Assert.Equal(methodName, compInstance.OnInitialized.Name);
+			method = compInstance.OnInitialized;
+			Assert.Equal(methodName, method.Name);
 			traceList = compInstance.OnInitialized.TraceList;
 		}
 		else if (traceInfo.IsOnParameterSet)
 		{
-			Assert.Equal(methodName, compInstance.OnParameterSet.Name);
+			method = compInstance.OnParameterSet;
+			Assert.Equal(methodName, method.Name);
 			traceList = compInstance.OnParameterSet.TraceList;
 		}
 		else if (traceInfo.IsOnAfterRender)
 		{
-			Assert.Equal(methodName, compInstance.OnAfterRender.Name);
+			method = compInstance.OnAfterRender;
+			Assert.Equal(methodName, method.Name);
 			traceList = compInstance.OnAfterRender.TraceList;
 		}
 		else if (traceInfo.IsShouldRender)
 		{
-			Assert.Equal(methodName, compInstance.ShouldRender.Name);
+			method = compInstance.ShouldRender;
+			Assert.Equal(methodName, method.Name);
 			traceList = compInstance.ShouldRender.TraceList;
 		}
 		else if (traceInfo.IsDispose)
 		{
-			Assert.Equal(methodName, compInstance.Dispose.Name);
+			method = compInstance.Dispose;
+			Assert.Equal(methodName, method.Name);
 			traceList = compInstance.Dispose.TraceList;
 		}
 		else if (traceInfo.IsOther)
 		{
 			Assert.NotNull(compInstance.OtherMethods.SingleOrDefault(x => x.Name == methodName));
-			traceList = compInstance.OtherMethods.Single(x => x.Name == methodName).TraceList;
+			method = compInstance.OtherMethods.Single(x => x.Name == methodName);
+			traceList = method.TraceList;
 		}
-
+		Assert.NotNull(method);
 		Assert.NotEmpty(traceList);
 		Assert.NotNull(traceList.SingleOrDefault(x => x.TraceId == traceId));
-		return traceList.Single();
+		trace = traceList.Single();
+
+		return (method,trace);
 	}
 }
