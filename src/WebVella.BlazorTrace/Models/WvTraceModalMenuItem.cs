@@ -9,5 +9,5 @@ public class WvTraceModalMenuItem
 {
 	public WvTraceModalMenu Id { get; set; } = WvTraceModalMenu.MethodName;
 	public bool IsActive { get; set; } = false;
-	public Action OnClick { get; set; }
+	public Action OnClick { get; set; } = default!;
 }

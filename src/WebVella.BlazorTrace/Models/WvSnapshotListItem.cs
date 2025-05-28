@@ -10,7 +10,7 @@ public class WvSnapshotListItem
 	public Guid Id { get; set; }
 	public string Name { get; set; } = default!;
 	public DateTimeOffset CreatedOn { get; set; } = default!;
-	public Action? OnRemove { get; set; }
-	public Action? OnRename { get; set; }
+	public Action OnRemove { get; set; } = default!;
+	public Action OnRename { get; set; } = default!;
 }
 

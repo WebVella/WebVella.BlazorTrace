@@ -37,7 +37,7 @@ public class MemorySizeCalculator
 		string valueLabel,
 		List<WvTraceMemoryInfo> memoryDetails,
 		WvBlazorTraceConfiguration configuration,
-		int currentDepth, HashSet<object> visited = null)
+		int currentDepth, HashSet<object>? visited = null)
 	{
 		// Initialize the set on first call
 		visited ??= new HashSet<object>();
@@ -75,7 +75,7 @@ public class MemorySizeCalculator
 				if (currentDepth > 0)
 					size += CalculateSize(
 							measuredObject: element,
-							component:component,
+							component: component,
 							valueLabel: valueLabel,
 							memoryDetails: memoryDetails,
 							configuration: configuration,
@@ -97,13 +97,13 @@ public class MemorySizeCalculator
 				var fields = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 				foreach (var field in fields)
 				{
-					object fieldValue = field.GetValue(measuredObject);
+					object? fieldValue = field.GetValue(measuredObject);
 					if (fieldValue == null) continue;
 
 					if (currentDepth > 0)
 						size += CalculateSize(
 								measuredObject: fieldValue,
-								component:component,
+								component: component,
 								valueLabel: field.Name,
 								memoryDetails: memoryDetails,
 								configuration: configuration,
@@ -121,13 +121,13 @@ public class MemorySizeCalculator
 
 			foreach (var field in fields)
 			{
-				object fieldValue = field.GetValue(measuredObject);
+				object? fieldValue = field.GetValue(measuredObject);
 				if (fieldValue == null) continue;
 
 				if (currentDepth > 0)
 					size += CalculateSize(
 							measuredObject: fieldValue,
-							component:component,
+							component: component,
 							valueLabel: field.Name,
 							memoryDetails: memoryDetails,
 							configuration: configuration,

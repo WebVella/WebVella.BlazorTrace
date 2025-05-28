@@ -61,7 +61,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 				OnEnterFirstRender = action.FirstRender,
 				OnEnterCallTag = action.CallTag,
 				OnEnterMemoryBytes = null,
-				OnEnterOptions = action.Options,
+				OnEnterOptions = action.MethodOptions,
 				ExitedOn = null,
 				OnExitCallTag = null,
 				OnExitFirstRender = null,
@@ -109,7 +109,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 			else
 				throw new Exception("method type not supported");
 		}
-		else
+		else if(action.MethodCalled == WvTraceQueueItemMethod.OnExit)
 		{
 
 			WvTraceSessionTrace? trace = null;
@@ -208,8 +208,11 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 			trace.OnExitCallTag = action.CallTag;
 			trace.OnExitFirstRender = action.FirstRender;
 			trace.OnExitMemoryBytes = action.Component is null ? null : action.Component.GetSize(trace.OnExitMemoryInfo, _configuration);
-			trace.OnExitOptions = action.Options;
+			trace.OnExitOptions = action.MethodOptions;
 
+		}
+		else if(action.MethodCalled == WvTraceQueueItemMethod.Signal)
+		{
 		}
 	}
 

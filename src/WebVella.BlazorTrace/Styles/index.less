@@ -1,3 +1,20 @@
 ﻿@import 'wv-trace-button.less';
 @import 'wv-trace-modal.less';
 @import 'wv-trace-nav.less';
+
+.animation-keyframes(@name, @from, @to, @anim-selector) {
+	@keyf: ~"@keyframes @{name} { `'\n'`from ";
+	@anim: ~"} `'\n'`.@{anim-selector}";
+
+	@{keyf} {
+		.from(@name,@from);
+	}
+
+	to {
+		.to(@name,@to);
+	}
+
+	@{anim} {
+		animation-name: @name;
+	}
+}

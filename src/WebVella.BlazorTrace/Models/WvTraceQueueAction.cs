@@ -11,10 +11,12 @@ namespace WebVella.BlazorTrace.Models;
 public class WvTraceQueueAction
 {
 	public WvTraceQueueItemMethod MethodCalled { get; set; } = WvTraceQueueItemMethod.OnEnter;
-	public ComponentBase Component { get; set; } = default!;
+	public ComponentBase? Component { get; set; } = null;
 	public Guid? TraceId { get; set; } = null;
-	public WvTraceMethodOptions Options { get; set; } = default!;
+	public WvTraceMethodOptions MethodOptions { get; set; } = default!;
+	public WvTraceSignalOptions SignalOptions { get; set; } = default!;
 	public bool? FirstRender { get; set; } = null;
+	public string SignalTag { get; set; } = default!;
 	public string? InstanceTag { get; set; } = null;
 	public string? CallTag { get; set; } = null;
 	public string MethodName { get; set; } = default!;
@@ -24,5 +26,6 @@ public class WvTraceQueueAction
 public enum WvTraceQueueItemMethod
 {
 	OnEnter = 0,
-	OnExit = 1
+	OnExit = 1,
+	Signal = 2
 }

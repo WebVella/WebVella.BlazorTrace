@@ -11,18 +11,19 @@ public partial interface IWvBlazorTraceService
 	/// A tracer placed at the immediate beginning of a method. Usually paired with OnExit tracer
 	/// </summary>
 	/// <param name="component">the component instance that calls the method. Usually provided with 'this'</param>
-	/// <param name="options">setting up the limits, exceeding which will be presented by the service as a problem</param>
-	/// <param name="firstRender">when available, usually if the tracer is called by OnAfterRender methods</param>
-	/// <param name="callTag">custom string or JSON that you need stored with each call for more advanced tracing</param>
+	/// <param name="traceId">unique identifier for pairing OnEnter and OnExit calls</param>
 	/// <param name="instanceTag">NULL by default, will group all instances of the component in the trace. A way to tag each separate instance of the component so you can see them separately</param>
+	/// <param name="callTag">custom string or JSON that you need stored with each call for more advanced tracing</param>
+	/// <param name="firstRender">when available, usually if the tracer is called by OnAfterRender methods</param>
+	/// <param name="options">setting up the limits, exceeding which will be presented by the service as a problem</param>
 	/// <param name="methodName">automatically initialized in most cases by its attribute. Override only if you need to.</param>
 	void OnEnter(
 		ComponentBase component,
 		Guid? traceId = null,
-		WvTraceMethodOptions? options = null,
-		bool? firstRender = null,
 		string? instanceTag = null,
 		string? callTag = null,
+		bool? firstRender = null,
+		WvTraceMethodOptions? options = null,
 		[CallerMemberName] string methodName = ""
 		);
 
@@ -30,18 +31,35 @@ public partial interface IWvBlazorTraceService
 	/// A tracer placed just before the ending of a method. Usually in finally clause or before returns.
 	/// </summary>
 	/// <param name="component">the component instance that calls the method. Usually provided with 'this'</param>
-	/// <param name="options">setting up the limits, exceeding which will be presented by the service as a problem</param>
-	/// <param name="firstRender">when available, usually if the tracer is called by OnAfterRender methods</param>
-	/// <param name="callTag">custom string or JSON that you need stored with each call for more advanced tracing</param>
+	/// <param name="traceId">unique identifier for pairing OnEnter and OnExit calls</param>
 	/// <param name="instanceTag">NULL by default, will group all instances of the component in the trace. A way to tag each separate instance of the component so you can see them separately</param>
+	/// <param name="callTag">custom string or JSON that you need stored with each call for more advanced tracing</param>
+	/// <param name="firstRender">when available, usually if the tracer is called by OnAfterRender methods</param>
+	/// <param name="options">setting up the limits, exceeding which will be presented by the service as a problem</param>
 	/// <param name="methodName">automatically initialized in most cases by its attribute. Override only if you need to.</param>
 	void OnExit(
 		ComponentBase component,
 		Guid? traceId = null,
-		WvTraceMethodOptions? options = null,
-		bool? firstRender = null,
 		string? instanceTag = null,
 		string? callTag = null,
+		bool? firstRender = null,
+		WvTraceMethodOptions? options = null,
+		[CallerMemberName] string methodName = ""
+		);
+
+	/// <summary>
+	/// A tracer that will log a signal call. Can be placed anywhere in a component.
+	/// </summary>
+	/// <param name="component">the component instance that calls the method. Usually provided with 'this'</param>
+	/// <param name="signalTag">Identifier of the signal</param>
+	/// <param name="instanceTag">NULL by default, will group all instances of the component in the trace. A way to tag each separate instance of the component so you can see them separately</param>
+	/// <param name="options">setting up the limits, exceeding which will be presented by the service as a problem</param>
+	/// <param name="methodName">automatically initialized in most cases by its attribute. Override only if you need to.</param>
+	void OnSignal(
+		ComponentBase? component,
+		string signalTag,
+		string? instanceTag = null,
+		WvTraceSignalOptions? options = null,
 		[CallerMemberName] string methodName = ""
 		);
 }
@@ -52,10 +70,10 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 	public void OnEnter(
 		ComponentBase component,
 		Guid? traceId = null,
-		WvTraceMethodOptions? options = null,
-		bool? firstRender = null,
 		string? instanceTag = null,
 		string? callTag = null,
+		bool? firstRender = null,
+		WvTraceMethodOptions? options = null,
 		[CallerMemberName] string methodName = ""
 	)
 	{
@@ -74,7 +92,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 				FirstRender = firstRender,
 				InstanceTag = instanceTag,
 				MethodName = methodName,
-				Options = options ?? new WvTraceMethodOptions(),
+				MethodOptions = options ?? new WvTraceMethodOptions(),
 				Timestamp = DateTimeOffset.Now
 			});
 		}
@@ -82,10 +100,10 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 	public void OnExit(
 		ComponentBase component,
 		Guid? traceId = null,
-		WvTraceMethodOptions? options = null,
-		bool? firstRender = null,
 		string? instanceTag = null,
 		string? callTag = null,
+		bool? firstRender = null,
+		WvTraceMethodOptions? options = null,
 		[CallerMemberName] string methodName = ""
 	)
 	{
@@ -105,10 +123,42 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 				FirstRender = firstRender,
 				InstanceTag = instanceTag,
 				MethodName = methodName,
-				Options = options ?? new WvTraceMethodOptions(),
+				MethodOptions = options ?? new WvTraceMethodOptions(),
 				Timestamp = DateTimeOffset.Now
 			});
 		}
+	}
+
+	public void OnSignal(
+		ComponentBase? component,
+		string signalTag,
+		string? instanceTag = null,
+		WvTraceSignalOptions? options = null,
+		[CallerMemberName] string methodName = ""
+		)
+	{
+#if !DEBUG
+		return;
+#endif
+
+		if (!_configuration.EnableTracing) return;
+		lock (_onExitLock)
+		{
+			_addToQueue(new WvTraceQueueAction
+			{
+				MethodCalled = WvTraceQueueItemMethod.Signal,
+				Component = component,
+				SignalTag = signalTag,
+				TraceId = null,
+				CallTag = null,
+				FirstRender = null,
+				InstanceTag = instanceTag,
+				MethodName = methodName,
+				MethodOptions = new WvTraceMethodOptions(),
+				SignalOptions = options ?? new WvTraceSignalOptions(),
+				Timestamp = DateTimeOffset.Now
+			});
+		}	
 	}
 }
 
