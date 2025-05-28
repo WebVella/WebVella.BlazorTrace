@@ -248,14 +248,34 @@ public static partial class WvTraceUtility
 			}
 			#endregion
 
-			if(trace.EnteredOn is not null)
+			if (trace.EnteredOn is not null)
 				processedOnEnter++;
-			if(trace.ExitedOn is not null)
+			if (trace.ExitedOn is not null)
 				processedOnExit++;
 		}
 
 
 		return result;
+	}
+
+	public static string CalculateLimitsHTML(this WvTraceSessionTrace trace, bool isOnEnter)
+	{
+		var list = new List<string>();
+		if (isOnEnter && trace.OnEnterOptions is not null)
+		{
+			list.Add($"<div>{trace.OnEnterOptions.CallLimit} <span class='wv-mute'>calls</span></div>");
+			list.Add($"<div>{trace.OnEnterOptions.MemoryLimitTotalBytes.ToKilobytesString()} <span class='wv-mute'>total memory</span></div>");
+			list.Add($"<div>{trace.OnEnterOptions.MemoryLimitDeltaBytes.ToKilobytesString()} <span class='wv-mute'>delta memory</span></div>");
+			list.Add($"<div>{trace.OnEnterOptions.DurationLimitMS.ToDurationMSString()} <span class='wv-mute'>duration</span></div>");
+		}
+		else if (!isOnEnter && trace.OnExitOptions is not null)
+		{
+			list.Add($"<div>{trace.OnExitOptions.CallLimit} <span class='wv-mute'>calls</span></div>");
+			list.Add($"<div>{trace.OnExitOptions.MemoryLimitTotalBytes.ToKilobytesString()} <span class='wv-mute'>total memory</span></div>");
+			list.Add($"<div>{trace.OnExitOptions.MemoryLimitDeltaBytes.ToKilobytesString()} <span class='wv-mute'>delta memory</span></div>");
+			list.Add($"<div>{trace.OnExitOptions.DurationLimitMS.ToDurationMSString()} <span class='wv-mute'>duration</span></div>");
+		}
+		return String.Join("", list);
 	}
 
 	public static List<WvTraceSessionLimitHit> CalculateLimitsInfo(this WvTraceSessionSignal signal)
@@ -284,5 +304,16 @@ public static partial class WvTraceUtility
 		}
 
 		return result;
+	}
+
+	public static string CalculateLimitsHTML(this WvTraceSessionSignalTrace trace)
+	{
+		var list = new List<string>();
+
+		if (trace.Options is not null)
+		{
+			list.Add($"<div>{trace.Options.CallLimit} <span class='wv-mute'>calls</span></div>");
+		}
+		return String.Join("", list);
 	}
 }

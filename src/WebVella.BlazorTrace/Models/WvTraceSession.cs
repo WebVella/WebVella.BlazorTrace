@@ -120,6 +120,8 @@ public class WvTraceSessionTrace
 	public string? OnExitCustomData { get; set; } = null;
 	public WvTraceMethodOptions OnEnterOptions { get; set; } = default!;
 	public WvTraceMethodOptions OnExitOptions { get; set; } = default!;
+	public string OnEnterLimitsHTML { get=> this.CalculateLimitsHTML(true);}
+	public string OnExitLimitsHTML { get=> this.CalculateLimitsHTML(false);}
 }
 
 public class WvTraceSessionSignal
@@ -140,6 +142,9 @@ public class WvTraceSessionSignalTrace
 	public string? MethodName { get; set; } = null;
 	public string? CustomData { get; set; } = null;
 	public WvTraceSignalOptions Options { get; set; } = default!;
+
+	[JsonIgnore]
+	public string LimitHtml { get => this.CalculateLimitsHTML(); }
 }
 
 

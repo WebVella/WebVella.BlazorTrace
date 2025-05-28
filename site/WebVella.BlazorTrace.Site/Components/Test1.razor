@@ -24,11 +24,11 @@
 	protected override void OnInitialized()
 	{
 		if (_enableTrace)
-			WvBlazorTraceService.OnEnter(component: this, instanceTag: InstanceTag);
+			WvBlazorTraceService.OnEnter(component: this, instanceTag: InstanceTag, customData: $"counter");
 
 		base.OnInitialized();
 		if (_enableTrace)
-			WvBlazorTraceService.OnExit(component: this, instanceTag: InstanceTag);
+			WvBlazorTraceService.OnExit(component: this, instanceTag: InstanceTag, customData: $"counter");
 	}
 
 	protected override void OnAfterRender(bool firstRender)
@@ -73,7 +73,12 @@
 
 		_counter++;
 		if(_enableTrace)
-			WvBlazorTraceService.OnSignal(caller: this, signalName: "test-signal", instanceTag: InstanceTag);
+			WvBlazorTraceService.OnSignal(caller: this, signalName: "counter", instanceTag: InstanceTag, 
+				customData: $"counter:{_counter}",
+				options: new Models.WvTraceSignalOptions
+				{
+					CallLimit = 0
+				});
 
 		if (_enableTrace)
 			WvBlazorTraceService.OnExit(component: this, instanceTag: InstanceTag);

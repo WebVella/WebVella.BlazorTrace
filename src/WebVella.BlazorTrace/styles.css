@@ -151,10 +151,10 @@
 }
 .wv-trace-modal.secondary {
   z-index: 1002;
-  width: 50vw;
-  height: 50vh;
-  left: 25vw;
-  top: 25vh;
+  width: 75vw;
+  height: 75vh;
+  left: 12.5vw;
+  top: 12.5vh;
 }
 .wv-trace-modal__header {
   display: flex;
@@ -355,10 +355,10 @@
   color: #64748b;
   position: absolute;
   left: 0;
-  top: 0;
+  top: 50%;
   bottom: 0;
   width: 30px;
-  padding-top: 12px;
+  margin-top: -8px;
   display: flex;
   justify-content: center;
   align-items: start;

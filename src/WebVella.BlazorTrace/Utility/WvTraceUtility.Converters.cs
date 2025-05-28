@@ -36,20 +36,20 @@ public static partial class WvTraceUtility
 		if (bytes == null) return "n/a";
 			
 		if (bytes < 0) return "err"; // Handle invalid input
-		if(bytes == 0) return "0KB";
-		if(bytes <= 15) return bytes.ToString() + "bytes";
+		if(bytes == 0) return "0 KB";
+		if(bytes <= 15) return bytes.ToString() + " bytes";
 		const double kilobyteFactor = 1024.0;
 		var kb = Math.Round((double)bytes / kilobyteFactor, 2, MidpointRounding.AwayFromZero);
-		return kb.ToString() + "KB";
+		return kb.ToString() + " KB";
 	}
 	public static string ToKilobytesString(this long bytes)
 	{
 		if (bytes < 0) return "err"; // Handle invalid input
-		if(bytes == 0) return "0KB";
-		if(bytes <= 15) return bytes.ToString() + "bytes";
+		if(bytes == 0) return "0 KB";
+		if(bytes <= 15) return bytes.ToString() + " bytes";
 		const double kilobyteFactor = 1024.0;
 		var kb = Math.Round((double)bytes / kilobyteFactor, 2, MidpointRounding.AwayFromZero);
-		return kb.ToString() + "KB";
+		return kb.ToString() + " KB";
 	}
 	public static string GetMemoryInfoId(string assemblyFullName, string fieldName)
 		=> $"{assemblyFullName}$$${fieldName}";
@@ -59,12 +59,12 @@ public static partial class WvTraceUtility
 		if (!firstRender.Value) return "no";
 		return "yes";
 	}
-	public static string GetDurationMSString(this long? duration)
+	public static string ToDurationMSString(this long? duration)
 	{
 		if (duration == null) return "n/a";
 		return $"{duration.Value} ms";
 	}
-	public static string GetDurationMSString(this long duration)
+	public static string ToDurationMSString(this long duration)
 	{
 		return $"{duration} ms";
 	}
@@ -77,7 +77,7 @@ public static partial class WvTraceUtility
 			case WvTraceSessionLimitType.MemoryDelta:
 				return limit.ToKilobytesString();
 			case WvTraceSessionLimitType.Duration:
-				return limit.GetDurationMSString();
+				return limit.ToDurationMSString();
 			default:
 				return limit.ToString();
 		}
