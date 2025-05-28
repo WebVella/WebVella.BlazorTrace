@@ -1,0 +1,50 @@
+﻿@namespace WebVella.BlazorTrace
+@using WebVella.BlazorTrace.Utility
+@inherits WvBlazorTraceComponentBase
+@if (_modalVisible && _row is not null)
+{
+	<div title="click to close [Esc]" class="wv-trace-overlay secondary" @onclick=@(()=> Hide(false))></div>
+	<div class="wv-trace-modal secondary">
+		<div class="wv-trace-modal__header">
+			<div class="wv-trace-modal__header__left" style="flex:1 1 auto;">@((MarkupString)_getTitle())</div>
+			<div class="wv-trace-modal__header__right">
+				<button title="Close [Esc]" type="button" class="circle icon" @onclick=@(()=> Hide(false))>X</button>
+			</div>
+		</div>
+		<div class="wv-trace-modal__body">
+			<table>
+				<thead>
+					<tr>
+						<th>limit type</th>
+						<th class="wv-number">limit</th>
+						<th class="wv-number">actual</th>
+					</tr>
+				</thead>
+				<tbody>
+					@foreach (var item in _row.LimitHits)
+					{
+						<tr @key="@Guid.NewGuid()">
+							<td>@item.Type.ToDescriptionString()</td>
+							<td class="wv-number">@item.Limit.GetLimitValueAsString(item.Type)</td>
+							<td class="wv-number">@item.Actual.GetLimitValueAsString(item.Type)</td>
+						</tr>
+					}
+
+					@if (_row.LimitHits.Count == 0)
+					{
+						<tr>
+							<td colspan="3" style="padding:30px;text-align:center;">No tracers are logged yet for this method</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+		<div class="wv-trace-modal__footer">
+			<button title="Close [Esc]" type="button" @onclick=@(()=> Hide(false))>Close [Esc]</button>
+		</div>
+	</div>
+}
+
+
+
+

@@ -40,8 +40,10 @@ private bool _visible = false;
 	private CancellationTokenSource? _infiniteLoopCancellationTokenSource;
 	private WvBlazorTraceConfiguration _configuration = default!;
 	private WvBlazorTraceListModal? _traceListModal = null;
+	private WvBlazorSignalTraceListModal? _signalTraceListModal = null;
 	private WvBlazorMemoryModal? _memoryModal = null;
 	private WvBlazorLimitModal? _limitModal = null;
+	private WvBlazorSignalLimitModal? _signalLimitModal = null;
 	private string? _primarySnHighlightClass = null;
 
 	private List<WvTraceModalMenuItem> _methodMenu = new();
@@ -150,6 +152,7 @@ private bool _visible = false;
 		if (_data is null) return;
 		_data.Request.ModuleFilter = null;
 		_data.Request.ComponentFilter = null;
+		_data.Request.SignalNameFilter = null;
 		_data.Request.MethodFilter = null;
 		_data.Request.MemoryFilter = null;
 		_data.Request.DurationFilter = null;
@@ -180,7 +183,6 @@ private bool _visible = false;
 		};
 		_signalMenu = new(){
 			new WvTraceModalMenuItem{ Id = WvTraceModalMenu.SignalCalls},
-			new WvTraceModalMenuItem{ Id = WvTraceModalMenu.SignalMemory},
 			new WvTraceModalMenuItem{ Id = WvTraceModalMenu.SignalLimits},
 			new WvTraceModalMenuItem{ Id = WvTraceModalMenu.SignalName}
 		};
@@ -214,7 +216,7 @@ private bool _visible = false;
 			else
 			{
 				var data = await WvBlazorTraceService.GetModalData(_data?.Request);
-				_data!.TraceRows = data.TraceRows;
+				_data!.MethodTraceRows = data.MethodTraceRows;
 			}
 		}
 		catch (Exception ex)
@@ -283,33 +285,69 @@ private bool _visible = false;
 			}
 		}, _infiniteLoopCancellationTokenSource.Token);
 	}
-	private async Task _showTraceListModal(WvTraceRow row)
+	private async Task _showTraceListModal(object row)
 	{
-		if (_traceListModal is null) return;
-		await _traceListModal.Show(row);
+		if (row == null) return;
+		if (row is WvMethodTraceRow)
+		{
+			if (_traceListModal is null) return;
+			await _traceListModal.Show((WvMethodTraceRow)row);
+		}
+		else if (row is WvSignalTraceRow)
+		{
+			if (_signalTraceListModal is null) return;
+			await _signalTraceListModal.Show((WvSignalTraceRow)row);
+		}
 	}
-	private async Task _showMemoryModal(WvTraceRow row)
+	private async Task _showMemoryModal(WvMethodTraceRow row)
 	{
 		if (_memoryModal is null) return;
 		await _memoryModal.Show(row);
 	}
-	private async Task _showLimitModal(WvTraceRow row)
+	private async Task _showLimitModal(object row)
 	{
-		if (_limitModal is null) return;
-		await _limitModal.Show(row);
+		if (row == null) return;
+		if (row is WvMethodTraceRow)
+		{
+			if (_limitModal is null) return;
+			await _limitModal.Show((WvMethodTraceRow)row);
+		}
+		else if (row is WvSignalTraceRow)
+		{
+			if (_signalLimitModal is null) return;
+			await _signalLimitModal.Show((WvSignalTraceRow)row);
+		}
 	}
 
-	private async Task _bookmarkClicked(WvTraceRow row)
+	private async Task _bookmarkClicked(object rowObject)
 	{
-		if (row.IsBookmarked)
+		if (rowObject is WvMethodTraceRow)
 		{
-			await WvBlazorTraceService.RemoveBookmarkAsync(row.Id);
-			row.IsBookmarked = false;
+			var row = (WvMethodTraceRow)rowObject;
+			if (row.IsBookmarked)
+			{
+				await WvBlazorTraceService.RemoveBookmarkAsync(row.Id);
+				row.IsBookmarked = false;
+			}
+			else
+			{
+				await WvBlazorTraceService.AddBookmarkAsync(row.Id);
+				row.IsBookmarked = true;
+			}
 		}
-		else
+		else if (rowObject is WvSignalTraceRow)
 		{
-			await WvBlazorTraceService.AddBookmarkAsync(row.Id);
-			row.IsBookmarked = true;
+			var row = (WvSignalTraceRow)rowObject;
+			if (row.IsBookmarked)
+			{
+				await WvBlazorTraceService.RemoveBookmarkAsync(row.Id);
+				row.IsBookmarked = false;
+			}
+			else
+			{
+				await WvBlazorTraceService.AddBookmarkAsync(row.Id);
+				row.IsBookmarked = true;
+			}
 		}
 
 		RegenRenderLock();

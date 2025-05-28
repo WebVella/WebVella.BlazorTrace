@@ -15,8 +15,9 @@ public class WvSnapshotStore
 public class WvSnapshot
 {
 	public Guid Id { get; set; } = Guid.NewGuid();
-	public DateTime CreatedOn { get; set; } = default!;
+	public DateTimeOffset CreatedOn { get; set; } = default!;
 	public string Name { get; set; } = string.Empty;
 	public Dictionary<string, WvTraceSessionModule> ModuleDict { get; set; } = new();
+	public Dictionary<string, WvTraceSessionSignal> SignalDict { get; set; } = new();
 }
 

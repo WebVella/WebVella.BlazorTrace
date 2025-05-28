@@ -12,7 +12,7 @@ using WebVella.BlazorTrace.Models;
 namespace WebVella.BlazorTrace.Utility;
 public static partial class WvTraceUtility
 {
-	public static long GetSize(this ComponentBase obj,
+	public static long GetSize(this object obj,
 		List<WvTraceMemoryInfo> memoryDetails,
 		WvBlazorTraceConfiguration configuration,
 		int maxDepth = 5)

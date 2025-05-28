@@ -22,12 +22,12 @@
 					<tr>
 						<th>timestamp</th>
 						<th>memory</th>
-						<th>call tag</th>
+						<th>custom data</th>
 						<th>first render</th>
 						<th>limits</th>
 						<th>timestamp</th>
 						<th>memory</th>
-						<th>call tag</th>
+						<th>custom data</th>
 						<th>first render</th>
 						<th>limits</th>
 					</tr>
@@ -49,7 +49,7 @@
 									@item.OnEnterMemoryBytes.ToKilobytesString()
 								</div>
 							</td>
-							<td class="wv-tag">@item.OnEnterCallTag</td>
+							<td class="wv-tag">@item.OnEnterCustomData</td>
 							<td>@item.OnEnterFirstRender.GetFirstRenderString()</td>
 							<td></td>
 							<td class="wv-number">@item.ExitedOn?.ToString(WvConstants.TimestampFormat) ms</td>
@@ -64,7 +64,7 @@
 									@item.OnExitMemoryBytes.ToKilobytesString()
 								</div>
 							</td>
-							<td class="wv-tag">@item.OnExitCallTag</td>
+							<td class="wv-tag">@item.OnExitCustomData</td>
 							<td>@item.OnExitFirstRender.GetFirstRenderString()</td>
 							<td></td>
 						</tr>

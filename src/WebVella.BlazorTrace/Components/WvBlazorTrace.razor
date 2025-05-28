@@ -154,7 +154,7 @@
 							<thead>
 								<tr>
 									<th style="width:40px">
-										@if (_data?.Request is not null && _data.Request.HasFilter)
+										@if (_data?.Request is not null && _data.Request.HasMethodFilter)
 										{
 											<button type="button" class="icon wv-accent" @onclick=_clearFilter style="border-width:1px;">
 												<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
@@ -216,7 +216,7 @@
 										</InputSelect>
 									</th>
 								</tr>
-								@foreach (var item in _data.TraceRows.Where(x => x.IsBookmarked))
+								@foreach (var item in _data.MethodTraceRows.Where(x => x.IsBookmarked))
 								{
 									<WvBlazorTraceRow @key=item.Id Item="item" Class="bookmark-row"
 													  OnTraceListView="_showTraceListModal"
@@ -234,7 +234,7 @@
 								}
 								else
 								{
-									@foreach (var item in _data.TraceRows.Where(x => !x.IsBookmarked))
+									@foreach (var item in _data.MethodTraceRows.Where(x => !x.IsBookmarked))
 									{
 										<WvBlazorTraceRow @key=item.Id Item="item"
 														  OnTraceListView="_showTraceListModal"
@@ -242,7 +242,7 @@
 														  OnBookmark="_bookmarkClicked"
 														  OnLimitView="_showLimitModal" />
 									}
-									@if (_data.TraceRows.Count == 0)
+									@if (_data.MethodTraceRows.Count == 0)
 									{
 										<tr>
 											<td colspan="8" style="padding:30px;text-align:center;">No tracers are logged yet</td>
@@ -254,7 +254,76 @@
 					}
 					else if (_data.Request!.IsSignalMenu)
 					{
-						<div>signals</div>
+						<table>
+							<thead>
+								<tr>
+									<th style="width:40px">
+										@if (_data?.Request is not null && _data.Request.HasSignalFilter)
+										{
+											<button type="button" class="icon wv-accent" @onclick=_clearFilter style="border-width:1px;">
+												<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+													<path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+												</svg>
+											</button>
+										}
+									</th>
+									<th>
+										<InputText placeholder="signal name" autocomplete="new-password"
+												   @bind-Value=@_data!.Request.SignalNameFilter
+												   @bind-Value:after=_submitFilter />
+									</th>
+									<th>
+										<InputSelect @bind-Value="@_data!.Request.CallsFilter" @bind-Value:after="_submitFilter">
+											<option value="">no call filter</option>
+											@foreach (var option in Enum.GetValues<WvTraceModalCallsFilter>())
+											{
+												<option value="@option">@option.ToDescriptionString()</option>
+											}
+										</InputSelect>
+									</th>
+									<th>
+										<InputSelect @bind-Value="@_data.Request.LimitsFilter" @bind-Value:after="_submitFilter">
+											<option value="">no limit filter</option>
+											@foreach (var option in Enum.GetValues<WvTraceModalLimitsFilter>())
+											{
+												<option value="@option">@option.ToDescriptionString()</option>
+											}
+										</InputSelect>
+									</th>
+								</tr>
+								@foreach (var item in _data.SignalTraceRows.Where(x => x.IsBookmarked))
+								{
+									<WvBlazorTraceSignalRow @key=item.Id Item="item" Class="bookmark-row"
+													  OnTraceListView="_showTraceListModal"
+													  OnBookmark="_bookmarkClicked"
+													  OnLimitView="_showLimitModal" />
+								}
+							</thead>
+							<tbody>
+								@if (_loadingData)
+								{
+									<tr>
+										<td colspan="4" style="padding:30px;text-align:center;">Loading ....</td>
+									</tr>
+								}
+								else
+								{
+									@foreach (var item in _data.SignalTraceRows.Where(x => !x.IsBookmarked))
+									{
+										<WvBlazorTraceSignalRow @key=item.Id Item="item"
+														  OnTraceListView="_showTraceListModal"
+														  OnBookmark="_bookmarkClicked"
+														  OnLimitView="_showLimitModal" />
+									}
+									@if (_data.SignalTraceRows.Count == 0)
+									{
+										<tr>
+											<td colspan="4" style="padding:30px;text-align:center;">No tracers are logged yet</td>
+										</tr>
+									}
+								}
+							</tbody>
+						</table>
 					}
 					else if (_data.Request!.IsSnapshotMenu)
 					{
@@ -299,8 +368,10 @@
 		</div>
 
 		<WvBlazorTraceListModal @ref=_traceListModal />
+		<WvBlazorSignalTraceListModal @ref=_signalTraceListModal />
 		<WvBlazorMemoryModal @ref=_memoryModal />
 		<WvBlazorLimitModal @ref=_limitModal />
+		<WvBlazorSignalLimitModal @ref=_signalLimitModal />
 	}
 }
 

@@ -18,7 +18,7 @@ public partial class WvBlazorLimitModal : WvBlazorTraceComponentBase
 	private DotNetObjectReference<WvBlazorLimitModal> _objectRef = default!;
 	private bool _escapeListenerEnabled = false;
 	private bool _modalVisible = false;
-	private WvTraceRow? _row = null;
+	private WvMethodTraceRow? _row = null;
 
 	// LIFECYCLE
 	/// //////////////////////////////////////////////
@@ -37,7 +37,7 @@ public partial class WvBlazorLimitModal : WvBlazorTraceComponentBase
 
 	// PUBLIC
 	//////////////////////////////////////////////////
-	public async Task Show(WvTraceRow row)
+	public async Task Show(WvMethodTraceRow row)
 	{
 		await new JsService(JSRuntimeSrv).AddKeyEventListener(_objectRef, "OnShortcutKey", "Escape", _componentId.ToString());
 		_escapeListenerEnabled = true;

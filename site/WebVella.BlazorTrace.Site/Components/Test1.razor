@@ -73,7 +73,7 @@
 
 		_counter++;
 		if(_enableTrace)
-			WvBlazorTraceService.OnSignal(component: this, signalTag: "test-signal", instanceTag: InstanceTag);
+			WvBlazorTraceService.OnSignal(caller: this, signalName: "test-signal", instanceTag: InstanceTag);
 
 		if (_enableTrace)
 			WvBlazorTraceService.OnExit(component: this, instanceTag: InstanceTag);

@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using WebVella.BlazorTrace.Utility;
 
 namespace WebVella.BlazorTrace.Models;
-public class WvTraceRow
+public class WvMethodTraceRow
 {
-	public string Id { get => WvModalUtility.GenerateHash(Module, ComponentFullName, InstanceTag, Method); }
+	public string Id { get => WvModalUtility.GenerateMethodHash(Module, ComponentFullName, InstanceTag, Method); }
 	public string? Module { get; set; }
 	public string? Component { get; set; }
 	public string? ComponentFullName { get; set; }
@@ -24,7 +24,7 @@ public class WvTraceRow
 		get
 		{
 			var hints = new List<string>();
-			if (MethodCallsLimitHits.Count > 0) hints.Add($"{MethodCallsLimitHits.Count} call");
+			if (MethodCallsLimitHits.Count > 0) hints.Add($"{MethodCallsLimitHits.Count} calls");
 			if (MemoryTotalLimitHits.Count > 0) hints.Add($"{MemoryTotalLimitHits.Count} total memory");
 			if (MemoryDeltaLimitHits.Count > 0) hints.Add($"{MemoryDeltaLimitHits.Count} memory delta");
 			if (DurationLimitHits.Count > 0) hints.Add($"{DurationLimitHits.Count} duration");

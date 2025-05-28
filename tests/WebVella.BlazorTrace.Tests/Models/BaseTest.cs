@@ -104,8 +104,35 @@ public class BaseTest
 		return (method, trace);
 	}
 
-	public WvTraceRow CheckTraceRowExists(
-			List<WvTraceRow> traceRows,
+		public (WvTraceSessionSignal, WvTraceSessionSignalTrace) CheckSignalTraceExists(
+		Dictionary<string, WvTraceSessionModule> moduleDict,
+		string moduleName,
+		string signalName,
+		string componentFullName,
+		string instanceTag,
+		string methodName)
+	{
+		WvTraceSessionSignal? signal = null;
+		WvTraceSessionSignalTrace? trace = null;
+
+		Assert.Single(moduleDict.Keys);
+		Assert.NotNull(moduleDict.Keys.SingleOrDefault(x => x == moduleName));
+		var module = moduleDict[moduleName];
+		Assert.NotNull(module.SignalDict.Keys.SingleOrDefault(x => x == signalName));
+		signal = module.SignalDict[signalName];
+		Assert.NotEmpty(signal.TraceList);
+		trace = signal.TraceList.FirstOrDefault(x => 
+			x.ComponentFullName == componentFullName
+			&& x.InstanceTag == instanceTag
+			&& x.MethodName == methodName
+		);
+		Assert.NotNull(trace);
+
+		return (signal, trace);
+	}
+
+	public WvMethodTraceRow CheckTraceRowExists(
+			List<WvMethodTraceRow> traceRows,
 			string moduleName,
 			string componentFullName,
 			string componentName,

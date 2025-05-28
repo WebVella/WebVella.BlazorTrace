@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Components;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -52,7 +53,6 @@ public class WvTraceSessionComponentTaggedInstance
 public class WvTraceSessionMethod
 {
 	public string? Name { get; set; } = null;
-	public bool IsBookmarked { get; set; } = false;
 
 	[JsonIgnore]
 	public long? MinDurationMs { get => this.GetMinDuration(); }
@@ -94,7 +94,7 @@ public class WvTraceSessionMethod
 	public List<WvTraceSessionLimitHit> LimitHits { get => this.CalculateLimitsInfo(); }
 	public string GenerateHash(string moduleName, string componentFullname, string? tag)
 	{
-		return WvModalUtility.GenerateHash(moduleName, componentFullname, tag, Name);
+		return WvModalUtility.GenerateMethodHash(moduleName, componentFullname, tag, Name);
 	}
 }
 
@@ -116,17 +116,32 @@ public class WvTraceSessionTrace
 	public List<WvTraceMemoryInfo>? OnExitMemoryInfo { get; set; } = null;
 	public bool? OnEnterFirstRender { get; set; } = null;
 	public bool? OnExitFirstRender { get; set; } = null;
-	public string? OnEnterCallTag { get; set; } = null;
-	public string? OnExitCallTag { get; set; } = null;
+	public string? OnEnterCustomData { get; set; } = null;
+	public string? OnExitCustomData { get; set; } = null;
 	public WvTraceMethodOptions OnEnterOptions { get; set; } = default!;
 	public WvTraceMethodOptions OnExitOptions { get; set; } = default!;
 }
 
 public class WvTraceSessionSignal
 {
-	public DateTimeOffset SendOn { get; set; } = default!;
-	public string? Payload { get; set; } = null;
+	public List<WvTraceSessionSignalTrace> TraceList { get; set; } = new();
+
+	[JsonIgnore]
+	public List<WvTraceSessionLimitHit> LimitHits { get => this.CalculateLimitsInfo(); }
 }
+
+public class WvTraceSessionSignalTrace
+{
+	public DateTimeOffset SendOn { get; set; } = default!;
+	public string? ModuleName { get; set; } = null;
+	public string? ComponentName { get; set; } = null;
+	public string? ComponentFullName { get; set; } = null;
+	public string? InstanceTag { get; set; } = null;
+	public string? MethodName { get; set; } = null;
+	public string? CustomData { get; set; } = null;
+	public WvTraceSignalOptions Options { get; set; } = default!;
+}
+
 
 public class WvTraceSessionLimitHit
 {

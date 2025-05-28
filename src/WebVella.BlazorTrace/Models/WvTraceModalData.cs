@@ -18,6 +18,7 @@ public class WvTraceModalRequest
 	public bool SortAscending { get; set; } = true;
 	public string? ModuleFilter { get; set; } = null;
 	public string? ComponentFilter { get; set; } = null;
+	public string? SignalNameFilter { get; set; } = null;
 	public string? MethodFilter { get; set; } = null;
 	public WvTraceModalMemoryFilter? MemoryFilter { get; set; } = null;
 	public WvTraceModalDurationFilter? DurationFilter { get; set; } = null;
@@ -34,6 +35,7 @@ public class WvTraceModalRequest
 		&& SortAscending
 		&& ModuleFilter is null
 		&& ComponentFilter is null
+		&& SignalNameFilter is null
 		&& MethodFilter is null
 		&& MemoryFilter is null
 		&& DurationFilter is null
@@ -42,14 +44,23 @@ public class WvTraceModalRequest
 		&& !IsAutoRefresh;
 	}
 	[JsonIgnore]
-	public bool HasFilter
+	public bool HasMethodFilter
 	{
 		get => !String.IsNullOrWhiteSpace(ModuleFilter)
 		|| !String.IsNullOrWhiteSpace(ComponentFilter)
 		|| !String.IsNullOrWhiteSpace(MethodFilter)
 		|| MemoryFilter is not null
 		|| DurationFilter is not null
-		|| CallsFilter is not null;
+		|| CallsFilter is not null
+		|| LimitsFilter is not null;
+	}
+	[JsonIgnore]
+	public bool HasSignalFilter
+	{
+		get => !String.IsNullOrWhiteSpace(ModuleFilter)
+		|| !String.IsNullOrWhiteSpace(SignalNameFilter)
+		|| CallsFilter is not null
+		|| LimitsFilter is not null;
 	}
 	[JsonIgnore]
 	public bool IsMethodMenu
@@ -75,7 +86,6 @@ public class WvTraceModalRequest
 		{
 			if(
 				Menu == WvTraceModalMenu.SignalCalls
-				|| Menu == WvTraceModalMenu.SignalMemory
 				|| Menu == WvTraceModalMenu.SignalLimits
 				|| Menu == WvTraceModalMenu.SignalName
 			) return true;
@@ -112,8 +122,6 @@ public enum WvTraceModalMenu
 	MethodName = 4,
 	[Description("Calls")]
 	SignalCalls = 5,
-	[Description("Memory")]
-	SignalMemory = 6,
 	[Description("Limits")]
 	SignalLimits = 7,
 	[Description("Name")]
@@ -188,6 +196,7 @@ public class WvTraceModalData
 {
 	public WvTraceModalRequest Request { get; set; } = new();
 	public List<WvSnapshotListItem> SnapshotList { get; set; } = new();
-	public List<WvTraceRow> TraceRows { get; set; } = new();
+	public List<WvMethodTraceRow> MethodTraceRows { get; set; } = new();
+	public List<WvSignalTraceRow> SignalTraceRows { get; set; } = new();
 }
 

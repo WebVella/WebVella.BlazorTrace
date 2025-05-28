@@ -21,7 +21,7 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 			var methodName = "SlowMethod";
 			var traceId = Guid.NewGuid();
 			var instanceTag = Guid.NewGuid().ToString();
-			var callTag = Guid.NewGuid().ToString();
+			var customData = Guid.NewGuid().ToString();
 			//when
 			WvBlazorTraceServiceMock.Object.OnEnter(
 				component: Component,
@@ -29,7 +29,7 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 				options: options,
 				firstRender: firstRender,
 				instanceTag: instanceTag,
-				callTag: callTag,
+				customData: customData,
 				methodName: methodName
 			);
 			Thread.Sleep(5);
@@ -39,7 +39,7 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 				options: options,
 				firstRender: firstRender,
 				instanceTag: instanceTag,
-				callTag: callTag,
+				customData: customData,
 				methodName: methodName
 			);
 			

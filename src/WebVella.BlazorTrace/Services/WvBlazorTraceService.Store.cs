@@ -40,9 +40,10 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		var snapshot = new WvSnapshot
 		{
 			Id = Guid.NewGuid(),
-			CreatedOn = DateTime.Now,
-			Name = !String.IsNullOrWhiteSpace(name) ? name : DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-			ModuleDict = _moduleDict
+			CreatedOn = DateTimeOffset.Now,
+			Name = !String.IsNullOrWhiteSpace(name) ? name : DateTimeOffset.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+			ModuleDict = _moduleDict,
+			SignalDict = _signalDict,
 		};
 		store.Snapshots.Add(snapshot);
 		var json = JsonSerializer.Serialize(store);

@@ -21,17 +21,9 @@
 				</button>
 			}
 		</td>
-		<td title="module / assembly short name">@Item.Module</td>
-		<td title="@Item.ComponentFullName">
-			<span>@Item.Component</span>
-			@if (!String.IsNullOrWhiteSpace(Item.InstanceTag))
-			{
-				<span class="wv-trace-modal__divider"></span>
-
-				<span class="wv-tag" title="tag">@Item.InstanceTag</span>
-			}
+		<td title="signal name">
+			<span>@Item.SignalName</span>
 		</td>
-		<td title="method name">@Item.Method</td>
 		<td title="view details" class="clickable" @onclick=_onTraceListView>
 			<div class="icon">
 				<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-box-arrow-up-right" viewBox="0 0 16 16">
@@ -41,25 +33,7 @@
 			</div>
 			<div class="wv-data">
 				<div>@Item.TraceList.Count</div>
-				<div>@((MarkupString)Item.MethodComparison.TraceListChangeHtml)</div>
-			</div>
-		</td>
-		<td title="view details" class="clickable" @onclick=_onMemoryView>
-			<div class="icon">
-				<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-box-arrow-up-right" viewBox="0 0 16 16">
-					<path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5" />
-					<path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z" />
-				</svg>
-			</div>
-			<div class="wv-data">
-				<div>@(Item.LastMemoryKB is not null ? $"{Item.LastMemoryKB} KB" : "n/a")</div>
-				<div>@((MarkupString)Item.MemoryComparison.LastMemoryChangeKBHtml)</div>
-			</div>
-		</td>
-		<td>
-			<div class="wv-data">
-				<div>@(Item.LastDurationMS is not null ? $"{Item.LastDurationMS} ms" : "n/a")</div>
-				<div>@((MarkupString)Item.MethodComparison.LastDurationChangeMSHtml)</div>
+				<div>@((MarkupString)Item.SignalComparison.TraceListChangeHtml)</div>
 			</div>
 		</td>
 		<td title="@Item.LimitsHint" class="clickable" @onclick=_onLimitView>
@@ -76,15 +50,12 @@
 }
 @code {
 	[Parameter] public string? Class { get; set; }
-	[Parameter] public WvMethodTraceRow? Item { get; set; }
-	[Parameter] public EventCallback<WvMethodTraceRow> OnTraceListView { get; set; }
-	[Parameter] public EventCallback<WvMethodTraceRow> OnMemoryView { get; set; }
-	[Parameter] public EventCallback<WvMethodTraceRow> OnBookmark { get; set; }
-	[Parameter] public EventCallback<WvMethodTraceRow> OnLimitView { get; set; }
+	[Parameter] public WvSignalTraceRow? Item { get; set; }
+	[Parameter] public EventCallback<WvSignalTraceRow> OnTraceListView { get; set; }
+	[Parameter] public EventCallback<WvSignalTraceRow> OnBookmark { get; set; }
+	[Parameter] public EventCallback<WvSignalTraceRow> OnLimitView { get; set; }
 
 	private async Task _onTraceListView() => await OnTraceListView.InvokeAsync(Item);
-
-	private async Task _onMemoryView() => await OnMemoryView.InvokeAsync(Item);
 	private async Task _onBookmark() => await OnBookmark.InvokeAsync(Item);
 	private async Task _onLimitView() => await OnLimitView.InvokeAsync(Item);
 }

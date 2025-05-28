@@ -59,9 +59,10 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		WvSnapshot secondarySN = new();
 		WvSnapshot currentSN = new()
 		{
-			CreatedOn = DateTime.Now,
+			CreatedOn = DateTimeOffset.Now,
 			Id = Guid.Empty,
 			ModuleDict = _moduleDict,
+			SignalDict = _signalDict,
 			Name = "current"
 		};
 		if (request.PrimarySnapshotId.HasValue)
@@ -84,49 +85,77 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		{
 			secondarySN = currentSN;
 		}
-		var traceRows = WvModalUtility.GenerateTraceRows(
-			primarySn: primarySN,
-			secondarySn: secondarySN
-		);
-		foreach (var row in traceRows)
-		{
-			if (!row.ModuleMatches(result.Request.ModuleFilter)) continue;
-			if (!row.ComponentMatches(result.Request.ComponentFilter)) continue;
-			if (!row.MethodMatches(result.Request.MethodFilter)) continue;
-			if (!row.CallsMatches(result.Request.CallsFilter)) continue;
-			if (!row.MemoryMatches(result.Request.MemoryFilter)) continue;
-			if (!row.DurationMatches(result.Request.DurationFilter)) continue;
-			if (!row.LimitMatches(result.Request.LimitsFilter)) continue;
 
-			if (store.Bookmarked.Contains(row.Id))
-				row.IsBookmarked = true;
-			else
-				row.IsBookmarked = false;
-			result.TraceRows.Add(row);
-		}
-		if (result.Request.Menu == WvTraceModalMenu.MethodCalls
-		|| result.Request.Menu == WvTraceModalMenu.SignalLimits)
+		if (result.Request.IsMethodMenu)
 		{
-			result.TraceRows = result.TraceRows.OrderByDescending(x => x.TraceList.Count).ToList();
+			var traceRows = primarySN.GenerateMethodTraceRows(
+				secondarySn: secondarySN
+			);
+			foreach (var row in traceRows)
+			{
+				if (!row.ModuleMatches(result.Request.ModuleFilter)) continue;
+				if (!row.ComponentMatches(result.Request.ComponentFilter)) continue;
+				if (!row.MethodMatches(result.Request.MethodFilter)) continue;
+				if (!row.CallsMatches(result.Request.CallsFilter)) continue;
+				if (!row.MemoryMatches(result.Request.MemoryFilter)) continue;
+				if (!row.DurationMatches(result.Request.DurationFilter)) continue;
+				if (!row.LimitMatches(result.Request.LimitsFilter)) continue;
+
+				if (store.Bookmarked.Contains(row.Id))
+					row.IsBookmarked = true;
+				else
+					row.IsBookmarked = false;
+				result.MethodTraceRows.Add(row);
+			}
+			if (result.Request.Menu == WvTraceModalMenu.MethodCalls)
+			{
+				result.MethodTraceRows = result.MethodTraceRows.OrderByDescending(x => x.TraceList.Count).ToList();
+			}
+			else if (result.Request.Menu == WvTraceModalMenu.MethodMemory)
+			{
+				result.MethodTraceRows = result.MethodTraceRows.OrderByDescending(x => x.LastMemoryKB).ToList();
+			}
+			else if (result.Request.Menu == WvTraceModalMenu.MethodDuration)
+			{
+				result.MethodTraceRows = result.MethodTraceRows.OrderByDescending(x => x.LastDurationMS).ToList();
+			}
+			else if (result.Request.Menu == WvTraceModalMenu.MethodLimits)
+			{
+				result.MethodTraceRows = result.MethodTraceRows.OrderByDescending(x => x.LimitHits.Count).ToList();
+			}
+			else if (result.Request.Menu == WvTraceModalMenu.MethodName)
+			{
+				result.MethodTraceRows = result.MethodTraceRows.OrderBy(x => $"{x.Module}{x.ComponentFullName}{x.Method}").ToList();
+			}
 		}
-		else if (result.Request.Menu == WvTraceModalMenu.MethodMemory
-		|| result.Request.Menu == WvTraceModalMenu.SignalMemory)
-		{
-			result.TraceRows = result.TraceRows.OrderByDescending(x => x.LastMemoryKB).ToList();
-		}
-		else if (result.Request.Menu == WvTraceModalMenu.MethodDuration)
-		{
-			result.TraceRows = result.TraceRows.OrderByDescending(x => x.LastDurationMS).ToList();
-		}
-		else if (result.Request.Menu == WvTraceModalMenu.MethodLimits
-		|| result.Request.Menu == WvTraceModalMenu.SignalLimits)
-		{
-			result.TraceRows = result.TraceRows.OrderByDescending(x => x.LimitHits.Count).ToList();
-		}
-		else if (result.Request.Menu == WvTraceModalMenu.MethodName
-		|| result.Request.Menu == WvTraceModalMenu.SignalName)
-		{
-			result.TraceRows = result.TraceRows.OrderBy(x => $"{x.Module}{x.ComponentFullName}{x.Method}").ToList();
+		else if(result.Request.IsSignalMenu){ 
+			var traceRows = primarySN.GenerateSignalTraceRows(
+				secondarySn: secondarySN
+			);		
+			foreach (var row in traceRows)
+			{
+				if (!row.SignalNameMatches(result.Request.SignalNameFilter)) continue;
+				if (!row.CallsMatches(result.Request.CallsFilter)) continue;
+				if (!row.LimitMatches(result.Request.LimitsFilter)) continue;
+
+				if (store.Bookmarked.Contains(row.Id))
+					row.IsBookmarked = true;
+				else
+					row.IsBookmarked = false;
+				result.SignalTraceRows.Add(row);
+			}
+			if (result.Request.Menu == WvTraceModalMenu.SignalCalls)
+			{
+				result.SignalTraceRows = result.SignalTraceRows.OrderByDescending(x => x.TraceList.Count).ToList();
+			}
+			else if (result.Request.Menu == WvTraceModalMenu.MethodLimits)
+			{
+				result.SignalTraceRows = result.SignalTraceRows.OrderByDescending(x => x.LimitHits.Count).ToList();
+			}
+			else if (result.Request.Menu == WvTraceModalMenu.MethodName)
+			{
+				result.SignalTraceRows = result.SignalTraceRows.OrderBy(x => $"{x.SignalName}").ToList();
+			}
 		}
 		return result;
 	}

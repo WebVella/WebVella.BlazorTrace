@@ -12,7 +12,7 @@ using WebVella.BlazorTrace.Models;
 namespace WebVella.BlazorTrace.Utility;
 public static class WvModalUtility
 {
-	public static List<WvTraceRow> GenerateTraceRows(this WvSnapshot primarySn,
+	public static List<WvMethodTraceRow> GenerateMethodTraceRows(this WvSnapshot primarySn,
 		WvSnapshot secondarySn)
 	{
 		//Generate data on secondarySN (which should be the newest in the default case
@@ -22,7 +22,7 @@ public static class WvModalUtility
 		unionDataDict.AddSnapshotToComparisonDictionary(methodComparisonDict, memoryComparisonDict, primarySn, true);
 		unionDataDict.AddSnapshotToComparisonDictionary(methodComparisonDict, memoryComparisonDict, secondarySn, false);
 		unionDataDict.ProcessComparisonDictionary(methodComparisonDict, memoryComparisonDict);
-		var result = new List<WvTraceRow>();
+		var result = new List<WvMethodTraceRow>();
 
 		foreach (var moduleName in unionDataDict.Keys)
 		{
@@ -36,7 +36,7 @@ public static class WvModalUtility
 						if (methodUnionData.Primary is null && methodUnionData.Secondary is null)
 							continue;
 
-						var row = new WvTraceRow
+						var row = new WvMethodTraceRow
 						{
 							Module = moduleName,
 							Component = unionDataDict[moduleName].ComponentDict[componentFullName].Name,
@@ -59,8 +59,42 @@ public static class WvModalUtility
 		return result;
 	}
 
-	public static string GenerateHash(string? moduleName, string? componentFullname, string? tag, string? methodName)
+	public static List<WvSignalTraceRow> GenerateSignalTraceRows(this WvSnapshot primarySn,
+		WvSnapshot secondarySn)
+	{
+		//Generate data on secondarySN (which should be the newest in the default case
+		var unionDataDict = new Dictionary<string, WvSignalUnionData>();
+		var signalComparisonDict = new Dictionary<string, WvSnapshotSignalComparison>();
+		unionDataDict.AddSnapshotToSignalComparisonDictionary(signalComparisonDict, primarySn, true);
+		unionDataDict.AddSnapshotToSignalComparisonDictionary(signalComparisonDict, secondarySn, false);
+		unionDataDict.ProcessSignalComparisonDictionary(signalComparisonDict);
+		var result = new List<WvSignalTraceRow>();
+
+		foreach (var signalName in unionDataDict.Keys)
+		{
+
+			var signalUnionData = unionDataDict[signalName];
+			if (signalUnionData.Primary is null && signalUnionData.Secondary is null)
+				continue;
+
+			var row = new WvSignalTraceRow
+			{
+				SignalName = signalName,
+				TraceList = signalUnionData.Secondary is not null ? signalUnionData.Secondary.TraceList : new(),
+				LimitHits = signalUnionData.Secondary is not null ? signalUnionData.Secondary.LimitHits : new(),
+				SignalComparison = signalComparisonDict[signalName].ComparisonData,
+			};
+			result.Add(row);
+		}
+
+		return result;
+	}
+
+	public static string GenerateMethodHash(string? moduleName, string? componentFullname, string? tag, string? methodName)
 		=> $"{moduleName}$$${componentFullname}$$${tag}$$${methodName}";
+
+	public static string GenerateSignalHash(string? signalName)
+		=> $"{signalName}";
 
 	public static void AddSnapshotToComparisonDictionary(this Dictionary<string, WvModuleUnionData> unionDict, Dictionary<string, WvSnapshotMethodComparison> methodComp,
 		Dictionary<string, WvSnapshotMemoryComparison> memoryComp,
@@ -110,6 +144,26 @@ public static class WvModalUtility
 		}
 	}
 
+	public static void AddSnapshotToSignalComparisonDictionary(this Dictionary<string, WvSignalUnionData> unionDict, Dictionary<string, WvSnapshotSignalComparison> signalComp,
+			WvSnapshot? snapshot,
+			bool isPrimary = true)
+	{
+		if (unionDict is null) unionDict = new();
+		if (signalComp is null) signalComp = new();
+		if (snapshot is null) return;
+		foreach (var signalName in snapshot.SignalDict.Keys)
+		{
+			var signal = snapshot.SignalDict[signalName];
+			unionDict.SetSignalUnionData(signalName, signal, isPrimary);
+			if (!signalComp.ContainsKey(signalName))
+				signalComp[signalName] = new();
+
+			if (isPrimary)
+				signalComp[signalName].PrimarySnapshotSignal = signal;
+			else
+				signalComp[signalName].SecondarySnapshotSignal = signal;
+		}
+	}
 	public static void ProcessComparisonDictionary(this Dictionary<string, WvModuleUnionData> unionDict, Dictionary<string, WvSnapshotMethodComparison> methodDict,
 		Dictionary<string, WvSnapshotMemoryComparison> memoryDict)
 	{
@@ -185,6 +239,31 @@ public static class WvModalUtility
 			}
 		}
 	}
+
+
+	public static void ProcessSignalComparisonDictionary(this Dictionary<string, WvSignalUnionData> unionDict, Dictionary<string, WvSnapshotSignalComparison> signalDict)
+	{
+		if (unionDict is null) unionDict = new();
+		if (signalDict is null) signalDict = new();
+		foreach (var signalName in signalDict.Keys)
+		{
+			var signalComparison = signalDict[signalName];
+			//Method comparison
+			var pr = signalComparison.PrimarySnapshotSignal;
+			var sc = signalComparison.SecondarySnapshotSignal;
+			var compData = signalComparison.ComparisonData;
+			compData.TraceListChange = 0;
+			if (sc is not null)
+			{
+				compData.TraceListChange += sc.TraceList.Count;
+			}
+			if (pr is not null)
+			{
+				compData.TraceListChange -= pr.TraceList.Count;
+			}
+		}
+	}
+
 	public static long? GetValueChange(this long? primary, long? secondary)
 	{
 		if (primary is null && secondary is null) return null;
@@ -239,6 +318,21 @@ public static class WvModalUtility
 			unionDict[moduleName].ComponentDict[componentFullName].Primary = component;
 		else
 			unionDict[moduleName].ComponentDict[componentFullName].Secondary = component;
+	}
+
+	private static void SetSignalUnionData(this Dictionary<string, WvSignalUnionData> unionDict,
+		string signalName,
+		WvTraceSessionSignal signal,
+		bool isPrimary)
+	{
+
+		if (!unionDict.ContainsKey(signalName))
+			unionDict[signalName] = new();
+
+		if (isPrimary)
+			unionDict[signalName].Primary = signal;
+		else
+			unionDict[signalName].Secondary = signal;
 	}
 
 	private static void SetTaggedInstanceUnionData(this Dictionary<string, WvModuleUnionData> unionDict,

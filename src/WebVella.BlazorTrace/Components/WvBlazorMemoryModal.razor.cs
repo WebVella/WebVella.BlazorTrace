@@ -18,7 +18,7 @@ public partial class WvBlazorMemoryModal : WvBlazorTraceComponentBase
 	private DotNetObjectReference<WvBlazorMemoryModal> _objectRef = default!;
 	private bool _escapeListenerEnabled = false;
 	private bool _modalVisible = false;
-	private WvTraceRow? _row = null;
+	private WvMethodTraceRow? _row = null;
 	private List<WvSnapshotMemoryComparisonDataField> _items = new();
 
 	// LIFECYCLE
@@ -38,7 +38,7 @@ public partial class WvBlazorMemoryModal : WvBlazorTraceComponentBase
 
 	// PUBLIC
 	//////////////////////////////////////////////////
-	public async Task Show(WvTraceRow row, List<WvSnapshotMemoryComparisonDataField>? items = null)
+	public async Task Show(WvMethodTraceRow row, List<WvSnapshotMemoryComparisonDataField>? items = null)
 	{
 		await new JsService(JSRuntimeSrv).AddKeyEventListener(_objectRef, "OnShortcutKey", "Escape", _componentId.ToString());
 		_escapeListenerEnabled = true;

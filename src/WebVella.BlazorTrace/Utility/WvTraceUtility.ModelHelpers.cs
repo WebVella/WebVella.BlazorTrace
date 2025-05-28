@@ -152,6 +152,8 @@ public static partial class WvTraceUtility
 	public static List<WvTraceSessionLimitHit> CalculateLimitsInfo(this WvTraceSessionMethod method)
 	{
 		var result = new List<WvTraceSessionLimitHit>();
+		int processedOnEnter = 1;
+		int processedOnExit = 1;
 		foreach (var trace in method.TraceList)
 		{
 			#region << OnEnter >>
@@ -172,14 +174,13 @@ public static partial class WvTraceUtility
 				}
 				//calls
 				{
-					var calls = method.TraceList.Where(x => x.EnteredOn is not null).ToList();
-					if (trace.OnEnterOptions.CallLimit < calls.Count)
+					if (trace.OnEnterOptions.CallLimit < processedOnEnter)
 					{
 						result.Add(new WvTraceSessionLimitHit
 						{
 							IsOnEnter = true,
 							Type = WvTraceSessionLimitType.CallCount,
-							Actual = calls.Count,
+							Actual = processedOnEnter,
 							Limit = trace.OnEnterOptions.CallLimit
 						});
 					}
@@ -216,14 +217,13 @@ public static partial class WvTraceUtility
 				}
 				//calls
 				{
-					var calls = method.TraceList.Where(x => x.ExitedOn is not null).ToList();
-					if (trace.OnExitOptions.CallLimit < calls.Count)
+					if (trace.OnExitOptions.CallLimit < processedOnExit)
 					{
 						result.Add(new WvTraceSessionLimitHit
 						{
 							IsOnEnter = false,
 							Type = WvTraceSessionLimitType.CallCount,
-							Actual = calls.Count,
+							Actual = processedOnExit,
 							Limit = trace.OnExitOptions.CallLimit
 						});
 					}
@@ -248,8 +248,40 @@ public static partial class WvTraceUtility
 			}
 			#endregion
 
+			if(trace.EnteredOn is not null)
+				processedOnEnter++;
+			if(trace.ExitedOn is not null)
+				processedOnExit++;
 		}
 
+
+		return result;
+	}
+
+	public static List<WvTraceSessionLimitHit> CalculateLimitsInfo(this WvTraceSessionSignal signal)
+	{
+		var result = new List<WvTraceSessionLimitHit>();
+		int processedCalls = 1;
+		foreach (var trace in signal.TraceList)
+		{
+			if (trace.Options is not null)
+			{
+				//calls
+				{
+					if (trace.Options.CallLimit < processedCalls)
+					{
+						result.Add(new WvTraceSessionLimitHit
+						{
+							IsOnEnter = true,
+							Type = WvTraceSessionLimitType.CallCount,
+							Actual = processedCalls,
+							Limit = trace.Options.CallLimit
+						});
+					}
+				}
+			}
+			processedCalls++;
+		}
 
 		return result;
 	}

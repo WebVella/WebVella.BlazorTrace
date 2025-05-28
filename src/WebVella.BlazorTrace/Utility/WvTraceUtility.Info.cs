@@ -12,7 +12,7 @@ using WebVella.BlazorTrace.Models;
 namespace WebVella.BlazorTrace.Utility;
 public static partial class WvTraceUtility
 {
-	public static WvTraceInfo? GetInfo(this ComponentBase component, Guid? traceId, string? instanceTag, string methodName)
+	public static WvTraceInfo? GetInfo(this object component, Guid? traceId, string? instanceTag, string methodName)
 	{
 		var componentType = component.GetType();
 		return new WvTraceInfo

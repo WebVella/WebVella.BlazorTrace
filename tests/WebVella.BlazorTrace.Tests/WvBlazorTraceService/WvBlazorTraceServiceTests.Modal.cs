@@ -22,12 +22,12 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 			var methodName = "OnInitialized";
 			var traceId = Guid.NewGuid();
 			var instanceTag = Guid.NewGuid().ToString();
-			var callTag = Guid.NewGuid().ToString();
+			var customData = Guid.NewGuid().ToString();
 
 			var primarySN = new WvSnapshot()
 			{
 				Id = Guid.NewGuid(),
-				CreatedOn = DateTime.Now,
+				CreatedOn = DateTimeOffset.Now,
 				Name = "Test",
 				ModuleDict = new Dictionary<string, WvTraceSessionModule> {
 					{moduleName,new WvTraceSessionModule{
@@ -38,13 +38,12 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 									new WvTraceSessionComponentTaggedInstance{
 										Tag = instanceTag,
 										OnInitialized = new WvTraceSessionMethod{
-											IsBookmarked = false,
 											Name = methodName,
 											TraceList = new List<WvTraceSessionTrace>{
 												new WvTraceSessionTrace{
 													TraceId = traceId,
-													OnEnterCallTag = callTag,
-													OnExitCallTag = callTag,
+													OnEnterCustomData = customData,
+													OnExitCustomData = customData,
 													EnteredOn = DateTimeOffset.Now,
 													ExitedOn = DateTimeOffset.Now.AddMilliseconds(15),
 													OnEnterFirstRender = firstRender,
@@ -68,8 +67,8 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 
 
 			//when
-			var result = new List<WvTraceRow>();
-			Action action = () => result = primarySN.GenerateTraceRows(primarySN);
+			var result = new List<WvMethodTraceRow>();
+			Action action = () => result = primarySN.GenerateMethodTraceRows(primarySN);
 			var ex = Record.Exception(action);
 			Assert.Null(ex);
 			Assert.Single(result);
@@ -108,7 +107,7 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 			var methodName = "OnInitialized";
 			var traceId = Guid.NewGuid();
 			var instanceTag = Guid.NewGuid().ToString();
-			var callTag = Guid.NewGuid().ToString();
+			var customData = Guid.NewGuid().ToString();
 			var timestamp = DateTimeOffset.Now;
 			var timestamp2 = DateTimeOffset.Now.AddSeconds(2);
 			int delayMS = 200;
@@ -117,7 +116,7 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 			var primarySN = new WvSnapshot()
 			{
 				Id = Guid.NewGuid(),
-				CreatedOn = DateTime.Now,
+				CreatedOn = DateTimeOffset.Now,
 				Name = "Test",
 				ModuleDict = new Dictionary<string, WvTraceSessionModule> {
 					{moduleName,new WvTraceSessionModule{
@@ -128,13 +127,12 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 									new WvTraceSessionComponentTaggedInstance{
 										Tag = instanceTag,
 										OnInitialized = new WvTraceSessionMethod{
-											IsBookmarked = false,
 											Name = methodName,
 											TraceList = new List<WvTraceSessionTrace>{
 												new WvTraceSessionTrace{
 													TraceId = traceId,
-													OnEnterCallTag = callTag,
-													OnExitCallTag = callTag,
+													OnEnterCustomData = customData,
+													OnExitCustomData = customData,
 													EnteredOn = timestamp,
 													ExitedOn = timestamp,
 													OnEnterFirstRender = firstRender,
@@ -171,7 +169,7 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 			var secondarySN = new WvSnapshot()
 			{
 				Id = Guid.NewGuid(),
-				CreatedOn = DateTime.Now,
+				CreatedOn = DateTimeOffset.Now,
 				Name = "Test 2",
 				ModuleDict = new Dictionary<string, WvTraceSessionModule> {
 					{moduleName,new WvTraceSessionModule{
@@ -182,13 +180,12 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 									new WvTraceSessionComponentTaggedInstance{
 										Tag = instanceTag,
 										OnInitialized = new WvTraceSessionMethod{
-											IsBookmarked = false,
 											Name = methodName,
 											TraceList = new List<WvTraceSessionTrace>{
 												new WvTraceSessionTrace{
 													TraceId = traceId,
-													OnEnterCallTag = callTag,
-													OnExitCallTag = callTag,
+													OnEnterCustomData = customData,
+													OnExitCustomData = customData,
 													EnteredOn = timestamp,
 													ExitedOn = timestamp,
 													OnEnterFirstRender = firstRender,
@@ -214,8 +211,8 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 												},
 												new WvTraceSessionTrace{
 													TraceId = traceId,
-													OnEnterCallTag = callTag,
-													OnExitCallTag = callTag,
+													OnEnterCustomData = customData,
+													OnExitCustomData = customData,
 													EnteredOn = timestamp2,
 													ExitedOn = timestamp2.AddMilliseconds(delayMS),
 													OnEnterFirstRender = firstRender,
@@ -251,8 +248,8 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 
 
 			//when
-			var result = new List<WvTraceRow>();
-			Action action = () => result = primarySN.GenerateTraceRows(secondarySN);
+			var result = new List<WvMethodTraceRow>();
+			Action action = () => result = primarySN.GenerateMethodTraceRows(secondarySN);
 			var ex = Record.Exception(action);
 			Assert.Null(ex);
 			Assert.Single(result);

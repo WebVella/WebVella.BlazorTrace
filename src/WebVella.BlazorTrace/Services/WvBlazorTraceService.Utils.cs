@@ -24,52 +24,51 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 {
 	private void _saveSessionTrace(WvTraceInfo traceInfo, WvTraceQueueAction action)
 	{
-		if (String.IsNullOrWhiteSpace(traceInfo.ModuleName))
-			throw new ArgumentNullException(nameof(traceInfo), "ModuleName is required");
-
-		if (String.IsNullOrWhiteSpace(traceInfo.ComponentFullName))
-			throw new ArgumentNullException(nameof(traceInfo), "CompFullName is required");
-
-		if (String.IsNullOrWhiteSpace(traceInfo.MethodName))
-			throw new ArgumentNullException(nameof(traceInfo), "MethodName is required");
-
-
-		if (!_moduleDict.ContainsKey(traceInfo.ModuleName))
-			_moduleDict[traceInfo.ModuleName] = new();
-
-		var module = _moduleDict[traceInfo.ModuleName];
-
-		if (!module.ComponentDict.ContainsKey(traceInfo.ComponentFullName))
-			module.ComponentDict[traceInfo.ComponentFullName] = new()
-			{
-				Name = traceInfo.ComponentName
-			};
-
-		var component = module.ComponentDict[traceInfo.ComponentFullName];
-		if (!component.TaggedInstances.Any(x => x.Tag == traceInfo.InstanceTag))
-			component.TaggedInstances.Add(new WvTraceSessionComponentTaggedInstance() { Tag = traceInfo.InstanceTag });
-
-		var componentTaggedInstance = component.TaggedInstances.Single(x => x.Tag == traceInfo.InstanceTag);
-
 		if (action.MethodCalled == WvTraceQueueItemMethod.OnEnter)
 		{
+			if (String.IsNullOrWhiteSpace(traceInfo.ModuleName))
+				throw new ArgumentNullException(nameof(traceInfo), "ModuleName is required");
+
+			if (String.IsNullOrWhiteSpace(traceInfo.ComponentFullName))
+				throw new ArgumentNullException(nameof(traceInfo), "CompFullName is required");
+
+			if (String.IsNullOrWhiteSpace(traceInfo.MethodName))
+				throw new ArgumentNullException(nameof(traceInfo), "MethodName is required");
+
+
+			if (!_moduleDict.ContainsKey(traceInfo.ModuleName))
+				_moduleDict[traceInfo.ModuleName] = new();
+
+			var module = _moduleDict[traceInfo.ModuleName];
+			if (!module.ComponentDict.ContainsKey(traceInfo.ComponentFullName))
+			{
+				module.ComponentDict[traceInfo.ComponentFullName] = new()
+				{
+					Name = traceInfo.ComponentName
+				};
+			}
+			var component = module.ComponentDict[traceInfo.ComponentFullName];
+			if (!component.TaggedInstances.Any(x => x.Tag == traceInfo.InstanceTag))
+				component.TaggedInstances.Add(new WvTraceSessionComponentTaggedInstance() { Tag = traceInfo.InstanceTag });
+
+			var componentTaggedInstance = component.TaggedInstances.Single(x => x.Tag == traceInfo.InstanceTag);
 			var trace = new WvTraceSessionTrace()
 			{
 				TraceId = traceInfo.TraceId,
 				OnEnterMemoryInfo = new List<WvTraceMemoryInfo>(),
 				EnteredOn = action.Timestamp,
 				OnEnterFirstRender = action.FirstRender,
-				OnEnterCallTag = action.CallTag,
+				OnEnterCustomData = action.CustomData,
 				OnEnterMemoryBytes = null,
 				OnEnterOptions = action.MethodOptions,
 				ExitedOn = null,
-				OnExitCallTag = null,
+				OnExitCustomData = null,
 				OnExitFirstRender = null,
 				OnExitMemoryBytes = null,
 				OnExitMemoryInfo = null,
 				OnExitOptions = default!
 			};
-			trace.OnEnterMemoryBytes = action.Component is null ? null : action.Component.GetSize(trace.OnEnterMemoryInfo, _configuration);
+			trace.OnEnterMemoryBytes = action.Caller.GetSize(trace.OnEnterMemoryInfo, _configuration);
 
 			if (traceInfo.IsOnInitialized)
 			{
@@ -109,9 +108,34 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 			else
 				throw new Exception("method type not supported");
 		}
-		else if(action.MethodCalled == WvTraceQueueItemMethod.OnExit)
+		else if (action.MethodCalled == WvTraceQueueItemMethod.OnExit)
 		{
+			if (String.IsNullOrWhiteSpace(traceInfo.ModuleName))
+				throw new ArgumentNullException(nameof(traceInfo), "ModuleName is required");
 
+			if (String.IsNullOrWhiteSpace(traceInfo.ComponentFullName))
+				throw new ArgumentNullException(nameof(traceInfo), "CompFullName is required");
+
+			if (String.IsNullOrWhiteSpace(traceInfo.MethodName))
+				throw new ArgumentNullException(nameof(traceInfo), "MethodName is required");
+
+
+			if (!_moduleDict.ContainsKey(traceInfo.ModuleName))
+				_moduleDict[traceInfo.ModuleName] = new();
+
+			var module = _moduleDict[traceInfo.ModuleName];
+			if (!module.ComponentDict.ContainsKey(traceInfo.ComponentFullName))
+			{
+				module.ComponentDict[traceInfo.ComponentFullName] = new()
+				{
+					Name = traceInfo.ComponentName
+				};
+			}
+			var component = module.ComponentDict[traceInfo.ComponentFullName];
+			if (!component.TaggedInstances.Any(x => x.Tag == traceInfo.InstanceTag))
+				component.TaggedInstances.Add(new WvTraceSessionComponentTaggedInstance() { Tag = traceInfo.InstanceTag });
+
+			var componentTaggedInstance = component.TaggedInstances.Single(x => x.Tag == traceInfo.InstanceTag);
 			WvTraceSessionTrace? trace = null;
 			if (traceInfo.IsOnInitialized)
 			{
@@ -205,14 +229,32 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 			trace.TraceId = action.TraceId;
 			trace.OnExitMemoryInfo = new List<WvTraceMemoryInfo>();
 			trace.ExitedOn = action.Timestamp;
-			trace.OnExitCallTag = action.CallTag;
+			trace.OnExitCustomData = action.CustomData;
 			trace.OnExitFirstRender = action.FirstRender;
-			trace.OnExitMemoryBytes = action.Component is null ? null : action.Component.GetSize(trace.OnExitMemoryInfo, _configuration);
+			trace.OnExitMemoryBytes = action.Caller is null ? null : action.Caller.GetSize(trace.OnExitMemoryInfo, _configuration);
 			trace.OnExitOptions = action.MethodOptions;
 
 		}
-		else if(action.MethodCalled == WvTraceQueueItemMethod.Signal)
+		else if (action.MethodCalled == WvTraceQueueItemMethod.Signal)
 		{
+			if (String.IsNullOrWhiteSpace(action.SignalName))
+				throw new ArgumentNullException(nameof(action), "SignalName is required");
+			if (!_signalDict.ContainsKey(action.SignalName))
+			{
+				_signalDict[action.SignalName] = new();
+			}
+			var signal = _signalDict[action.SignalName];
+			signal.TraceList.Add(new WvTraceSessionSignalTrace
+			{
+				SendOn = action.Timestamp,
+				ModuleName = traceInfo.ModuleName,
+				ComponentName = traceInfo.ComponentName,
+				ComponentFullName = traceInfo.ComponentFullName,
+				InstanceTag = traceInfo.InstanceTag,
+				MethodName = action.MethodName,
+				CustomData = action.CustomData,
+				Options = action.SignalOptions
+			});
 		}
 	}
 

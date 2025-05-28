@@ -64,8 +64,8 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 	private void _processQueueTrace(WvTraceQueueAction action)
 	{
 		if (action is null) return;
-		if (action.Component is null) return;
-		var traceInfo = action.Component.GetInfo(action.TraceId, action.InstanceTag, action.MethodName);
+		if (action.Caller is null) return;
+		var traceInfo = action.Caller.GetInfo(action.TraceId, action.InstanceTag, action.MethodName);
 		if (traceInfo is null)
 			throw new Exception("callerInfo cannot be evaluated");
 		_saveSessionTrace(traceInfo, action);
