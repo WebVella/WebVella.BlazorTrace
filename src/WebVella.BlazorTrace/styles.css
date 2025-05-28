@@ -311,6 +311,7 @@
   flex: 1 1 auto;
   overflow: auto;
   padding: 10px;
+  color: #e5e7eb;
 }
 .wv-trace-modal__body table {
   font-size: 14px;
@@ -376,13 +377,14 @@
 }
 .wv-trace-modal__body table thead tr.bookmark-row:last-child th,
 .wv-trace-modal__body table thead tr.bookmark-row:last-child td {
-  border-bottom: 2px solid rgba(6, 182, 212, 0.5);
+  border-bottom: 5px solid rgba(6, 182, 212, 0.15);
 }
 .wv-trace-modal__body table thead th {
   background: rgba(76, 5, 25, 0.35);
   padding: 5px;
   color: #64748b;
   font-weight: normal;
+  text-align: left;
 }
 .wv-trace-modal__body table thead th input,
 .wv-trace-modal__body table thead th select {
@@ -524,7 +526,7 @@
   color: #64748b;
 }
 .wv-trace-modal .wv-tag {
-  color: #5b21b6;
+  color: #06b6d4;
 }
 .wv-trace-modal .wv-number {
   text-align: right;

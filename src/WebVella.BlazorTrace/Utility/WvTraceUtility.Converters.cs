@@ -33,12 +33,20 @@ public static partial class WvTraceUtility
 	}
 	public static string ToKilobytesString(this long? bytes)
 	{
-		if (bytes == null)
-			return "n/a";
-		if (bytes < 0)
-		{
-			return "err"; // Handle invalid input
-		}
+		if (bytes == null) return "n/a";
+			
+		if (bytes < 0) return "err"; // Handle invalid input
+		if(bytes == 0) return "0KB";
+		if(bytes <= 15) return bytes.ToString() + "bytes";
+		const double kilobyteFactor = 1024.0;
+		var kb = Math.Round((double)bytes / kilobyteFactor, 2, MidpointRounding.AwayFromZero);
+		return kb.ToString() + "KB";
+	}
+	public static string ToKilobytesString(this long bytes)
+	{
+		if (bytes < 0) return "err"; // Handle invalid input
+		if(bytes == 0) return "0KB";
+		if(bytes <= 15) return bytes.ToString() + "bytes";
 		const double kilobyteFactor = 1024.0;
 		var kb = Math.Round((double)bytes / kilobyteFactor, 2, MidpointRounding.AwayFromZero);
 		return kb.ToString() + "KB";
@@ -56,5 +64,22 @@ public static partial class WvTraceUtility
 		if (duration == null) return "n/a";
 		return $"{duration.Value} ms";
 	}
+	public static string GetDurationMSString(this long duration)
+	{
+		return $"{duration} ms";
+	}
 
+	public static string GetLimitValueAsString(this long limit, WvTraceSessionLimitType type)
+	{
+		switch (type)
+		{
+			case WvTraceSessionLimitType.MemoryTotal:
+			case WvTraceSessionLimitType.MemoryDelta:
+				return limit.ToKilobytesString();
+			case WvTraceSessionLimitType.Duration:
+				return limit.GetDurationMSString();
+			default:
+				return limit.ToString();
+		}
+	}
 }

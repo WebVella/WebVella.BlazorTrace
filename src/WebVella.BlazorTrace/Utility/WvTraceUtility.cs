@@ -15,7 +15,7 @@ public static partial class WvTraceUtility
 	public static void ConsoleLog(string message)
 	{
 #if DEBUG
-		//Console.WriteLine($"$$$$$$ [{DateTime.Now.ToString("HH:mm:ss:ffff")}] =>{message} ");
+		Console.WriteLine($"$$$$$$ [{DateTime.Now.ToString("HH:mm:ss:ffff")}] =>{message} ");
 #endif
 	}
 }

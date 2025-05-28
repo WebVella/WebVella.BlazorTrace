@@ -52,8 +52,6 @@
 	@green-hover: rgba(@green,0.35);
 	@cyan: #06b6d4;
 	@cyan-hover: rgba(@cyan,0.35);
-	@purple: #5b21b6;
-	@purple-hover: rgba(@purple,0.35);
 
 	@keyframes highlight {
 		0% {
@@ -264,6 +262,7 @@
 		flex: 1 1 auto;
 		overflow: auto;
 		padding: 10px;
+		color:@color;
 
 		table {
 			font-size: 14px;
@@ -333,7 +332,7 @@
 
 				tr.bookmark-row:last-child {
 					th, td {
-						border-bottom: 2px solid rgba(@cyan,0.5);
+						border-bottom: 5px solid rgba(@cyan,0.15);
 					}
 				}
 
@@ -342,7 +341,7 @@
 					padding: 5px;
 					color: @color-mute;
 					font-weight: normal;
-
+					text-align:left;
 					input, select {
 						background: @accent-input-background;
 						border-color: @accent-input-stroke;
@@ -512,7 +511,7 @@
 	}
 
 	.wv-tag {
-		color: @purple;
+		color: @cyan;
 	}
 
 	.wv-number {

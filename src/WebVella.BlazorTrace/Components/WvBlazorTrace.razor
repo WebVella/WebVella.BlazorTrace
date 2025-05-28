@@ -33,26 +33,49 @@
 				<span class="wv-trace-modal__header__left__title">WebVella BlazorTrace</span>
 			</div>
 			<div class="wv-trace-modal__header__center">
-				<div class="wv-trace-modal__header__center__text">compare: </div>
-				<div class="wv-trace-modal__header__center__selector @_primarySnHighlightClass">
-					<select title="baseline snapshot">
-						<option>memory</option>
-					</select>
-				</div>
-				<div class="wv-trace-modal__header__center__text">to</div>
-				<div class="wv-trace-modal__header__center__selector">
-					<select title="comparison snapshot">
-						<option>memory</option>
-					</select>
-				</div>
-				<div class="wv-trace-modal__divider"></div>
-				<div class="wv-trace-modal__header__center__save">
-					<button class="wv-green" type="button"
-							@onclick=_saveSnapshot
-							title="saves the current state as snapshot">
-						Save Snapshot
-					</button>
-				</div>
+				@if (_data is not null)
+				{
+					<div class="wv-trace-modal__header__center__text">compare: </div>
+					<div class="wv-trace-modal__header__center__selector @_primarySnHighlightClass">
+						<InputSelect @bind-Value="@_data!.Request.PrimarySnapshotId" @bind-Value:after="@_submitFilter">
+							<option value="">current</option>
+							@foreach (var option in _data.SnapshotList)
+							{
+								<option value="@option.Id">@option.Name</option>
+							}
+						</InputSelect>
+					</div>
+					<div class="wv-trace-modal__header__center__text">to</div>
+					<div class="wv-trace-modal__header__center__selector">
+						<InputSelect @bind-Value="@_data!.Request.SecondarySnapshotId" @bind-Value:after="@_submitFilter">
+							<option value="">current + memory info</option>
+							@foreach (var option in _data.SnapshotList)
+							{
+								<option value="@option.Id">@option.Name</option>
+							}
+						</InputSelect>
+					</div>
+					<div class="wv-trace-modal__divider"></div>
+					<div class="wv-trace-modal__header__center__save">
+						@if (_savingState == WvSnapshotSavingState.NotSaving)
+						{
+							<button class="wv-green" type="button"
+									@onclick=_saveSnapshot
+									title="saves the current state as snapshot">
+								Save Snapshot
+							</button>
+						}
+						else
+						{
+							<button class="wv-green" type="button"
+									disabled
+									title="saves the current state as snapshot">
+								@(_savingState == WvSnapshotSavingState.Saving ? "Saving" : "Saved!")
+							</button>
+
+						}
+					</div>
+				}
 			</div>
 			<div class="wv-trace-modal__header__right">
 				<button title="Close (Esc)" type="button" class="circle icon" @onclick=_hide>X</button>
@@ -90,21 +113,24 @@
 					{
 						<button class="wv-mute" type="button" title="@($"data auto-reloading on {_infiniteLoopDelaySeconds} seconds is OFF")"
 								@onclick=@_enableAutoReload>
-							Refresh OFF
+							RealTime OFF
 						</button>
 					}
 					else
 					{
 						<button class="wv-cyan" type="button" title="@($"data auto-reloading on {_infiniteLoopDelaySeconds} seconds is ON")"
 								@onclick=@_disableAutoReload>
-							Refresh ON
+							RealTime ON
 						</button>
 					}
 				</div>
 				<ul class="wv-trace-nav" style="margin-left:20px;">
-					<li>
-						<a href="https://blazor-trace.webvella.com" target="_blank" title="Saved snapshots">Snapshots</a>
-					</li>
+					@foreach (var item in _snapshotMenu)
+					{
+						<li class="@(_data?.Request?.Menu == item.Id ? "active" : "")">
+							<a href="#" @onclick=@item.OnClick @onclick:preventDefault>@item.Id.ToDescriptionString()</a>
+						</li>
+					}
 					<li>
 						<a href="https://blazor-trace.webvella.com" target="_blank" title="Documentation website">
 							<span>Help</span>
@@ -121,107 +147,149 @@
 		<div class="wv-trace-modal__body">
 			@if (_data is not null)
 			{
-				<table>
-					<thead>
-						<tr>
-							<th style="width:40px">
-								@if (_data?.Request is not null && _data.Request.HasFilter)
-								{
-									<button type="button" class="icon wv-accent" @onclick=_clearFilter style="border-width:1px;">
-										<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
-											<path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
-										</svg>
-									</button>
-								}
-							</th>
-							<th>
-								<InputText placeholder="module" autocomplete="new-password"
-										   @bind-Value=@_data.Request.ModuleFilter
-										   @bind-Value:after=_submitFilter />
-							</th>
-							<th>
-								<InputText placeholder="component" autocomplete="new-password"
-										   @bind-Value=@_data.Request.ComponentFilter
-										   @bind-Value:after=_submitFilter />
-							</th>
-							<th>
-								<InputText placeholder="method" autocomplete="new-password"
-										   @bind-Value=@_data.Request.MethodFilter
-										   @bind-Value:after=_submitFilter />
-							</th>
-							<th>
-								<InputSelect @bind-Value="@_data.Request.CallsFilter" @bind-Value:after="_submitFilter">
-									<option value="">no call filter</option>
-									@foreach (var option in Enum.GetValues<WvTraceModalCallsFilter>())
-									{
-										<option value="@option">@option.ToDescriptionString()</option>
-									}
-								</InputSelect>
-							</th>
-							<th>
-								<InputSelect TValue="WvTraceModalMemoryFilter?" @bind-Value="@_data.Request.MemoryFilter"
-											 @bind-Value:after="_submitFilter">
-									<option value="">no memory filter</option>
-									@foreach (var option in Enum.GetValues<WvTraceModalMemoryFilter>())
-									{
-										<option value="@option">@option.ToDescriptionString()</option>
-									}
-								</InputSelect>
-							</th>
-							<th>
-								<InputSelect @bind-Value="@_data.Request.DurationFilter" @bind-Value:after="_submitFilter">
-									<option value="">no duration filter</option>
-									@foreach (var option in Enum.GetValues<WvTraceModalDurationFilter>())
-									{
-										<option value="@option">@option.ToDescriptionString()</option>
-									}
-								</InputSelect>
-							</th>
-							<th>
-								<InputSelect @bind-Value="@_data.Request.LimitsFilter" @bind-Value:after="_submitFilter">
-									<option value="">no limit filter</option>
-									@foreach (var option in Enum.GetValues<WvTraceModalLimitsFilter>())
-									{
-										<option value="@option">@option.ToDescriptionString()</option>
-									}
-								</InputSelect>
-							</th>
-						</tr>
-						@foreach (var item in _data.TraceRows.Where(x => x.IsBookmarked))
-						{
-							<WvBlazorTraceRow @key=item.Id Item="item" Class="bookmark-row"
-											  OnTraceListView="_showTraceListModal"
-											  OnMemoryView="_showMemoryModal" 
-											  OnBookmark="_bookmarkClicked"
-											  OnLimitView="_showLimitModal" />
-						}
-					</thead>
-					<tbody>
-						@if (_loadingData)
-						{
+				@if (_data.Request!.IsMethodMenu)
+				{
+					<table>
+						<thead>
 							<tr>
-								<td colspan="8" style="padding:30px;text-align:center;">Loading ....</td>
+								<th style="width:40px">
+									@if (_data?.Request is not null && _data.Request.HasFilter)
+									{
+										<button type="button" class="icon wv-accent" @onclick=_clearFilter style="border-width:1px;">
+											<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+												<path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+											</svg>
+										</button>
+									}
+								</th>
+								<th>
+									<InputText placeholder="module" autocomplete="new-password"
+											   @bind-Value=@_data.Request.ModuleFilter
+											   @bind-Value:after=_submitFilter />
+								</th>
+								<th>
+									<InputText placeholder="component" autocomplete="new-password"
+											   @bind-Value=@_data.Request.ComponentFilter
+											   @bind-Value:after=_submitFilter />
+								</th>
+								<th>
+									<InputText placeholder="method" autocomplete="new-password"
+											   @bind-Value=@_data.Request.MethodFilter
+											   @bind-Value:after=_submitFilter />
+								</th>
+								<th>
+									<InputSelect @bind-Value="@_data.Request.CallsFilter" @bind-Value:after="_submitFilter">
+										<option value="">no call filter</option>
+										@foreach (var option in Enum.GetValues<WvTraceModalCallsFilter>())
+										{
+											<option value="@option">@option.ToDescriptionString()</option>
+										}
+									</InputSelect>
+								</th>
+								<th>
+									<InputSelect TValue="WvTraceModalMemoryFilter?" @bind-Value="@_data.Request.MemoryFilter"
+												 @bind-Value:after="_submitFilter">
+										<option value="">no memory filter</option>
+										@foreach (var option in Enum.GetValues<WvTraceModalMemoryFilter>())
+										{
+											<option value="@option">@option.ToDescriptionString()</option>
+										}
+									</InputSelect>
+								</th>
+								<th>
+									<InputSelect @bind-Value="@_data.Request.DurationFilter" @bind-Value:after="_submitFilter">
+										<option value="">no duration filter</option>
+										@foreach (var option in Enum.GetValues<WvTraceModalDurationFilter>())
+										{
+											<option value="@option">@option.ToDescriptionString()</option>
+										}
+									</InputSelect>
+								</th>
+								<th>
+									<InputSelect @bind-Value="@_data.Request.LimitsFilter" @bind-Value:after="_submitFilter">
+										<option value="">no limit filter</option>
+										@foreach (var option in Enum.GetValues<WvTraceModalLimitsFilter>())
+										{
+											<option value="@option">@option.ToDescriptionString()</option>
+										}
+									</InputSelect>
+								</th>
 							</tr>
-						}
-						else
-						{
-							@foreach (var item in _data.TraceRows.Where(x => !x.IsBookmarked))
+							@foreach (var item in _data.TraceRows.Where(x => x.IsBookmarked))
 							{
-								<WvBlazorTraceRow @key=item.Id Item="item"
+								<WvBlazorTraceRow @key=item.Id Item="item" Class="bookmark-row"
 												  OnTraceListView="_showTraceListModal"
 												  OnMemoryView="_showMemoryModal"
-												  OnBookmark="_bookmarkClicked" 
-												  OnLimitView="_showLimitModal"/>
+												  OnBookmark="_bookmarkClicked"
+												  OnLimitView="_showLimitModal" />
 							}
-							@if (_data.TraceRows.Count == 0)
+						</thead>
+						<tbody>
+							@if (_loadingData)
 							{
 								<tr>
-									<td colspan="8" style="padding:30px;text-align:center;">No tracers are logged yet</td>
+									<td colspan="8" style="padding:30px;text-align:center;">Loading ....</td>
 								</tr>
 							}
-						}
-					</tbody>
-				</table>
+							else
+							{
+								@foreach (var item in _data.TraceRows.Where(x => !x.IsBookmarked))
+								{
+									<WvBlazorTraceRow @key=item.Id Item="item"
+													  OnTraceListView="_showTraceListModal"
+													  OnMemoryView="_showMemoryModal"
+													  OnBookmark="_bookmarkClicked"
+													  OnLimitView="_showLimitModal" />
+								}
+								@if (_data.TraceRows.Count == 0)
+								{
+									<tr>
+										<td colspan="8" style="padding:30px;text-align:center;">No tracers are logged yet</td>
+									</tr>
+								}
+							}
+						</tbody>
+					</table>
+				}
+				else if (_data.Request!.IsSignalMenu)
+				{
+					<div>signals</div>
+				}
+				else if (_data.Request!.IsSnapshotMenu)
+				{
+					<table>
+						<thead>
+							<tr>
+								<th style="width:100px"></th>
+								<th style="width:140px">created on</th>
+								<th>name</th>
+							</tr>
+						</thead>
+						<tbody>
+							@foreach (var item in _data.SnapshotList.OrderBy(x => x.CreatedOn))
+							{
+								<tr @key=item.Id>
+									<td style="padding:0 10px;">
+										<button class="wv-accent" style="margin-right:10px;" @onclick=item.OnRemove!>remove</button>
+									</td>
+									<td>@item.CreatedOn.ToString("yyyy-MM-dd HH:mm:ss")</td>
+									<td>
+										<InputText placeholder="date string if empty" autocomplete="new-password"
+												   @bind-Value=@item.Name
+												   @bind-Value:after=item.OnRename! />
+									</td>
+
+								</tr>
+							}
+							@if (_data.SnapshotList.Count == 0)
+							{
+								<tr>
+									<td colspan="3" style="padding:30px;text-align:center;">No snapshots saved yet</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				}
 			}
 		</div>
 		<div class="wv-trace-modal__footer">

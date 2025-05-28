@@ -39,22 +39,22 @@ public class WvTraceRow
 		get
 		{
 			var html = new List<string>();
-			if (MethodCallsLimitHits.Count > 0) 
+			if (MethodCallsLimitHits.Count > 0)
 				html.Add($"<strong class='wv-negative'>{MethodCallsLimitHits.Count}</strong>");
 			else
 				html.Add($"<span class='wv-mute'>0</span>");
 
-			if (MemoryTotalLimitHits.Count > 0) 
+			if (MemoryTotalLimitHits.Count > 0)
 				html.Add($"<strong class='wv-negative'>{MemoryTotalLimitHits.Count}</strong>");
 			else
 				html.Add($"<span class='wv-mute'>0</span>");
 
-			if (MemoryDeltaLimitHits.Count > 0) 
+			if (MemoryDeltaLimitHits.Count > 0)
 				html.Add($"<strong class='wv-negative'>{MemoryDeltaLimitHits.Count}</strong>");
 			else
 				html.Add($"<span class='wv-mute'>0</span>");
 
-			if (DurationLimitHits.Count > 0) 
+			if (DurationLimitHits.Count > 0)
 				html.Add($"<strong class='wv-negative'>{DurationLimitHits.Count}</strong>");
 			else
 				html.Add($"<span class='wv-mute'>0</span>");
@@ -107,9 +107,12 @@ public class WvTraceRow
 		if (filter is null) return true;
 		if (TraceList is null) return false;
 
-		if (filter == WvTraceModalCallsFilter.LessThan5 && TraceList.Count <= 5) return true;
-		if (filter == WvTraceModalCallsFilter.FiveTo42 && TraceList.Count > 5 && TraceList.Count <= 42) return true;
-		if (filter == WvTraceModalCallsFilter.MoreThan42 && TraceList.Count > 42) return true;
+		if (filter == WvTraceModalCallsFilter.LessThan25 && TraceList.Count <= 25) return true;
+		if (filter == WvTraceModalCallsFilter.TwentyFiveTo50 && TraceList.Count > 25 && TraceList.Count <= 50) return true;
+		if (filter == WvTraceModalCallsFilter.MoreThan50 && TraceList.Count > 50) return true;
+		if (filter == WvTraceModalCallsFilter.PositiveDelta && MethodComparison.TraceListChange > 0) return true;
+		if (filter == WvTraceModalCallsFilter.NegativeDelta && MethodComparison.TraceListChange < 0) return true;
+		if (filter == WvTraceModalCallsFilter.NoDelta && MethodComparison.TraceListChange == 0) return true;
 
 		return false;
 	}
@@ -118,9 +121,12 @@ public class WvTraceRow
 	{
 		if (filter is null) return true;
 		if (LastMemoryKB is null) return false;
-		if (filter == WvTraceModalMemoryFilter.LessThan5 && LastMemoryKB.Value <= 5) return true;
-		if (filter == WvTraceModalMemoryFilter.FiveTo42 && LastMemoryKB.Value > 5 && LastMemoryKB.Value <= 42) return true;
-		if (filter == WvTraceModalMemoryFilter.MoreThan42 && LastMemoryKB.Value > 42) return true;
+		if (filter == WvTraceModalMemoryFilter.LessThan50 && LastMemoryKB.Value <= 50) return true;
+		if (filter == WvTraceModalMemoryFilter.FiftyTo500 && LastMemoryKB.Value > 50 && LastMemoryKB.Value <= 500) return true;
+		if (filter == WvTraceModalMemoryFilter.MoreThan500 && LastMemoryKB.Value > 500) return true;
+		if (filter == WvTraceModalMemoryFilter.PositiveDelta && MemoryComparison.LastMemoryChangeBytes > 0) return true;
+		if (filter == WvTraceModalMemoryFilter.NegativeDelta && MemoryComparison.LastMemoryChangeBytes < 0) return true;
+		if (filter == WvTraceModalMemoryFilter.NoDelta && MemoryComparison.LastMemoryChangeBytes == 0) return true;
 
 		return false;
 	}
@@ -129,9 +135,12 @@ public class WvTraceRow
 	{
 		if (filter is null) return true;
 		if (LastDurationMS is null) return false;
-		if (filter == WvTraceModalDurationFilter.LessThan5 && LastDurationMS.Value <= 5) return true;
-		if (filter == WvTraceModalDurationFilter.FiveTo42 && LastDurationMS.Value > 5 && LastDurationMS.Value <= 42) return true;
-		if (filter == WvTraceModalDurationFilter.MoreThan42 && LastDurationMS.Value > 42) return true;
+		if (filter == WvTraceModalDurationFilter.LessThan50 && LastDurationMS.Value <= 50) return true;
+		if (filter == WvTraceModalDurationFilter.FiftyTo500 && LastDurationMS.Value > 50 && LastDurationMS.Value <= 500) return true;
+		if (filter == WvTraceModalDurationFilter.MoreThan500 && LastDurationMS.Value > 500) return true;
+		if (filter == WvTraceModalDurationFilter.PositiveDelta && MethodComparison.LastDurationChangeMS > 0) return true;
+		if (filter == WvTraceModalDurationFilter.NegativeDelta && MethodComparison.LastDurationChangeMS < 0) return true;
+		if (filter == WvTraceModalDurationFilter.NoDelta && MethodComparison.LastDurationChangeMS == 0) return true;
 
 		return false;
 	}

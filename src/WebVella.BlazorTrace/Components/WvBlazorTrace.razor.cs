@@ -46,6 +46,9 @@ private bool _visible = false;
 
 	private List<WvTraceModalMenuItem> _methodMenu = new();
 	private List<WvTraceModalMenuItem> _signalMenu = new();
+	private List<WvTraceModalMenuItem> _snapshotMenu = new();
+
+	private WvSnapshotSavingState _savingState = WvSnapshotSavingState.NotSaving;
 
 
 	//LIFECYCLE
@@ -181,16 +184,19 @@ private bool _visible = false;
 			new WvTraceModalMenuItem{ Id = WvTraceModalMenu.SignalLimits},
 			new WvTraceModalMenuItem{ Id = WvTraceModalMenu.SignalName}
 		};
+		_snapshotMenu = new(){
+			new WvTraceModalMenuItem{ Id = WvTraceModalMenu.Snapshots},
+		};
+
 
 		foreach (var item in _methodMenu)
-		{
 			item.OnClick = async () => await _menuClick(item);
-		}
 
 		foreach (var item in _signalMenu)
-		{
 			item.OnClick = async () => await _menuClick(item);
-		}
+
+		foreach (var item in _snapshotMenu)
+			item.OnClick = async () => await _menuClick(item);
 	}
 	private async Task _getData(bool fromLoop = false)
 	{
@@ -203,6 +209,7 @@ private bool _visible = false;
 			if (!fromLoop)
 			{
 				_data = await WvBlazorTraceService.GetModalData(_data?.Request);
+				_initSnapshotActions();
 			}
 			else
 			{
@@ -294,13 +301,15 @@ private bool _visible = false;
 
 	private async Task _bookmarkClicked(WvTraceRow row)
 	{
-		if(row.IsBookmarked){
+		if (row.IsBookmarked)
+		{
 			await WvBlazorTraceService.RemoveBookmarkAsync(row.Id);
 			row.IsBookmarked = false;
 		}
-		else { 
+		else
+		{
 			await WvBlazorTraceService.AddBookmarkAsync(row.Id);
-			row.IsBookmarked = true;		
+			row.IsBookmarked = true;
 		}
 
 		RegenRenderLock();
@@ -308,7 +317,46 @@ private bool _visible = false;
 	}
 	private async Task _saveSnapshot()
 	{
-		await _highlightPrimarySnapshot();
+		if (_savingState != WvSnapshotSavingState.NotSaving) return;
+		_savingState = WvSnapshotSavingState.Saving;
+		RegenRenderLock();
+		await InvokeAsync(StateHasChanged);
+		await Task.Delay(1);
+		try
+		{
+			var snapshot = await WvBlazorTraceService.CreateSnapshotAsync();
+			_data!.SnapshotList.Add(new WvSnapshotListItem
+			{
+				Id = snapshot.Id,
+				Name = snapshot.Name,
+				CreatedOn = snapshot.CreatedOn,
+
+			});
+			_data!.SnapshotList = _data!.SnapshotList.OrderBy(x => x.Name).ToList();
+			_initSnapshotActions();
+			if (_data.Request.PrimarySnapshotId is null)
+			{
+				_data.Request.PrimarySnapshotId = snapshot.Id;
+				await _highlightPrimarySnapshot();
+				await _getData(true);
+			}
+
+			_savingState = WvSnapshotSavingState.Saved;
+			RegenRenderLock();
+			await InvokeAsync(StateHasChanged);
+			await Task.Delay(1);
+			await Task.Delay(1000);
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine(ex.ToString());
+		}
+		finally
+		{
+			_savingState = WvSnapshotSavingState.NotSaving;
+			RegenRenderLock();
+			await InvokeAsync(StateHasChanged);
+		}
 	}
 	private async Task _highlightPrimarySnapshot()
 	{
@@ -320,5 +368,66 @@ private bool _visible = false;
 		RegenRenderLock();
 		await InvokeAsync(StateHasChanged);
 
+	}
+
+	private void _initSnapshotActions()
+	{
+		if (_data is null || _data.SnapshotList is null) return;
+		foreach (var item in _data.SnapshotList)
+		{
+			item.OnRemove = async () => await _removeSnapshot(item);
+			item.OnRename = async () => await _renameSnapshot(item);
+		}
+	}
+
+	private async Task _removeSnapshot(WvSnapshotListItem sn)
+	{
+		if (!await JSRuntimeSrv.InvokeAsync<bool>("confirm", "Are you sure that you need this snapshot removed?"))
+			return;
+		try
+		{
+			await WvBlazorTraceService.RemoveSnapshotAsync(sn.Id);
+			//check update list
+			//if the removed is selected in primary or secondary in request
+			//set to null
+			_data!.SnapshotList = _data!.SnapshotList.Where(x => x.Id != sn.Id).ToList();
+			if (_data.Request.PrimarySnapshotId == sn.Id)
+				_data.Request.PrimarySnapshotId = null;
+			if (_data.Request.SecondarySnapshotId == sn.Id)
+				_data.Request.SecondarySnapshotId = null;
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine(ex.ToString());
+		}
+		finally
+		{
+			RegenRenderLock();
+			await InvokeAsync(StateHasChanged);
+		}
+	}
+
+	private async Task _renameSnapshot(WvSnapshotListItem sn)
+	{
+
+		try
+		{
+			var snapshot = await WvBlazorTraceService.RenameSnapshotAsync(sn.Id, sn.Name);
+			//Check an update list with the new name
+			var snIndex = _data!.SnapshotList.FindIndex(x => x.Id != sn.Id);
+			if (snIndex > -1)
+			{
+				_data!.SnapshotList[snIndex].Name = snapshot.Name;
+			}
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine(ex.ToString());
+		}
+		finally
+		{
+			RegenRenderLock();
+			await InvokeAsync(StateHasChanged);
+		}
 	}
 }

@@ -27,8 +27,8 @@
 						<tr @key="@Guid.NewGuid()">
 							<td>@item.Type.ToDescriptionString()</td>
 							<td>@(item.IsOnEnter ? "onEnter" : "OnExit")</td>
-							<td class="wv-number">@item.Limit</td>
-							<td class="wv-number">@item.Actual</td>
+							<td class="wv-number">@item.Limit.GetLimitValueAsString(item.Type)</td>
+							<td class="wv-number">@item.Actual.GetLimitValueAsString(item.Type)</td>
 						</tr>
 					}
 

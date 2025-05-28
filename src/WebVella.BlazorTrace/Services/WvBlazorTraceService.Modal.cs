@@ -30,7 +30,6 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 	/// <exception cref="Exception"></exception>
 	public async Task<WvTraceModalData> GetModalData(WvTraceModalRequest? request)
 	{
-
 		ForceProcessQueue();
 		var result = new WvTraceModalData();
 		var store = await GetSnapshotStoreAsync();
@@ -44,16 +43,18 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		}
 		result.Request = request;
 		await SaveLastestRequestAsync(request);
-
 		//Init snapshots
-		result.SnapshotOptions = new(){
-			new WvSelectOption{Value = null, Label = "current"}
-		};
+		result.SnapshotList = new();
 		foreach (var sn in store.Snapshots)
 		{
-			result.SnapshotOptions.Add(new WvSelectOption { Value = sn.Id.ToString(), Label = sn.Name });
+			result.SnapshotList.Add(new WvSnapshotListItem
+			{
+				Id = sn.Id,
+				Name = sn.Name,
+				CreatedOn = sn.CreatedOn
+			});
 		}
-
+		result.SnapshotList = result.SnapshotList.OrderBy(x => x.Name).ToList();
 		WvSnapshot primarySN = new();
 		WvSnapshot secondarySN = new();
 		WvSnapshot currentSN = new()
@@ -83,7 +84,6 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		{
 			secondarySN = currentSN;
 		}
-
 		var traceRows = WvModalUtility.GenerateTraceRows(
 			primarySn: primarySN,
 			secondarySn: secondarySN
@@ -98,7 +98,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 			if (!row.DurationMatches(result.Request.DurationFilter)) continue;
 			if (!row.LimitMatches(result.Request.LimitsFilter)) continue;
 
-			if(store.Bookmarked.Contains(row.Id))
+			if (store.Bookmarked.Contains(row.Id))
 				row.IsBookmarked = true;
 			else
 				row.IsBookmarked = false;
@@ -128,8 +128,6 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		{
 			result.TraceRows = result.TraceRows.OrderBy(x => $"{x.Module}{x.ComponentFullName}{x.Method}").ToList();
 		}
-
-
 		return result;
 	}
 }

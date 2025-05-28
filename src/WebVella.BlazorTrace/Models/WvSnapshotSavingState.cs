@@ -5,9 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace WebVella.BlazorTrace.Models;
-public class WvSelectOption
+public enum WvSnapshotSavingState
 {
-	public string? Value { get; set; } = null;
-	public string Label { get; set; } = string.Empty;
+	NotSaving = 0,
+	Saving = 1,
+	Saved = 2
 }
 

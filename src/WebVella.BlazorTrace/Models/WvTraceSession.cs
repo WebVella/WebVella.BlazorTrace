@@ -30,7 +30,7 @@ public class WvTraceSessionComponentTaggedInstance
 	public List<WvTraceSessionMethod> OtherMethods { get; set; } = new();
 	public List<WvTraceSessionSignal> Signals { get; set; } = new();
 
-	public List<WvTraceSessionMethod> MethodsTotal(bool includeNotCalled = false)
+	public List<WvTraceSessionMethod> MethodsTotal()
 	{
 		var methods = new List<WvTraceSessionMethod>();
 		methods.Add(OnInitialized);
@@ -39,9 +39,6 @@ public class WvTraceSessionComponentTaggedInstance
 		methods.Add(ShouldRender);
 		methods.Add(Dispose);
 		methods.AddRange(OtherMethods);
-		if (includeNotCalled)
-			return methods;
-
 		var calledMethods = new List<WvTraceSessionMethod>();
 		foreach (var method in methods)
 		{
@@ -88,10 +85,12 @@ public class WvTraceSessionMethod
 	[JsonIgnore]
 	public long CompletedCallsCount { get => this.CompletedCallsCount(); }
 	public List<WvTraceSessionTrace> TraceList { get; set; } = new();
+	[JsonIgnore]
 	public WvTraceSessionTrace? LastExitedTrace
 	{
 		get => TraceList.Where(x => x.ExitedOn is not null).OrderByDescending(x => x.ExitedOn).FirstOrDefault();
 	}
+	[JsonIgnore]
 	public List<WvTraceSessionLimitHit> LimitHits { get => this.CalculateLimitsInfo(); }
 	public string GenerateHash(string moduleName, string componentFullname, string? tag)
 	{
@@ -105,10 +104,15 @@ public class WvTraceSessionTrace
 	public Guid? TraceId { get; set; } = null;
 	public DateTimeOffset? EnteredOn { get; set; } = null;
 	public DateTimeOffset? ExitedOn { get; set; } = null;
+	[JsonIgnore]
 	public long? DurationMs { get => this.GetDurationMS(); }
 	public long? OnEnterMemoryBytes { get; set; } = null;
+	[JsonIgnore]
+	//to much info to be stored in the store
 	public List<WvTraceMemoryInfo>? OnEnterMemoryInfo { get; set; } = null;
 	public long? OnExitMemoryBytes { get; set; } = null;
+	[JsonIgnore]
+	//to much info to be stored in the store
 	public List<WvTraceMemoryInfo>? OnExitMemoryInfo { get; set; } = null;
 	public bool? OnEnterFirstRender { get; set; } = null;
 	public bool? OnExitFirstRender { get; set; } = null;

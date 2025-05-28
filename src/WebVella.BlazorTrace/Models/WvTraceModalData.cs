@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using WebVella.BlazorTrace.Utility;
 
@@ -23,9 +24,10 @@ public class WvTraceModalRequest
 	public WvTraceModalCallsFilter? CallsFilter { get; set; } = null;
 	public WvTraceModalLimitsFilter? LimitsFilter { get; set; } = null;
 	public bool IsAutoRefresh { get; set; } = false;
+	[JsonIgnore]
 	public bool IsEmpty
 	{
-		get => 
+		get =>
 		PrimarySnapshotId is null
 		&& SecondarySnapshotId is null
 		&& Menu == null
@@ -39,13 +41,60 @@ public class WvTraceModalRequest
 		&& LimitsFilter is null
 		&& !IsAutoRefresh;
 	}
-	public bool HasFilter{ 
+	[JsonIgnore]
+	public bool HasFilter
+	{
 		get => !String.IsNullOrWhiteSpace(ModuleFilter)
 		|| !String.IsNullOrWhiteSpace(ComponentFilter)
 		|| !String.IsNullOrWhiteSpace(MethodFilter)
 		|| MemoryFilter is not null
 		|| DurationFilter is not null
 		|| CallsFilter is not null;
+	}
+	[JsonIgnore]
+	public bool IsMethodMenu
+	{
+		get
+		{
+			if(
+				Menu == WvTraceModalMenu.MethodCalls
+				|| Menu == WvTraceModalMenu.MethodMemory
+				|| Menu == WvTraceModalMenu.MethodDuration
+				|| Menu == WvTraceModalMenu.MethodLimits
+				|| Menu == WvTraceModalMenu.MethodName
+			) return true;
+
+			return false;
+		}
+	}
+
+	[JsonIgnore]
+	public bool IsSignalMenu
+	{
+		get
+		{
+			if(
+				Menu == WvTraceModalMenu.SignalCalls
+				|| Menu == WvTraceModalMenu.SignalMemory
+				|| Menu == WvTraceModalMenu.SignalLimits
+				|| Menu == WvTraceModalMenu.SignalName
+			) return true;
+
+			return false;
+		}
+	}
+
+	[JsonIgnore]
+	public bool IsSnapshotMenu
+	{
+		get
+		{
+			if(
+				Menu == WvTraceModalMenu.Snapshots
+			) return true;
+
+			return false;
+		}
 	}
 }
 
@@ -69,55 +118,76 @@ public enum WvTraceModalMenu
 	SignalLimits = 7,
 	[Description("Name")]
 	SignalName = 8,
+	[Description("Snapshots")]
+	Snapshots = 9,
 }
+public enum WvTraceModalCallsFilter
+{
+	[Description("<= 25 calls")]
+	LessThan25 = 0,
+	[Description("25 to 50 calls")]
+	TwentyFiveTo50 = 1,
+	[Description("> 50 calls")]
+	MoreThan50 = 2,
+	[Description("positive change")]
+	PositiveDelta = 3,
+	[Description("negative change")]
+	NegativeDelta = 4,
+	[Description("no change")]
+	NoDelta = 5,
+}
+
 public enum WvTraceModalMemoryFilter
 {
-	[Description("<= 5 KB")]
-	LessThan5 = 0,
-	[Description("5 to 42 KB")]
-	FiveTo42= 1,
-	[Description("> 42 KB")]
-	MoreThan42 = 2
+	[Description("<= 50 KB")]
+	LessThan50 = 0,
+	[Description("50 to 500 KB")]
+	FiftyTo500 = 1,
+	[Description("> 500 KB")]
+	MoreThan500 = 2,
+	[Description("positive change")]
+	PositiveDelta = 3,
+	[Description("negative change")]
+	NegativeDelta = 4,
+	[Description("no change")]
+	NoDelta = 5,
 }
 
 public enum WvTraceModalDurationFilter
 {
-	[Description("<= 5 ms")]
-	LessThan5 = 0,
-	[Description("5 to 42 ms")]
-	FiveTo42= 1,
-	[Description("> 42 ms")]
-	MoreThan42 = 2
+	[Description("<= 50 ms")]
+	LessThan50 = 0,
+	[Description("50 to 500 ms")]
+	FiftyTo500 = 1,
+	[Description("> 500 ms")]
+	MoreThan500 = 2,
+	[Description("positive change")]
+	PositiveDelta = 3,
+	[Description("negative change")]
+	NegativeDelta = 4,
+	[Description("no change")]
+	NoDelta = 5,
 }
 
-public enum WvTraceModalCallsFilter
-{
-	[Description("<= 5 calls")]
-	LessThan5 = 0,
-	[Description("5 to 42 calls")]
-	FiveTo42 = 1,
-	[Description("> 42 calls")]
-	MoreThan42 = 2
-}
 
 public enum WvTraceModalLimitsFilter
 {
 	[Description("0 limits exceeded")]
 	ZeroLimitHits = 0,
 	[Description("exceeds calls limit")]
-	ExceedCallLimit= 1,
+	ExceedCallLimit = 1,
 	[Description("exceeds total memory limit")]
-	ExceedTotalMemory= 2,
+	ExceedTotalMemory = 2,
 	[Description("exceeds memory delta limit")]
-	ExceedMemoryDelta= 3,
+	ExceedMemoryDelta = 3,
 	[Description("exceeds duration limit")]
-	ExceedDuration= 4,
+	ExceedDuration = 4,
 }
 
 public class WvTraceModalData
 {
 	public WvTraceModalRequest Request { get; set; } = new();
-	public List<WvSelectOption> SnapshotOptions { get; set; } = new();
+	public List<WvSnapshotListItem> SnapshotList { get; set; } = new();
 	public List<WvTraceRow> TraceRows { get; set; } = new();
 }
 

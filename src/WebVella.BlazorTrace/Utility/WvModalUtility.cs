@@ -16,35 +16,37 @@ public static class WvModalUtility
 		WvSnapshot secondarySn)
 	{
 		//Generate data on secondarySN (which should be the newest in the default case
+		var unionDataDict = new Dictionary<string, WvModuleUnionData>();
 		var methodComparisonDict = new Dictionary<string, WvSnapshotMethodComparison>();
 		var memoryComparisonDict = new Dictionary<string, WvSnapshotMemoryComparison>();
-		methodComparisonDict.AddSnapshotToComparisonDictionary(memoryComparisonDict, primarySn, true);
-		methodComparisonDict.AddSnapshotToComparisonDictionary(memoryComparisonDict, secondarySn, false);
-		methodComparisonDict.ProcessComparisonDictionary(memoryComparisonDict);
+		unionDataDict.AddSnapshotToComparisonDictionary(methodComparisonDict, memoryComparisonDict, primarySn, true);
+		unionDataDict.AddSnapshotToComparisonDictionary(methodComparisonDict, memoryComparisonDict, secondarySn, false);
+		unionDataDict.ProcessComparisonDictionary(methodComparisonDict, memoryComparisonDict);
 		var result = new List<WvTraceRow>();
 
-		foreach (var moduleName in secondarySn.ModuleDict.Keys)
+		foreach (var moduleName in unionDataDict.Keys)
 		{
-			var module = secondarySn.ModuleDict[moduleName];
-			foreach (var componentFullName in module.ComponentDict.Keys)
+			foreach (var componentFullName in unionDataDict[moduleName].ComponentDict.Keys)
 			{
-				var component = module.ComponentDict[componentFullName];
-				foreach (var componentTaggedInstance in component.TaggedInstances)
+				foreach (var componentTaggedInstance in unionDataDict[moduleName].ComponentDict[componentFullName].TaggedInstances)
 				{
-					foreach (WvTraceSessionMethod tm in componentTaggedInstance.MethodsTotal(includeNotCalled: false))
+					foreach (var methodHash in componentTaggedInstance.MethodDict.Keys)
 					{
-						var methodHash = tm.GenerateHash(moduleName, componentFullName, componentTaggedInstance.Tag);
+						var methodUnionData = componentTaggedInstance.MethodDict[methodHash];
+						if (methodUnionData.Primary is null && methodUnionData.Secondary is null)
+							continue;
+
 						var row = new WvTraceRow
 						{
 							Module = moduleName,
-							Component = component.Name,
+							Component = unionDataDict[moduleName].ComponentDict[componentFullName].Name,
 							ComponentFullName = componentFullName,
 							InstanceTag = componentTaggedInstance.Tag,
-							Method = tm.Name,
-							LastMemoryKB = tm.LastMemoryBytes.ToKilobytes(),
-							LastDurationMS = tm.LastDurationMS,
-							TraceList = tm.TraceList,
-							LimitHits = tm.LimitHits,
+							Method = methodUnionData.Secondary?.Name ?? methodUnionData.Primary?.Name,
+							LastMemoryKB = methodUnionData.Secondary is not null ? methodUnionData.Secondary.LastMemoryBytes.ToKilobytes() : 0,
+							LastDurationMS = methodUnionData.Secondary is not null ? methodUnionData.Secondary.LastDurationMS : 0,
+							TraceList = methodUnionData.Secondary is not null ? methodUnionData.Secondary.TraceList : new(),
+							LimitHits = methodUnionData.Secondary is not null ? methodUnionData.Secondary.LimitHits : new(),
 							MethodComparison = methodComparisonDict[methodHash].ComparisonData,
 							MemoryComparison = memoryComparisonDict[methodHash].ComparisonData,
 						};
@@ -60,25 +62,33 @@ public static class WvModalUtility
 	public static string GenerateHash(string? moduleName, string? componentFullname, string? tag, string? methodName)
 		=> $"{moduleName}$$${componentFullname}$$${tag}$$${methodName}";
 
-	public static void AddSnapshotToComparisonDictionary(this Dictionary<string, WvSnapshotMethodComparison> methodComp,
+	public static void AddSnapshotToComparisonDictionary(this Dictionary<string, WvModuleUnionData> unionDict, Dictionary<string, WvSnapshotMethodComparison> methodComp,
 		Dictionary<string, WvSnapshotMemoryComparison> memoryComp,
 		WvSnapshot? snapshot,
 		bool isPrimary = true)
 	{
+		if (unionDict is null) unionDict = new();
 		if (methodComp is null) methodComp = new();
 		if (memoryComp is null) memoryComp = new();
 		if (snapshot is null) return;
 		foreach (var moduleName in snapshot.ModuleDict.Keys)
 		{
 			var module = snapshot.ModuleDict[moduleName];
+			unionDict.SetModuleUnionData(moduleName, module, isPrimary);
+
 			foreach (var componentFullName in module.ComponentDict.Keys)
 			{
 				var component = module.ComponentDict[componentFullName];
+				unionDict.SetComponentUnionData(moduleName, componentFullName, component, isPrimary);
+
 				foreach (var componentTaggedInstance in component.TaggedInstances)
 				{
-					foreach (var method in componentTaggedInstance.MethodsTotal(includeNotCalled: true))
+					unionDict.SetTaggedInstanceUnionData(moduleName, componentFullName, componentTaggedInstance, isPrimary);
+
+					foreach (var method in componentTaggedInstance.MethodsTotal())
 					{
 						var methodHash = method.GenerateHash(moduleName, componentFullName, componentTaggedInstance.Tag);
+						unionDict.SetMethodUnionData(moduleName, componentFullName, componentTaggedInstance.Tag, methodHash, method, isPrimary);
 						//Method comparison
 						if (!methodComp.ContainsKey(methodHash))
 							methodComp[methodHash] = new();
@@ -100,62 +110,78 @@ public static class WvModalUtility
 		}
 	}
 
-	public static void ProcessComparisonDictionary(this Dictionary<string, WvSnapshotMethodComparison> methodDict,
+	public static void ProcessComparisonDictionary(this Dictionary<string, WvModuleUnionData> unionDict, Dictionary<string, WvSnapshotMethodComparison> methodDict,
 		Dictionary<string, WvSnapshotMemoryComparison> memoryDict)
 	{
+		if (unionDict is null) unionDict = new();
 		if (methodDict is null) methodDict = new();
 		if (memoryDict is null) memoryDict = new();
 		foreach (var methodHash in methodDict.Keys)
 		{
 			var methodComparison = methodDict[methodHash];
-			if (methodComparison.SecondarySnapshotMethod is null) continue;
 			//Method comparison
 			var pr = methodComparison.PrimarySnapshotMethod;
 			var sc = methodComparison.SecondarySnapshotMethod;
 			var compData = methodComparison.ComparisonData;
-			compData.TraceListChange = sc.TraceList.Count - pr.TraceList.Count;
-			compData.LastDurationChangeMS = sc.LastDurationMS - pr.LastDurationMS;
+			compData.TraceListChange = 0;
+			compData.LastDurationChangeMS = 0;
+			if (sc is not null)
+			{
+				compData.TraceListChange += sc.TraceList.Count;
+				compData.LastDurationChangeMS += sc.LastDurationMS;
+			}
+			if (pr is not null)
+			{
+				compData.TraceListChange -= pr.TraceList.Count;
+				compData.LastDurationChangeMS -= pr.LastDurationMS;
+			}
 		}
 
 		foreach (var methodHash in memoryDict.Keys)
 		{
 			var memoryComparison = memoryDict[methodHash];
-			if (memoryComparison.SecondarySnapshotMethod is null) continue;
 			//Method comparison
 			var pr = memoryComparison.PrimarySnapshotMethod;
 			var sc = memoryComparison.SecondarySnapshotMethod;
-			var prLastExitedTrace = pr.LastExitedTrace;
-			var scLastExitedTrace = sc?.LastExitedTrace;
-			if (prLastExitedTrace is null || prLastExitedTrace.OnExitMemoryInfo is null
-			|| scLastExitedTrace is null || scLastExitedTrace.OnExitMemoryInfo is null) continue;
-
-			var compData = memoryComparison.ComparisonData;
-			compData.LastMemoryChangeBytes = (sc.LastMemoryBytes ?? 0) - (pr.LastMemoryBytes ?? 0);
-			foreach (var memInfo in prLastExitedTrace.OnExitMemoryInfo)
+			if (pr is not null)
 			{
-				memoryComparison.ComparisonData.Fields.Add(new WvSnapshotMemoryComparisonDataField
+				if (pr.LastExitedTrace is not null && pr.LastExitedTrace.OnExitMemoryInfo is not null)
 				{
-					FieldName = memInfo.FieldName,
-					AssemblyName = memInfo.AssemblyName,
-					PrimarySnapshotBytes = memInfo.Size
-				});
-			}
-			foreach (var memInfo in scLastExitedTrace.OnExitMemoryInfo)
-			{
-				var match = memoryComparison.ComparisonData.Fields.FirstOrDefault(x => x.Id == WvTraceUtility.GetMemoryInfoId(memInfo.AssemblyName, memInfo.FieldName));
-				if (match is not null)
-				{
-					match.SecondarySnapshotBytes = memInfo.Size;
-				}
-				else
-				{
-					memoryComparison.ComparisonData.Fields.Add(new WvSnapshotMemoryComparisonDataField
+					foreach (var memInfo in pr.LastExitedTrace.OnExitMemoryInfo)
 					{
-						FieldName = memInfo.FieldName,
-						AssemblyName = memInfo.AssemblyName,
-						SecondarySnapshotBytes = memInfo.Size
-					});
+						memoryComparison.ComparisonData.Fields.Add(new WvSnapshotMemoryComparisonDataField
+						{
+							FieldName = memInfo.FieldName,
+							AssemblyName = memInfo.AssemblyName,
+							PrimarySnapshotBytes = memInfo.Size
+						});
+					}
 				}
+				memoryComparison.ComparisonData.LastMemoryChangeBytes -= pr.LastMemoryBytes ?? 0;
+			}
+			if (sc is not null)
+			{
+				if (sc.LastExitedTrace is not null && sc.LastExitedTrace.OnExitMemoryInfo is not null)
+				{
+					foreach (var memInfo in sc.LastExitedTrace.OnExitMemoryInfo)
+					{
+						var match = memoryComparison.ComparisonData.Fields.FirstOrDefault(x => x.Id == WvTraceUtility.GetMemoryInfoId(memInfo.AssemblyName, memInfo.FieldName));
+						if (match is not null)
+						{
+							match.SecondarySnapshotBytes = memInfo.Size;
+						}
+						else
+						{
+							memoryComparison.ComparisonData.Fields.Add(new WvSnapshotMemoryComparisonDataField
+							{
+								FieldName = memInfo.FieldName,
+								AssemblyName = memInfo.AssemblyName,
+								SecondarySnapshotBytes = memInfo.Size
+							});
+						}
+					}
+				}
+				memoryComparison.ComparisonData.LastMemoryChangeBytes += sc.LastMemoryBytes ?? 0;
 			}
 		}
 	}
@@ -171,7 +197,7 @@ public static class WvModalUtility
 	public static List<WvSnapshotMemoryComparisonDataField> ToMemoryDataFields(this List<WvTraceMemoryInfo>? memInfo)
 	{
 		var result = new List<WvSnapshotMemoryComparisonDataField>();
-		if(memInfo is null) return result;
+		if (memInfo is null) return result;
 		foreach (var item in memInfo)
 		{
 			result.Add(new WvSnapshotMemoryComparisonDataField
@@ -183,5 +209,75 @@ public static class WvModalUtility
 			});
 		}
 		return result;
+	}
+
+	private static void SetModuleUnionData(this Dictionary<string, WvModuleUnionData> unionDict,
+		string moduleName,
+		WvTraceSessionModule module,
+		bool isPrimary)
+	{
+		if (!unionDict.ContainsKey(moduleName))
+			unionDict[moduleName] = new();
+
+		if (isPrimary)
+			unionDict[moduleName].Primary = module;
+		else
+			unionDict[moduleName].Secondary = module;
+	}
+
+	private static void SetComponentUnionData(this Dictionary<string, WvModuleUnionData> unionDict,
+		string moduleName,
+		string componentFullName,
+		WvTraceSessionComponent component,
+		bool isPrimary)
+	{
+
+		if (!unionDict[moduleName].ComponentDict.ContainsKey(componentFullName))
+			unionDict[moduleName].ComponentDict[componentFullName] = new() { Name = component.Name };
+
+		if (isPrimary)
+			unionDict[moduleName].ComponentDict[componentFullName].Primary = component;
+		else
+			unionDict[moduleName].ComponentDict[componentFullName].Secondary = component;
+	}
+
+	private static void SetTaggedInstanceUnionData(this Dictionary<string, WvModuleUnionData> unionDict,
+		string moduleName,
+		string componentFullName,
+		WvTraceSessionComponentTaggedInstance taggedInstance,
+		bool isPrimary)
+	{
+		var tag = taggedInstance.Tag ?? String.Empty;
+		var matchedInstanceUnionData = unionDict[moduleName].ComponentDict[componentFullName].TaggedInstances.FirstOrDefault(x => x.Tag == tag);
+		if (matchedInstanceUnionData is null)
+		{
+			matchedInstanceUnionData = new WvTaggedInstanceUnionData
+			{
+				Tag = tag,
+			};
+			unionDict[moduleName].ComponentDict[componentFullName].TaggedInstances.Add(matchedInstanceUnionData);
+		}
+		if (isPrimary)
+			matchedInstanceUnionData.Primary = taggedInstance;
+		else
+			matchedInstanceUnionData.Secondary = taggedInstance;
+	}
+
+	private static void SetMethodUnionData(this Dictionary<string, WvModuleUnionData> unionDict,
+		string moduleName,
+		string componentFullName,
+		string? taggedInstanceTag,
+		string methodHash,
+		WvTraceSessionMethod method,
+		bool isPrimary)
+	{
+		taggedInstanceTag = taggedInstanceTag ?? String.Empty;
+		var matchedInstanceUnionData = unionDict[moduleName].ComponentDict[componentFullName].TaggedInstances.Single(x => x.Tag == taggedInstanceTag);
+		if (!matchedInstanceUnionData.MethodDict.ContainsKey(methodHash))
+			matchedInstanceUnionData.MethodDict[methodHash] = new();
+		if (isPrimary)
+			matchedInstanceUnionData.MethodDict[methodHash].Primary = method;
+		else
+			matchedInstanceUnionData.MethodDict[methodHash].Secondary = method;
 	}
 }
