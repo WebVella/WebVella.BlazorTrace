@@ -46,8 +46,11 @@ builder.Services.AddBlazorTrace();
 </Router>
 <WvBlazorTrace/> @* <-- INSERT HERE *@
 ```
-
-4. Add tracers in your methods. They will feed runtime data to the library. There are several arguments that you can call them with, but here is an example with the only required one (component):
+4. Inject the service in your components
+``` csharp
+[Inject] protected IWvBlazorTraceService WvBlazorTraceService { get; set; }
+```
+5. Add tracers in your methods. They will feed runtime data to the library. There are several arguments that you can call them with, but here is an example with the only required one (component):
 
 ``` csharp
 	protected override void OnInitialized()
@@ -59,7 +62,7 @@ builder.Services.AddBlazorTrace();
 	}
 ```
 
-5. Add signals in your methods. They are a way to track events in your components. There are several arguments that you can call them with, but here is an example with the only required one (component):
+6. Add signals in your methods. They are a way to track events in your components. There are several arguments that you can call them with, but here is an example with the only required one (component):
 
 ``` csharp
 	private void _countTest()
@@ -69,7 +72,7 @@ builder.Services.AddBlazorTrace();
 	}
 ```
 
-6. Thats it. You can start reviewing the data by pressing the **F1** key or click on the red button on the top right corner of your screen.
+7. Thats it. You can start reviewing the data by pressing the **F1** key or click on the red button on the top right corner of your screen.
 
 ### Method OnEnter/OnExit call information
 
