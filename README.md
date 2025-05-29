@@ -56,19 +56,19 @@ builder.Services.AddBlazorTrace();
 
 ### Method OnEnter/OnExit call information
 
-![BlazorTrace modal](/images/trace-modal-methods.png)
+![BlazorTrace modal](https://github.com/WebVella/WebVella.BlazorTrace/blob/main/images/trace-modal-methods.png)
 
 ### Log signals information
 
-![BlazorTrace modal](/images/trace-modal-signals.png)
+![BlazorTrace modal](https://github.com/WebVella/WebVella.BlazorTrace/blob/main/images/trace-modal-signals.png)
 
 ### Trace calls detail information
 
-![BlazorTrace modal](/images/trace-list-modal.png)
+![BlazorTrace modal](https://github.com/WebVella/WebVella.BlazorTrace/blob/main/images/trace-list-modal.png)
 
 ### Memory detail information
 
-![BlazorTrace modal](/images/memory-modal.png)
+![BlazorTrace modal](https://github.com/WebVella/WebVella.BlazorTrace/blob/main/images/memory-modal.png)
 
 ## License
 BlazorTrace is distributed under the MIT license.
