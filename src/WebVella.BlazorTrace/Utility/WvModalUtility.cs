@@ -43,7 +43,7 @@ public static class WvModalUtility
 							ComponentFullName = componentFullName,
 							InstanceTag = componentTaggedInstance.Tag,
 							Method = methodUnionData.Secondary?.Name ?? methodUnionData.Primary?.Name,
-							LastMemoryKB = methodUnionData.Secondary is not null ? methodUnionData.Secondary.LastMemoryBytes.ToKilobytes() : 0,
+							LastMemoryBytes = methodUnionData.Secondary is not null ? methodUnionData.Secondary.LastMemoryBytes : 0,
 							LastDurationMS = methodUnionData.Secondary is not null ? methodUnionData.Secondary.LastDurationMS : 0,
 							TraceList = methodUnionData.Secondary is not null ? methodUnionData.Secondary.TraceList : new(),
 							LimitHits = methodUnionData.Secondary is not null ? methodUnionData.Secondary.LimitHits : new(),
@@ -206,6 +206,7 @@ public static class WvModalUtility
 						memoryComparison.ComparisonData.Fields.Add(new WvSnapshotMemoryComparisonDataField
 						{
 							FieldName = memInfo.FieldName,
+							TypeName = memInfo.TypeName,
 							AssemblyName = memInfo.AssemblyName,
 							PrimarySnapshotBytes = memInfo.Size
 						});
@@ -229,6 +230,7 @@ public static class WvModalUtility
 							memoryComparison.ComparisonData.Fields.Add(new WvSnapshotMemoryComparisonDataField
 							{
 								FieldName = memInfo.FieldName,
+								TypeName = memInfo.TypeName,
 								AssemblyName = memInfo.AssemblyName,
 								SecondarySnapshotBytes = memInfo.Size
 							});
@@ -264,15 +266,6 @@ public static class WvModalUtility
 		}
 	}
 
-	public static long? GetValueChange(this long? primary, long? secondary)
-	{
-		if (primary is null && secondary is null) return null;
-		if (primary is null || secondary is null) return 0;
-		return secondary.Value - primary;
-	}
-
-	public static double? GetValueAsKB(this long? value) => value.ToKilobytes();
-
 	public static List<WvSnapshotMemoryComparisonDataField> ToMemoryDataFields(this List<WvTraceMemoryInfo>? memInfo)
 	{
 		var result = new List<WvSnapshotMemoryComparisonDataField>();
@@ -283,6 +276,7 @@ public static class WvModalUtility
 			{
 				AssemblyName = item.AssemblyName,
 				FieldName = item.FieldName,
+				TypeName = item.TypeName,
 				PrimarySnapshotBytes = item.Size,
 				SecondarySnapshotBytes = item.Size
 			});

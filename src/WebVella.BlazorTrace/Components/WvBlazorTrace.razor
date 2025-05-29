@@ -61,16 +61,16 @@
 							@if (_savingState == WvSnapshotSavingState.NotSaving)
 							{
 								<button class="wv-green" type="button"
-										@onclick=_saveSnapshot
-										title="saves the current state as snapshot">
+								@onclick=_saveSnapshot
+								title="saves the current state as snapshot">
 									Save Snapshot
 								</button>
 							}
 							else
 							{
 								<button class="wv-green" type="button"
-										disabled
-										title="saves the current state as snapshot">
+								disabled
+								title="saves the current state as snapshot">
 									@(_savingState == WvSnapshotSavingState.Saving ? "Saving" : "Saved!")
 								</button>
 
@@ -113,14 +113,14 @@
 						@if (_data is null || _data.Request is null || !_data.Request.IsAutoRefresh)
 						{
 							<button class="wv-mute" type="button" title="@($"data auto-reloading on {_infiniteLoopDelaySeconds} seconds is OFF")"
-									@onclick=@_enableAutoReload>
+							@onclick=@_enableAutoReload>
 								RealTime OFF
 							</button>
 						}
 						else
 						{
 							<button class="wv-cyan" type="button" title="@($"data auto-reloading on {_infiniteLoopDelaySeconds} seconds is ON")"
-									@onclick=@_disableAutoReload>
+							@onclick=@_disableAutoReload>
 								RealTime ON
 							</button>
 						}
@@ -165,18 +165,18 @@
 									</th>
 									<th>
 										<InputText placeholder="module" autocomplete="new-password"
-												   @bind-Value=@_data!.Request.ModuleFilter
-												   @bind-Value:after=_submitFilter />
+										@bind-Value=@_data!.Request.ModuleFilter
+										@bind-Value:after=_submitFilter />
 									</th>
 									<th>
 										<InputText placeholder="component" autocomplete="new-password"
-												   @bind-Value=@_data!.Request.ComponentFilter
-												   @bind-Value:after=_submitFilter />
+										@bind-Value=@_data!.Request.ComponentFilter
+										@bind-Value:after=_submitFilter />
 									</th>
 									<th>
 										<InputText placeholder="method" autocomplete="new-password"
-												   @bind-Value=@_data!.Request.MethodFilter
-												   @bind-Value:after=_submitFilter />
+										@bind-Value=@_data!.Request.MethodFilter
+										@bind-Value:after=_submitFilter />
 									</th>
 									<th>
 										<InputSelect @bind-Value="@_data!.Request.CallsFilter" @bind-Value:after="_submitFilter">
@@ -189,7 +189,7 @@
 									</th>
 									<th>
 										<InputSelect TValue="WvTraceModalMemoryFilter?" @bind-Value="@_data.Request.MemoryFilter"
-													 @bind-Value:after="_submitFilter">
+										@bind-Value:after="_submitFilter">
 											<option value="">no memory filter</option>
 											@foreach (var option in Enum.GetValues<WvTraceModalMemoryFilter>())
 											{
@@ -219,10 +219,10 @@
 								@foreach (var item in _data.MethodTraceRows.Where(x => x.IsBookmarked))
 								{
 									<WvBlazorTraceRow @key=item.Id Item="item" Class="bookmark-row"
-													  OnTraceListView="_showTraceListModal"
-													  OnMemoryView="_showMemoryModal"
-													  OnBookmark="_bookmarkClicked"
-													  OnLimitView="_showLimitModal" />
+									OnTraceListView="_showTraceListModal"
+									OnMemoryView="_showMemoryModal"
+									OnBookmark="_bookmarkClicked"
+									OnLimitView="_showLimitModal" />
 								}
 							</thead>
 							<tbody>
@@ -237,10 +237,10 @@
 									@foreach (var item in _data.MethodTraceRows.Where(x => !x.IsBookmarked))
 									{
 										<WvBlazorTraceRow @key=item.Id Item="item"
-														  OnTraceListView="_showTraceListModal"
-														  OnMemoryView="_showMemoryModal"
-														  OnBookmark="_bookmarkClicked"
-														  OnLimitView="_showLimitModal" />
+										OnTraceListView="_showTraceListModal"
+										OnMemoryView="_showMemoryModal"
+										OnBookmark="_bookmarkClicked"
+										OnLimitView="_showLimitModal" />
 									}
 									@if (_data.MethodTraceRows.Count == 0)
 									{
@@ -269,8 +269,8 @@
 									</th>
 									<th>
 										<InputText placeholder="signal name" autocomplete="new-password"
-												   @bind-Value=@_data!.Request.SignalNameFilter
-												   @bind-Value:after=_submitFilter />
+										@bind-Value=@_data!.Request.SignalNameFilter
+										@bind-Value:after=_submitFilter />
 									</th>
 									<th>
 										<InputSelect @bind-Value="@_data!.Request.CallsFilter" @bind-Value:after="_submitFilter">
@@ -284,7 +284,10 @@
 									<th>
 										<InputSelect @bind-Value="@_data.Request.LimitsFilter" @bind-Value:after="_submitFilter">
 											<option value="">no limit filter</option>
-											@foreach (var option in Enum.GetValues<WvTraceModalLimitsFilter>())
+											@foreach (var option in new List<WvTraceModalLimitsFilter> { 
+												WvTraceModalLimitsFilter.HasLimitHits,
+												WvTraceModalLimitsFilter.ZeroLimitHits
+											})
 											{
 												<option value="@option">@option.ToDescriptionString()</option>
 											}

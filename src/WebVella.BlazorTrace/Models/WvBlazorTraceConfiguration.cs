@@ -16,17 +16,33 @@ public class WvBlazorTraceConfiguration
 	/// <summary>
 	/// Assemblies name start strings that you want to always include in memory trace. 
 	/// </summary>
-	public List<string> MemoryTraceIncludedAssemblyStartWithList { get; set; } = new();
+	public List<string> MemoryTraceIncludeAssemblyStartWithList { get; set; } = new();
 
 	/// <summary>
 	/// Assemblies name start strings that you want to exclude from memory trace. 
-	/// Some framework assemblies are excluded by default. Set the ExcludedFrameworkAssembliesByDefault to false if you need them
+	/// Some framework assemblies are excluded by default. Set the <ExcludeDefaultFrameworkAssemblies> to false if you need them
 	/// </summary>
-	public List<string> MemoryTraceExcludedAssemblyStartWithList { get; set; } = new();
+	public List<string> MemoryTraceExcludeAssemblyStartWithList { get; set; } = new();
 
 	/// <summary>
 	/// By default some framework assemblies are excluded for convenience.
 	/// </summary>
-	public bool ExcludedFrameworkAssembliesByDefault { get; set; } = true;
+	public bool ExcludeDefaultFrameworkAssemblies { get; set; } = true;
+
+	/// <summary>
+	/// Field Names that are containing one of the strings in this list will be always included in the trace 
+	/// </summary>
+	public List<string> MemoryTraceIncludeFieldNameContainsFromList { get; set; } = new();
+
+	/// <summary>
+	/// Field Names that are containing one of the strings in this list will be excluded from the trace 
+	/// Some field names are excluded by default. Set the <ExcludeDefaultFieldNames> to false if you need them
+	/// </summary>
+	public List<string> MemoryTraceExcludeFieldNameContainsFromList { get; set; } = new();
+
+	/// <summary>
+	/// By default some field names that are excluded for convenience.
+	/// </summary>
+	public bool ExcludeDefaultFieldNames { get; set; } = true;
 }
 

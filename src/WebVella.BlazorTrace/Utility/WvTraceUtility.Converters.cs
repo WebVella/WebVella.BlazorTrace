@@ -12,25 +12,6 @@ using WebVella.BlazorTrace.Models;
 namespace WebVella.BlazorTrace.Utility;
 public static partial class WvTraceUtility
 {
-	public static double? ToKilobytes(this long? bytes)
-	{
-		if (bytes is null) return null;
-		if (bytes < 0)
-		{
-			return -1; // Handle invalid input
-		}
-		const double kilobyteFactor = 1024.0;
-		return Math.Round((double)bytes / kilobyteFactor, 2, MidpointRounding.AwayFromZero);
-	}
-	public static double ToKilobytes(this long bytes)
-	{
-		if (bytes < 0)
-		{
-			return -1; // Handle invalid input
-		}
-		const double kilobyteFactor = 1024.0;
-		return Math.Round((double)bytes / kilobyteFactor, 2, MidpointRounding.AwayFromZero);
-	}
 	public static string ToKilobytesString(this long? bytes)
 	{
 		if (bytes == null) return "n/a";

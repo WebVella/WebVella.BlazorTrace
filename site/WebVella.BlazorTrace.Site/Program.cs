@@ -15,7 +15,7 @@ public class Program
 		{
 			EnableTracing = true,
 			EnableF1Shortcut = true,
-			MemoryTraceIncludedAssemblyStartWithList = new(){
+			MemoryTraceIncludeAssemblyStartWithList = new(){
 				"WebVella.BlazorTrace.Site"
 			}
 		});

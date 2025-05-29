@@ -180,16 +180,18 @@ public enum WvTraceModalDurationFilter
 
 public enum WvTraceModalLimitsFilter
 {
+	[Description("has limits exceeded")]
+	HasLimitHits = 0,
 	[Description("0 limits exceeded")]
-	ZeroLimitHits = 0,
+	ZeroLimitHits = 1,
 	[Description("exceeds calls limit")]
-	ExceedCallLimit = 1,
+	ExceedCallLimit = 2,
 	[Description("exceeds total memory limit")]
-	ExceedTotalMemory = 2,
+	ExceedTotalMemory = 3,
 	[Description("exceeds memory delta limit")]
-	ExceedMemoryDelta = 3,
+	ExceedMemoryDelta = 4,
 	[Description("exceeds duration limit")]
-	ExceedDuration = 4,
+	ExceedDuration = 5,
 }
 
 public class WvTraceModalData

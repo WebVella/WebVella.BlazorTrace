@@ -15,27 +15,29 @@
 			<table>
 				<thead>
 					<tr>
+						<th>field</th>
+						<th>type</th>
+						<th>assembly</th>
 						<th>memory</th>
 						<th>change</th>
-						<th>assembly</th>
-						<th>field</th>
 					</tr>
 				</thead>
 				<tbody>
 					@foreach (var item in _items.OrderByDescending(x => x.SecondarySnapshotBytes))
 					{
 						<tr @key="@Guid.NewGuid()">
+							<td>@item.FieldName</td>
+							<td class="wv-tag">@item.TypeName</td>
+							<td>@item.AssemblyName</td>
 							<td class="wv-number">@item.SecondarySnapshotBytes.ToKilobytesString()</td>
 							<td class="wv-number">@((MarkupString)item.ChangeKBHtml)</td>
-							<td>@item.AssemblyName</td>
-							<td>@item.FieldName</td>
 						</tr>
 					}
 
 					@if (_items.Count == 0)
 					{
 						<tr>
-							<td colspan="4" style="padding:30px;text-align:center;">Memory info is presented only if the current snapshot is selected as secondary</td>
+							<td colspan="5" style="padding:30px;text-align:center;">Memory info is presented only if the current snapshot is selected as secondary</td>
 						</tr>
 					}
 				</tbody>

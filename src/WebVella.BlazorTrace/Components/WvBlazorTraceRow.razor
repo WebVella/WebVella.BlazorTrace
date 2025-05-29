@@ -1,4 +1,5 @@
 ﻿@namespace WebVella.BlazorTrace
+@using WebVella.BlazorTrace.Utility
 
 @if (Item is not null)
 {
@@ -52,7 +53,7 @@
 				</svg>
 			</div>
 			<div class="wv-data">
-				<div>@(Item.LastMemoryKB is not null ? $"{Item.LastMemoryKB} KB" : "n/a")</div>
+				<div>@(Item.LastMemoryBytes is not null ? Item.LastMemoryBytes.ToKilobytesString() : "n/a")</div>
 				<div>@((MarkupString)Item.MemoryComparison.LastMemoryChangeKBHtml)</div>
 			</div>
 		</td>

@@ -16,7 +16,7 @@ public class WvMethodTraceRow
 	public string? Method { get; set; }
 	public bool IsBookmarked { get; set; } = false;
 	public List<WvTraceSessionTrace> TraceList { get; set; } = new();
-	public double? LastMemoryKB { get; set; }
+	public long? LastMemoryBytes { get; set; }
 	public long? LastDurationMS { get; set; }
 	public List<WvTraceSessionLimitHit> LimitHits { get; set; } = new();
 	public string LimitsHint
@@ -120,10 +120,10 @@ public class WvMethodTraceRow
 	public bool MemoryMatches(WvTraceModalMemoryFilter? filter)
 	{
 		if (filter is null) return true;
-		if (LastMemoryKB is null) return false;
-		if (filter == WvTraceModalMemoryFilter.LessThan50 && LastMemoryKB.Value <= 50) return true;
-		if (filter == WvTraceModalMemoryFilter.FiftyTo500 && LastMemoryKB.Value > 50 && LastMemoryKB.Value <= 500) return true;
-		if (filter == WvTraceModalMemoryFilter.MoreThan500 && LastMemoryKB.Value > 500) return true;
+		if (LastMemoryBytes is null) return false;
+		if (filter == WvTraceModalMemoryFilter.LessThan50 && LastMemoryBytes <= 50 * 1024) return true;
+		if (filter == WvTraceModalMemoryFilter.FiftyTo500 && LastMemoryBytes > 50 * 1024 && LastMemoryBytes <= 500 * 1024) return true;
+		if (filter == WvTraceModalMemoryFilter.MoreThan500 && LastMemoryBytes > 500 * 1024) return true;
 		if (filter == WvTraceModalMemoryFilter.PositiveDelta && MemoryComparison.LastMemoryChangeBytes > 0) return true;
 		if (filter == WvTraceModalMemoryFilter.NegativeDelta && MemoryComparison.LastMemoryChangeBytes < 0) return true;
 		if (filter == WvTraceModalMemoryFilter.NoDelta && MemoryComparison.LastMemoryChangeBytes == 0) return true;
@@ -149,6 +149,7 @@ public class WvMethodTraceRow
 	{
 		if (filter is null) return true;
 		if (LimitHits is null) return false;
+		if (filter == WvTraceModalLimitsFilter.HasLimitHits && LimitHits.Count > 0) return true;
 		if (filter == WvTraceModalLimitsFilter.ZeroLimitHits && LimitHits.Count == 0) return true;
 		if (filter == WvTraceModalLimitsFilter.ExceedCallLimit && MethodCallsLimitHits.Count > 0) return true;
 		if (filter == WvTraceModalLimitsFilter.ExceedTotalMemory && MemoryTotalLimitHits.Count > 0) return true;

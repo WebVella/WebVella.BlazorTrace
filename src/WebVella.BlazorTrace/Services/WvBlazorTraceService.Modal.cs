@@ -113,7 +113,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 			}
 			else if (result.Request.Menu == WvTraceModalMenu.MethodMemory)
 			{
-				result.MethodTraceRows = result.MethodTraceRows.OrderByDescending(x => x.LastMemoryKB).ToList();
+				result.MethodTraceRows = result.MethodTraceRows.OrderByDescending(x => x.LastMemoryBytes).ToList();
 			}
 			else if (result.Request.Menu == WvTraceModalMenu.MethodDuration)
 			{
@@ -129,10 +129,10 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 			}
 		}
 		else if(result.Request.IsSignalMenu){ 
-			var traceRows = primarySN.GenerateSignalTraceRows(
+			var signalTraceRows = primarySN.GenerateSignalTraceRows(
 				secondarySn: secondarySN
 			);		
-			foreach (var row in traceRows)
+			foreach (var row in signalTraceRows)
 			{
 				if (!row.SignalNameMatches(result.Request.SignalNameFilter)) continue;
 				if (!row.CallsMatches(result.Request.CallsFilter)) continue;

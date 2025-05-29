@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text;
 using WebVella.BlazorTrace;
 using WebVella.BlazorTrace.Models;
 using WebVella.BlazorTrace.Utility;
@@ -21,14 +22,14 @@ public class MemorySizeCalculator
 	{
 		if (component == null)
 			throw new ArgumentNullException(nameof(component));
-
 		return CalculateSize(
 		measuredObject: component,
 		component: component,
 		valueLabel: component.GetType().FullName!,
 		memoryDetails: memoryDetails,
 		configuration: configuration,
-		currentDepth: maxDepth);
+		currentDepth: maxDepth,
+		maxDepth:maxDepth);
 	}
 
 	private static long CalculateSize(
@@ -37,18 +38,24 @@ public class MemorySizeCalculator
 		string valueLabel,
 		List<WvTraceMemoryInfo> memoryDetails,
 		WvBlazorTraceConfiguration configuration,
-		int currentDepth, HashSet<object>? visited = null)
+		int currentDepth,
+		int maxDepth,
+		HashSet<object>? visited = null)
 	{
 		// Initialize the set on first call
 		visited ??= new HashSet<object>();
-
 		if (measuredObject == null || currentDepth < 0)
 			return 0;
 
 		Type type = measuredObject.GetType();
 		if (type.Assembly is null) return 0;
-		if (configuration.MemoryTraceExcludedAssemblyStartWithList.Any(x => type.Assembly.FullName!.StartsWith(x))
-			&& !configuration.MemoryTraceIncludedAssemblyStartWithList.Any(x => type.Assembly.FullName!.StartsWith(x)))
+		if (configuration.MemoryTraceExcludeAssemblyStartWithList.Any(x => type.Assembly.FullName!.StartsWith(x))
+			&& !configuration.MemoryTraceIncludeAssemblyStartWithList.Any(x => type.Assembly.FullName!.StartsWith(x)))
+		{
+			return 0;
+		}
+		if (configuration.MemoryTraceExcludeFieldNameContainsFromList.Any(x => valueLabel.Contains(x))
+			&& !configuration.MemoryTraceIncludeFieldNameContainsFromList.Any(x => valueLabel.Contains(x)))
 		{
 			return 0;
 		}
@@ -80,6 +87,7 @@ public class MemorySizeCalculator
 							memoryDetails: memoryDetails,
 							configuration: configuration,
 							currentDepth: currentDepth - 1,
+							maxDepth: maxDepth,
 							visited: visited);
 				else
 					// Approximate non-primitive elements as a pointer/ref
@@ -90,11 +98,13 @@ public class MemorySizeCalculator
 		{
 			// Handle primitive value types directly
 			if (IsPrimitiveType(type))
+			{
 				size += GetPrimitiveSize(measuredObject);
+			}
 			else
 			{
 				// Recursively calculate the size of complex struct fields
-				var fields = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+				var fields = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
 				foreach (var field in fields)
 				{
 					object? fieldValue = field.GetValue(measuredObject);
@@ -108,6 +118,7 @@ public class MemorySizeCalculator
 								memoryDetails: memoryDetails,
 								configuration: configuration,
 								currentDepth: currentDepth - 1,
+								maxDepth: maxDepth,
 								visited: visited);
 					else
 						// Approximate non-primitive struct elements as a pointer/ref
@@ -117,7 +128,7 @@ public class MemorySizeCalculator
 		}
 		else // Reference type but not array
 		{
-			var fields = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+			var fields = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
 
 			foreach (var field in fields)
 			{
@@ -132,6 +143,7 @@ public class MemorySizeCalculator
 							memoryDetails: memoryDetails,
 							configuration: configuration,
 							currentDepth: currentDepth - 1,
+							maxDepth: maxDepth,
 							visited: visited);
 				else
 					// Approximate non-primitive elements as a pointer/ref
@@ -144,7 +156,8 @@ public class MemorySizeCalculator
 			visited.Remove(measuredObject);
 
 		//Exclude the component itself from the log
-		if (size > 0 && type.FullName != component.GetType().FullName)
+		//maxDepth is the component, maxDepth-1 are the props of it
+		if (size > 0 && currentDepth == maxDepth-1)
 		{
 			var memInfoId = WvTraceUtility.GetMemoryInfoId(type.Assembly.FullName!, valueLabel);
 			var memIndex = memoryDetails.FindIndex(x => x.Id == memInfoId);
@@ -154,6 +167,7 @@ public class MemorySizeCalculator
 				{
 					FieldName = valueLabel,
 					AssemblyName = type.Assembly.GetName().Name ?? "unknown",
+					TypeName = type.Name,
 					Size = size,
 				});
 			}

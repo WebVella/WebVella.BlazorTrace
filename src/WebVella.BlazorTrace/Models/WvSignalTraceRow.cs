@@ -70,6 +70,7 @@ public class WvSignalTraceRow
 	{
 		if (filter is null) return true;
 		if (LimitHits is null) return false;
+		if (filter == WvTraceModalLimitsFilter.HasLimitHits && LimitHits.Count > 0) return true;
 		if (filter == WvTraceModalLimitsFilter.ZeroLimitHits && LimitHits.Count == 0) return true;
 		if (filter == WvTraceModalLimitsFilter.ExceedCallLimit && LimitHits.Count > 0) return true;
 

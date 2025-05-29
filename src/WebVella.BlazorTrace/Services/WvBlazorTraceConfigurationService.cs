@@ -26,13 +26,27 @@ public partial class WvBlazorTraceConfigurationService : IWvBlazorTraceConfigura
 	public WvBlazorTraceConfigurationService(WvBlazorTraceConfiguration? config)
 	{
 		this._configuration = config is not null ? config : new();
-		if (_configuration.ExcludedFrameworkAssembliesByDefault)
+		if (_configuration.ExcludeDefaultFrameworkAssemblies)
 		{
-			if(_configuration.MemoryTraceExcludedAssemblyStartWithList is null)
-				_configuration.MemoryTraceExcludedAssemblyStartWithList = new();
+			if (_configuration.MemoryTraceExcludeAssemblyStartWithList is null)
+				_configuration.MemoryTraceExcludeAssemblyStartWithList = new();
 
-			_configuration.MemoryTraceExcludedAssemblyStartWithList.Add("Microsoft.AspNetCore");
-			_configuration.MemoryTraceExcludedAssemblyStartWithList.Add("WebVella.BlazorTrace");
+			_configuration.MemoryTraceExcludeAssemblyStartWithList.AddRange(
+				new[]{
+					"Microsoft.AspNetCore"
+				}
+			);
+		}
+		if (_configuration.ExcludeDefaultFieldNames)
+		{
+			if (_configuration.MemoryTraceExcludeFieldNameContainsFromList is null)
+				_configuration.MemoryTraceExcludeFieldNameContainsFromList = new();
+
+			_configuration.MemoryTraceExcludeFieldNameContainsFromList.AddRange(
+				new[]{
+					"k__BackingField"
+				}
+			);
 		}
 	}
 	public WvBlazorTraceConfiguration GetConfiguraion()

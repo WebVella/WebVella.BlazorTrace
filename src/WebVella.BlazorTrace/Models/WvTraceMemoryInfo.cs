@@ -10,6 +10,7 @@ public class WvTraceMemoryInfo
 {
 	public string Id { get => WvTraceUtility.GetMemoryInfoId(AssemblyName,FieldName); }
 	public string FieldName { get; set; } = String.Empty;
+	public string TypeName { get; set; } = String.Empty;
 	public string AssemblyName { get; set; } = String.Empty;
 	public long Size { get; set; } = 0;
 }

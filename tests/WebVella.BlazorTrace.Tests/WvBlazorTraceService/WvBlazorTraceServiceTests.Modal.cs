@@ -262,7 +262,7 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 				methodName: methodName
 			);
 			Assert.Equal(2,trRow.TraceList.Count);
-			Assert.Equal(extraMemoryBytes.ToKilobytes(),trRow.LastMemoryKB);
+			Assert.Equal(extraMemoryBytes,trRow.LastMemoryBytes);
 			Assert.Equal(delayMS,trRow.LastDurationMS);
 			Assert.NotNull(trRow.MethodComparison);
 			Assert.Equal(1, trRow.MethodComparison.TraceListChange);
