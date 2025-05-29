@@ -8,29 +8,31 @@ using System.Threading.Tasks;
 namespace WebVella.BlazorTrace.Models;
 public enum WvButtonPosition
 {
+	[Description("wv-trace-hidden")]
+	Hidden = 0,
 	[Description("wv-trace-right-top")]
-	RightTop = 0,
+	RightTop = 1,
 	[Description("wv-trace-right-center")]
-	RightCenter = 1,
+	RightCenter = 2,
 	[Description("wv-trace-right-bottom")]
-	RightBottom = 2,
+	RightBottom = 3,
 	[Description("wv-trace-bottom-right")]
-	BottomRight = 3,
+	BottomRight = 4,
 	[Description("wv-trace-bottom-center")]
-	BottomCenter = 4,
+	BottomCenter = 5,
 	[Description("wv-trace-bottom-left")]
-	BottomLeft = 5,
+	BottomLeft = 6,
 	[Description("wv-trace-left-top")]
-	LeftTop = 6,
+	LeftTop = 7,
 	[Description("wv-trace-left-center")]
-	LeftCenter = 7,
+	LeftCenter = 8,
 	[Description("wv-trace-left-bottom")]
-	LeftBottom = 8,
+	LeftBottom = 9,
 	[Description("wv-trace-top-left")]
-	TopLeft = 9,
+	TopLeft = 10,
 	[Description("wv-trace-top-center")]
-	TopCenter = 10,
+	TopCenter = 11,
 	[Description("wv-trace-top-right")]
-	TopRight = 11
+	TopRight = 12
 }
 

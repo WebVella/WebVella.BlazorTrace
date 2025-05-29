@@ -2,9 +2,19 @@
 @using WebVella.BlazorTrace.Utility
 @if (WvBlazorTraceConfigurationService.GetConfiguraion().EnableTracing)
 {
-	<WvBlazorTraceBody/>
+	<WvBlazorTraceBody Position="@Position" ButtonColor="@ButtonColor"/>
 }
 
 @code {
 	[Inject] public IWvBlazorTraceConfigurationService WvBlazorTraceConfigurationService { get; set; } = default!;
+	// PARAMS
+	//////////////////////////////////////////////////
+	/// <summary>
+	/// the 'heart button' position on the screen
+	/// </summary>
+	[Parameter] public WvButtonPosition Position { get; set; } = WvButtonPosition.RightTop;
+	/// <summary>
+	/// the background color of the 'heart button'
+	/// </summary>
+	[Parameter] public string ButtonColor { get; set; } = "#be123c";
 }
