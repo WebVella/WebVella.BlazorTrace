@@ -52,7 +52,7 @@ builder.Services.AddBlazorTrace();
 		WvBlazorTraceService.OnSignal(caller: this, signalName: "counter");
 	}
 ```
-6. Thats it. You can start reviewing the data by pressing the *F1* key or click on the red button on the top right corner of your screen.
+6. Thats it. You can start reviewing the data by pressing the **F1** key or click on the red button on the top right corner of your screen.
 
 ### Method OnEnter/OnExit call information
 
