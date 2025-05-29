@@ -36,7 +36,7 @@ To start using BlazorTrace you need to do the following simple steps:
 builder.Services.AddBlazorTrace();
 ```
 
-3. Add the BlazorTrace component at the end of your ```App.razor``` component
+3. Add the BlazorTrace component at the end of your ```App.razor``` or ```Routes.razor``` component
 
 ``` razor
 <Router AppAssembly="@typeof(App).Assembly">
