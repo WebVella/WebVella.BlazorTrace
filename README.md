@@ -98,5 +98,9 @@ builder.Services.AddBlazorTrace(new WvBlazorTraceConfiguration()
 
 ![BlazorTrace modal](https://github.com/WebVella/WebVella.BlazorTrace/blob/main/images/memory-modal.png)
 
+### Limit hits
+
+![BlazorTrace modal](https://github.com/WebVella/WebVella.BlazorTrace/blob/main/images/limits-modal.png)
+
 ## License
 BlazorTrace is distributed under the MIT license.
