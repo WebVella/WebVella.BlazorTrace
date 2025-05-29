@@ -33,7 +33,15 @@ To start using BlazorTrace you need to do the following simple steps:
 2. Add the following line in your ```Program.cs``` file. You can get more info about options to fine tune it in the wiki.
 
 ``` csharp
-builder.Services.AddBlazorTrace();
+builder.Services.AddBlazorTrace(new WvBlazorTraceConfiguration()
+	{
+#if DEBUG
+	EnableTracing = true,
+#else
+	EnableTracing = false,
+#endif
+	}
+);
 ```
 
 3. Add the BlazorTrace component at the end of your ```App.razor``` or ```Routes.razor``` component
