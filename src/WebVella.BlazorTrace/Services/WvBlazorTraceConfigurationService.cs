@@ -26,12 +26,12 @@ public partial class WvBlazorTraceConfigurationService : IWvBlazorTraceConfigura
 	public WvBlazorTraceConfigurationService(WvBlazorTraceConfiguration? config)
 	{
 		this._configuration = config is not null ? config : new();
-		if (_configuration.ExcludeDefaultFrameworkAssemblies)
+		if (_configuration.ExcludeDefaultAssemblies)
 		{
-			if (_configuration.MemoryTraceExcludeAssemblyStartWithList is null)
-				_configuration.MemoryTraceExcludeAssemblyStartWithList = new();
+			if (_configuration.MemoryExcludeAssemblyList is null)
+				_configuration.MemoryExcludeAssemblyList = new();
 
-			_configuration.MemoryTraceExcludeAssemblyStartWithList.AddRange(
+			_configuration.MemoryExcludeAssemblyList.AddRange(
 				new[]{
 					"Microsoft.AspNetCore"
 				}
@@ -39,15 +39,20 @@ public partial class WvBlazorTraceConfigurationService : IWvBlazorTraceConfigura
 		}
 		if (_configuration.ExcludeDefaultFieldNames)
 		{
-			if (_configuration.MemoryTraceExcludeFieldNameContainsFromList is null)
-				_configuration.MemoryTraceExcludeFieldNameContainsFromList = new();
+			if (_configuration.MemoryExcludeFieldNameList is null)
+				_configuration.MemoryExcludeFieldNameList = new();
 
-			_configuration.MemoryTraceExcludeFieldNameContainsFromList.AddRange(
+			_configuration.MemoryExcludeFieldNameList.AddRange(
 				new[]{
 					"k__BackingField"
 				}
 			);
 		}
+		if(_configuration.DefaultTraceMethodOptions is null)
+			_configuration.DefaultTraceMethodOptions = new();
+
+		if(_configuration.DefaultTraceSignalOptions is null)
+			_configuration.DefaultTraceSignalOptions = new();
 	}
 	public WvBlazorTraceConfiguration GetConfiguraion()
 	{

@@ -49,13 +49,13 @@ public class MemorySizeCalculator
 
 		Type type = measuredObject.GetType();
 		if (type.Assembly is null) return 0;
-		if (configuration.MemoryTraceExcludeAssemblyStartWithList.Any(x => type.Assembly.FullName!.StartsWith(x))
-			&& !configuration.MemoryTraceIncludeAssemblyStartWithList.Any(x => type.Assembly.FullName!.StartsWith(x)))
+		if (configuration.MemoryExcludeAssemblyList.Any(x => type.Assembly.FullName!.StartsWith(x))
+			&& !configuration.MemoryIncludeAssemblyList.Any(x => type.Assembly.FullName!.StartsWith(x)))
 		{
 			return 0;
 		}
-		if (configuration.MemoryTraceExcludeFieldNameContainsFromList.Any(x => valueLabel.Contains(x))
-			&& !configuration.MemoryTraceIncludeFieldNameContainsFromList.Any(x => valueLabel.Contains(x)))
+		if (configuration.MemoryExcludeFieldNameList.Any(x => valueLabel.Contains(x))
+			&& !configuration.MemoryIncludeFieldNameList.Any(x => valueLabel.Contains(x)))
 		{
 			return 0;
 		}

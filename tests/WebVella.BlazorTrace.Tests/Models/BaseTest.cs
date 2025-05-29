@@ -105,7 +105,7 @@ public class BaseTest
 	}
 
 		public (WvTraceSessionSignal, WvTraceSessionSignalTrace) CheckSignalTraceExists(
-		Dictionary<string, WvTraceSessionModule> moduleDict,
+		Dictionary<string, WvTraceSessionSignal> signalDict,
 		string moduleName,
 		string signalName,
 		string componentFullName,
@@ -115,11 +115,8 @@ public class BaseTest
 		WvTraceSessionSignal? signal = null;
 		WvTraceSessionSignalTrace? trace = null;
 
-		Assert.Single(moduleDict.Keys);
-		Assert.NotNull(moduleDict.Keys.SingleOrDefault(x => x == moduleName));
-		var module = moduleDict[moduleName];
-		Assert.NotNull(module.SignalDict.Keys.SingleOrDefault(x => x == signalName));
-		signal = module.SignalDict[signalName];
+		Assert.NotNull(signalDict.Keys.SingleOrDefault(x => x == signalName));
+		signal = signalDict[signalName];
 		Assert.NotEmpty(signal.TraceList);
 		trace = signal.TraceList.FirstOrDefault(x => 
 			x.ComponentFullName == componentFullName

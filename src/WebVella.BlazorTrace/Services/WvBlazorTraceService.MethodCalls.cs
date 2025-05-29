@@ -11,8 +11,8 @@ public partial interface IWvBlazorTraceService
 	/// A tracer placed at the immediate beginning of a method. Usually paired with OnExit tracer
 	/// </summary>
 	/// <param name="component">the component instance that calls the method. Usually provided with 'this'</param>
-	/// <param name="traceId">unique identifier for pairing OnEnter and OnExit calls</param>
-	/// <param name="instanceTag">NULL by default, will group all instances of the component in the trace. A way to tag each separate instance of the component so you can see them separately</param>
+	/// <param name="traceId">unique identifier for pairing OnEnter and OnExit calls. If not provided will pair with the first non exited trace</param>
+	/// <param name="instanceTag">NULL by default, will group all instances of the component in the trace. To tag each separate instance of the component you need to provide unique tag for it.</param>
 	/// <param name="customData">custom string or JSON that you need stored with each call for more advanced tracing</param>
 	/// <param name="firstRender">when available, usually if the tracer is called by OnAfterRender methods</param>
 	/// <param name="options">setting up the limits, exceeding which will be presented by the service as a problem</param>
@@ -31,8 +31,8 @@ public partial interface IWvBlazorTraceService
 	/// A tracer placed just before the ending of a method. Usually in finally clause or before returns.
 	/// </summary>
 	/// <param name="component">the component instance that calls the method. Usually provided with 'this'</param>
-	/// <param name="traceId">unique identifier for pairing OnEnter and OnExit calls</param>
-	/// <param name="instanceTag">NULL by default, will group all instances of the component in the trace. A way to tag each separate instance of the component so you can see them separately</param>
+	/// <param name="traceId">unique identifier for pairing OnEnter and OnExit calls. If not provided will pair with the first non exited trace</param>
+	/// <param name="instanceTag">NULL by default, will group all instances of the component in the trace. To tag each separate instance of the component you need to provide unique tag for it.</param>
 	/// <param name="customData">custom string or JSON that you need stored with each call for more advanced tracing</param>
 	/// <param name="firstRender">when available, usually if the tracer is called by OnAfterRender methods</param>
 	/// <param name="options">setting up the limits, exceeding which will be presented by the service as a problem</param>
@@ -48,11 +48,11 @@ public partial interface IWvBlazorTraceService
 		);
 
 	/// <summary>
-	/// A tracer that will log a signal call. Can be placed anywhere in a component.
+	/// A tracer that will log a signal call. Can be placed anywhere in a component or service method.
 	/// </summary>
-	/// <param name="component">the component instance that calls the method. Usually provided with 'this'</param>
-	/// <param name="signalName">Identifier of the signal</param>
-	/// <param name="instanceTag">NULL by default, will group all instances of the component in the trace. A way to tag each separate instance of the component so you can see them separately</param>
+	/// <param name="caller">the caller instance that calls the method. Usually provided with 'this'</param>
+	/// <param name="signalName">Unique identifier of the signal</param>
+	/// <param name="instanceTag">NULL by default, will group all instances of the caller in the trace. To tag each separate instance of the caller you need to provide unique tag for it.</param>
 	/// <param name="customData">custom string or JSON that you need stored with each call for more advanced tracing</param>
 	/// <param name="options">setting up the limits, exceeding which will be presented by the service as a problem</param>
 	/// <param name="methodName">automatically initialized in most cases by its attribute. Override only if you need to.</param>
@@ -94,7 +94,9 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 				FirstRender = firstRender,
 				InstanceTag = instanceTag,
 				MethodName = methodName,
-				MethodOptions = options ?? new WvTraceMethodOptions(),
+				MethodOptions = options ?? (_configuration.DefaultTraceMethodOptions ?? new()),
+				SignalOptions = new(),
+				SignalName = String.Empty,
 				Timestamp = DateTimeOffset.Now
 			});
 		}
@@ -125,7 +127,9 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 				FirstRender = firstRender,
 				InstanceTag = instanceTag,
 				MethodName = methodName,
-				MethodOptions = options ?? new WvTraceMethodOptions(),
+				MethodOptions = options ?? (_configuration.DefaultTraceMethodOptions ?? new()),
+				SignalOptions = new(),
+				SignalName = String.Empty,
 				Timestamp = DateTimeOffset.Now
 			});
 		}
@@ -157,8 +161,8 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 				FirstRender = null,
 				InstanceTag = instanceTag,
 				MethodName = methodName,
-				MethodOptions = new WvTraceMethodOptions(),
-				SignalOptions = options ?? new WvTraceSignalOptions(),
+				MethodOptions = new(),
+				SignalOptions = options ?? (_configuration.DefaultTraceSignalOptions ?? new()),
 				Timestamp = DateTimeOffset.Now
 			});
 		}

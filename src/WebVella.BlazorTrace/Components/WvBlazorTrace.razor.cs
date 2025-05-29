@@ -15,7 +15,13 @@ public partial class WvBlazorTrace : WvBlazorTraceComponentBase, IAsyncDisposabl
 
 	// PARAMS
 	//////////////////////////////////////////////////
+	/// <summary>
+	/// the 'heart button' position on the screen
+	/// </summary>
 	[Parameter] public WvButtonPosition Position { get; set; } = WvButtonPosition.RightTop;
+	/// <summary>
+	/// the background color of the 'heart button'
+	/// </summary>
 	[Parameter] public string ButtonColor { get; set; } = "#be123c";
 
 	// LOCAL VARIABLES

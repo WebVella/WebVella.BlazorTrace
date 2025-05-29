@@ -31,10 +31,13 @@ To start using BlazorTrace you need to do the following simple steps:
 
 1. Install the latest version of the [WebVella.BlazorTrace Nuget package](https://www.nuget.org/packages/WebVella.BlazorTrace)
 2. Add the following line in your ```Program.cs``` file. You can get more info about options to fine tune it in the wiki.
+
 ``` csharp
 builder.Services.AddBlazorTrace();
 ```
+
 3. Add the BlazorTrace component at the end of your ```App.razor``` component
+
 ``` razor
 <Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">
@@ -43,7 +46,9 @@ builder.Services.AddBlazorTrace();
 </Router>
 <WvBlazorTrace/> @* <-- INSERT HERE *@
 ```
+
 4. Add tracers in your methods. They will feed runtime data to the library. There are several arguments that you can call them with, but here is an example with the only required one (component):
+
 ``` csharp
 	protected override void OnInitialized()
 	{
@@ -53,7 +58,9 @@ builder.Services.AddBlazorTrace();
 		WvBlazorTraceService.OnExit(component: this);
 	}
 ```
+
 5. Add signals in your methods. They are a way to track events in your components. There are several arguments that you can call them with, but here is an example with the only required one (component):
+
 ``` csharp
 	private void _countTest()
 	{
@@ -61,6 +68,7 @@ builder.Services.AddBlazorTrace();
 		WvBlazorTraceService.OnSignal(caller: this, signalName: "counter");
 	}
 ```
+
 6. Thats it. You can start reviewing the data by pressing the **F1** key or click on the red button on the top right corner of your screen.
 
 ### Method OnEnter/OnExit call information

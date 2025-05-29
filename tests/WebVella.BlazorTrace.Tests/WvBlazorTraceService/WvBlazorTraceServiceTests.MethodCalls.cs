@@ -150,7 +150,7 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 			Assert.NotEmpty(queue);
 			WvBlazorTraceServiceMock.Object.ForceProcessQueue();
 			var (method, trace) = CheckSignalTraceExists(
-				moduleDict: WvBlazorTraceServiceMock.Object.GetModuleDict(),
+				signalDict: WvBlazorTraceServiceMock.Object.GetSignalDict(),
 				moduleName: moduleName,
 				signalName : signalName,
 				componentFullName: componentFullName,

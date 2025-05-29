@@ -53,5 +53,6 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 			_processQueue();
 	}
 	public Dictionary<string, WvTraceSessionModule> GetModuleDict() => _moduleDict;
+	public Dictionary<string, WvTraceSessionSignal> GetSignalDict() => _signalDict;
 }
 
