@@ -1,9 +1,9 @@
-[![Documentation](https://img.shields.io/badge/Homepage-blue?style=for-the-badge)](https://github.com/WebVella/WebVella.BlazorTrace/wiki)
+[![Documentation](https://img.shields.io/badge/Documentation-blue?style=for-the-badge)](https://github.com/WebVella/WebVella.BlazorTrace/wiki)
 [![Dotnet](https://img.shields.io/badge/platform-.NET-blue?style=for-the-badge)](https://www.nuget.org/packages/WebVella.BlazorTrace)
 [![GitHub Repo stars](https://img.shields.io/github/stars/WebVella/WebVella.BlazorTrace?style=for-the-badge)](https://github.com/WebVella/WebVella.BlazorTrace/stargazers)
 [![Nuget version](https://img.shields.io/nuget/v/WebVella.BlazorTrace?style=for-the-badge)](https://www.nuget.org/packages/WebVella.BlazorTrace)
 [![Nuget download](https://img.shields.io/nuget/dt/WebVella.BlazorTrace?style=for-the-badge)](https://www.nuget.org/packages/WebVella.BlazorTrace)
-[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/WebVella/WebVella.BlazorTrace/blob/main/LICENSE)
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](https://github.com/WebVella/WebVella.BlazorTrace/blob/main/LICENSE)
 
 ## What is BlazorTrace?
 An easy to add library that will enable you to get detailed information about your Blazor components rerenders and memory, as well as compare it with different snapshots that you created. It is targeting Blazor UI developers and presents the information in a simple and focused way. BlazorTrace will help you build better, faster and more consistent user experience with your Blazor applications.
@@ -25,14 +25,14 @@ To start using BlazorTrace you need to do the following simple steps:
 ``` csharp
 builder.Services.AddBlazorTrace();
 ```
-3. Add the BlazorTrace component at the end of your ```App.razor`` component
+3. Add the BlazorTrace component at the end of your ```App.razor``` component
 ``` razor
 <Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">
         <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
     </Found>
 </Router>
-<WvBlazorTrace/>
+<WvBlazorTrace/> @* <-- INSERT HERE *@
 ```
 4. Add tracers in your methods. They will feed runtime data to the library. There are several arguments that you can call them with, but here is an example with the only required one (component):
 ``` csharp
@@ -52,7 +52,7 @@ builder.Services.AddBlazorTrace();
 		WvBlazorTraceService.OnSignal(caller: this, signalName: "counter");
 	}
 ```
-6. Thats it. You can start reviewing the data by pressing the "F1" key or click on the red button on the top right corner of your screen.
+6. Thats it. You can start reviewing the data by pressing the *F1* key or click on the red button on the top right corner of your screen.
 
 ### Method OnEnter/OnExit call information
 
