@@ -264,16 +264,16 @@ public static partial class WvTraceUtility
 		if (isOnEnter && trace.OnEnterOptions is not null)
 		{
 			list.Add($"<div>{trace.OnEnterOptions.CallLimit} <span class='wv-mute'>calls</span></div>");
-			list.Add($"<div>{trace.OnEnterOptions.MemoryLimitTotalBytes.ToKilobytesString()} <span class='wv-mute'>total memory</span></div>");
-			list.Add($"<div>{trace.OnEnterOptions.MemoryLimitDeltaBytes.ToKilobytesString()} <span class='wv-mute'>delta memory</span></div>");
-			list.Add($"<div>{trace.OnEnterOptions.DurationLimitMS.ToDurationMSString()} <span class='wv-mute'>duration</span></div>");
+			list.Add($"<div>{trace.OnEnterOptions.MemoryLimitTotalBytes.WvBTToKilobytesString()} <span class='wv-mute'>total memory</span></div>");
+			list.Add($"<div>{trace.OnEnterOptions.MemoryLimitDeltaBytes.WvBTToKilobytesString()} <span class='wv-mute'>delta memory</span></div>");
+			list.Add($"<div>{trace.OnEnterOptions.DurationLimitMS.WvBTToDurationMSString()} <span class='wv-mute'>duration</span></div>");
 		}
 		else if (!isOnEnter && trace.OnExitOptions is not null)
 		{
 			list.Add($"<div>{trace.OnExitOptions.CallLimit} <span class='wv-mute'>calls</span></div>");
-			list.Add($"<div>{trace.OnExitOptions.MemoryLimitTotalBytes.ToKilobytesString()} <span class='wv-mute'>total memory</span></div>");
-			list.Add($"<div>{trace.OnExitOptions.MemoryLimitDeltaBytes.ToKilobytesString()} <span class='wv-mute'>delta memory</span></div>");
-			list.Add($"<div>{trace.OnExitOptions.DurationLimitMS.ToDurationMSString()} <span class='wv-mute'>duration</span></div>");
+			list.Add($"<div>{trace.OnExitOptions.MemoryLimitTotalBytes.WvBTToKilobytesString()} <span class='wv-mute'>total memory</span></div>");
+			list.Add($"<div>{trace.OnExitOptions.MemoryLimitDeltaBytes.WvBTToKilobytesString()} <span class='wv-mute'>delta memory</span></div>");
+			list.Add($"<div>{trace.OnExitOptions.DurationLimitMS.WvBTToDurationMSString()} <span class='wv-mute'>duration</span></div>");
 		}
 		return String.Join("", list);
 	}

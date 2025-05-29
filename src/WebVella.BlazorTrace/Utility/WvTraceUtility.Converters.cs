@@ -12,7 +12,7 @@ using WebVella.BlazorTrace.Models;
 namespace WebVella.BlazorTrace.Utility;
 public static partial class WvTraceUtility
 {
-	public static string ToKilobytesString(this long? bytes)
+	public static string WvBTToKilobytesString(this long? bytes)
 	{
 		if (bytes == null) return "n/a";
 			
@@ -23,7 +23,7 @@ public static partial class WvTraceUtility
 		var kb = Math.Round((double)bytes / kilobyteFactor, 2, MidpointRounding.AwayFromZero);
 		return kb.ToString() + " KB";
 	}
-	public static string ToKilobytesString(this long bytes)
+	public static string WvBTToKilobytesString(this long bytes)
 	{
 		if (bytes < 0) return "err"; // Handle invalid input
 		if(bytes == 0) return "0 KB";
@@ -32,20 +32,20 @@ public static partial class WvTraceUtility
 		var kb = Math.Round((double)bytes / kilobyteFactor, 2, MidpointRounding.AwayFromZero);
 		return kb.ToString() + " KB";
 	}
-	public static string GetMemoryInfoId(string assemblyFullName, string fieldName)
+	public static string WvBTGetMemoryInfoId(string assemblyFullName, string fieldName)
 		=> $"{assemblyFullName}$$${fieldName}";
-	public static string GetFirstRenderString(this bool? firstRender)
+	public static string WvBTGetFirstRenderString(this bool? firstRender)
 	{
 		if (firstRender == null) return "n/a";
 		if (!firstRender.Value) return "no";
 		return "yes";
 	}
-	public static string ToDurationMSString(this long? duration)
+	public static string WvBTToDurationMSString(this long? duration)
 	{
 		if (duration == null) return "n/a";
 		return $"{duration.Value} ms";
 	}
-	public static string ToDurationMSString(this long duration)
+	public static string WvBTToDurationMSString(this long duration)
 	{
 		return $"{duration} ms";
 	}
@@ -56,9 +56,9 @@ public static partial class WvTraceUtility
 		{
 			case WvTraceSessionLimitType.MemoryTotal:
 			case WvTraceSessionLimitType.MemoryDelta:
-				return limit.ToKilobytesString();
+				return limit.WvBTToKilobytesString();
 			case WvTraceSessionLimitType.Duration:
-				return limit.ToDurationMSString();
+				return limit.WvBTToDurationMSString();
 			default:
 				return limit.ToString();
 		}

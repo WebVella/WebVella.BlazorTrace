@@ -25,7 +25,7 @@
 					@foreach (var item in _row.LimitHits)
 					{
 						<tr @key="@Guid.NewGuid()">
-							<td>@item.Type.ToDescriptionString()</td>
+							<td>@item.Type.WvBTToDescriptionString()</td>
 							<td>@(item.IsOnEnter ? "onEnter" : "OnExit")</td>
 							<td class="wv-number">@item.Limit.GetLimitValueAsString(item.Type)</td>
 							<td class="wv-number">@item.Actual.GetLimitValueAsString(item.Type)</td>

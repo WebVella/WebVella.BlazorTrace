@@ -23,9 +23,9 @@ public class WvSnapshotMemoryComparisonData
 			if (LastMemoryChangeBytes == 0) return $"<span class='wv-mute'>=</span>";
 			else if (LastMemoryChangeBytes < 0)
 			{
-				return $"<span class='wv-negative'>{LastMemoryChangeBytes.ToKilobytesString()}</span>";
+				return $"<span class='wv-negative'>{LastMemoryChangeBytes.WvBTToKilobytesString()}</span>";
 			}
-			return $"<span class='wv-positive'>+{LastMemoryChangeBytes.ToKilobytesString()}</span>";
+			return $"<span class='wv-positive'>+{LastMemoryChangeBytes.WvBTToKilobytesString()}</span>";
 		}
 	}
 	public List<WvSnapshotMemoryComparisonDataField> Fields { get; set; } = new();
@@ -34,7 +34,7 @@ public class WvSnapshotMemoryComparisonData
 
 public class WvSnapshotMemoryComparisonDataField
 {
-	public string Id { get => WvTraceUtility.GetMemoryInfoId(AssemblyName, FieldName); }
+	public string Id { get => WvTraceUtility.WvBTGetMemoryInfoId(AssemblyName, FieldName); }
 	public string FieldName { get; set; } = String.Empty;
 	public string TypeName { get; set; } = String.Empty;
 	public string AssemblyName { get; set; } = String.Empty;
@@ -48,9 +48,9 @@ public class WvSnapshotMemoryComparisonDataField
 			if (ChangeBytes == 0) return $"<span class='wv-mute'>=</span>";
 			else if (ChangeBytes < 0)
 			{
-				return $"<span class='wv-negative'>{ChangeBytes.ToKilobytesString()}</span>";
+				return $"<span class='wv-negative'>{ChangeBytes.WvBTToKilobytesString()}</span>";
 			}
-			return $"<span class='wv-positive'>+{ChangeBytes.ToKilobytesString()}</span>";
+			return $"<span class='wv-positive'>+{ChangeBytes.WvBTToKilobytesString()}</span>";
 		}
 	}
 

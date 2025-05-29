@@ -53,7 +53,7 @@
 				</svg>
 			</div>
 			<div class="wv-data">
-				<div>@(Item.LastMemoryBytes is not null ? Item.LastMemoryBytes.ToKilobytesString() : "n/a")</div>
+				<div>@(Item.LastMemoryBytes is not null ? Item.LastMemoryBytes.WvBTToKilobytesString() : "n/a")</div>
 				<div>@((MarkupString)Item.MemoryComparison.LastMemoryChangeKBHtml)</div>
 			</div>
 		</td>

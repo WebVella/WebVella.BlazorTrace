@@ -8,7 +8,7 @@ using WebVella.BlazorTrace.Utility;
 namespace WebVella.BlazorTrace.Models;
 public class WvTraceMemoryInfo
 {
-	public string Id { get => WvTraceUtility.GetMemoryInfoId(AssemblyName,FieldName); }
+	public string Id { get => WvTraceUtility.WvBTGetMemoryInfoId(AssemblyName,FieldName); }
 	public string FieldName { get; set; } = String.Empty;
 	public string TypeName { get; set; } = String.Empty;
 	public string AssemblyName { get; set; } = String.Empty;

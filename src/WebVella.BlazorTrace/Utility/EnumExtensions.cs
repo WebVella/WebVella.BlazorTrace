@@ -6,7 +6,7 @@ namespace WebVella.BlazorTrace;
 
 public static class EnumExtensions
 {
-	public static string ToDescriptionString<TEnum>(this TEnum e) where TEnum : IConvertible
+	public static string WvBTToDescriptionString<TEnum>(this TEnum e) where TEnum : IConvertible
 	{
 		string description = "";
 

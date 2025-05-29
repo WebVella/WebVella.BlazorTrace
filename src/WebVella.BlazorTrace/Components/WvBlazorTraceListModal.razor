@@ -36,7 +36,7 @@
 					@foreach (var item in _row.TraceList.OrderByDescending(x => x.DurationMs))
 					{
 						<tr @key="@Guid.NewGuid()">
-							<td class="wv-number">@item.DurationMs.ToDurationMSString()</td>
+							<td class="wv-number">@item.DurationMs.WvBTToDurationMSString()</td>
 							<td class="wv-number">@item.EnteredOn?.ToString(WvConstants.TimestampFormat) ms</td>
 							<td class="wv-number clickable" @onclick=@(() => _showMemoryModal(item.OnEnterMemoryInfo))>
 								<div class="icon">
@@ -46,11 +46,11 @@
 									</svg>
 								</div>
 								<div>
-									@item.OnEnterMemoryBytes.ToKilobytesString()
+									@item.OnEnterMemoryBytes.WvBTToKilobytesString()
 								</div>
 							</td>
 							<td class="wv-tag">@item.OnEnterCustomData</td>
-							<td>@item.OnEnterFirstRender.GetFirstRenderString()</td>
+							<td>@item.OnEnterFirstRender.WvBTGetFirstRenderString()</td>
 							<td>@((MarkupString)item.OnEnterLimitsHTML)</td>
 							<td class="wv-number">@item.ExitedOn?.ToString(WvConstants.TimestampFormat) ms</td>
 							<td class="wv-number clickable" @onclick=@(() => _showMemoryModal(item.OnExitMemoryInfo))>
@@ -61,11 +61,11 @@
 									</svg>
 								</div>
 								<div>
-									@item.OnExitMemoryBytes.ToKilobytesString()
+									@item.OnExitMemoryBytes.WvBTToKilobytesString()
 								</div>
 							</td>
 							<td class="wv-tag">@item.OnExitCustomData</td>
-							<td>@item.OnExitFirstRender.GetFirstRenderString()</td>
+							<td>@item.OnExitFirstRender.WvBTGetFirstRenderString()</td>
 							<td>@((MarkupString)item.OnExitLimitsHTML)</td>
 						</tr>
 					}

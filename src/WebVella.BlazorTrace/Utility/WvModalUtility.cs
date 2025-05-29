@@ -220,7 +220,7 @@ public static class WvModalUtility
 				{
 					foreach (var memInfo in sc.LastExitedTrace.OnExitMemoryInfo)
 					{
-						var match = memoryComparison.ComparisonData.Fields.FirstOrDefault(x => x.Id == WvTraceUtility.GetMemoryInfoId(memInfo.AssemblyName, memInfo.FieldName));
+						var match = memoryComparison.ComparisonData.Fields.FirstOrDefault(x => x.Id == WvTraceUtility.WvBTGetMemoryInfoId(memInfo.AssemblyName, memInfo.FieldName));
 						if (match is not null)
 						{
 							match.SecondarySnapshotBytes = memInfo.Size;

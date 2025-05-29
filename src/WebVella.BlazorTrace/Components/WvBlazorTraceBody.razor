@@ -91,7 +91,7 @@
 					@foreach (var item in _methodMenu)
 					{
 						<li class="@(_data?.Request?.Menu == item.Id ? "active" : "")">
-							<a href="#" @onclick=@item.OnClick @onclick:preventDefault>@item.Id.ToDescriptionString()</a>
+							<a href="#" @onclick=@item.OnClick @onclick:preventDefault>@item.Id.WvBTToDescriptionString()</a>
 						</li>
 					}
 				</ul>
@@ -102,7 +102,7 @@
 					@foreach (var item in _signalMenu)
 					{
 						<li class="@(_data?.Request?.Menu == item.Id ? "active" : "")">
-							<a href="#" @onclick=@item.OnClick @onclick:preventDefault>@item.Id.ToDescriptionString()</a>
+							<a href="#" @onclick=@item.OnClick @onclick:preventDefault>@item.Id.WvBTToDescriptionString()</a>
 						</li>
 					}
 				</ul>
@@ -128,7 +128,7 @@
 					@foreach (var item in _snapshotMenu)
 					{
 						<li class="@(_data?.Request?.Menu == item.Id ? "active" : "")">
-							<a href="#" @onclick=@item.OnClick @onclick:preventDefault>@item.Id.ToDescriptionString()</a>
+							<a href="#" @onclick=@item.OnClick @onclick:preventDefault>@item.Id.WvBTToDescriptionString()</a>
 						</li>
 					}
 					<li>
@@ -182,7 +182,7 @@
 										<option value="">no call filter</option>
 										@foreach (var option in Enum.GetValues<WvTraceModalCallsFilter>())
 										{
-											<option value="@option">@option.ToDescriptionString()</option>
+											<option value="@option">@option.WvBTToDescriptionString()</option>
 										}
 									</InputSelect>
 								</th>
@@ -192,7 +192,7 @@
 										<option value="">no memory filter</option>
 										@foreach (var option in Enum.GetValues<WvTraceModalMemoryFilter>())
 										{
-											<option value="@option">@option.ToDescriptionString()</option>
+											<option value="@option">@option.WvBTToDescriptionString()</option>
 										}
 									</InputSelect>
 								</th>
@@ -201,7 +201,7 @@
 										<option value="">no duration filter</option>
 										@foreach (var option in Enum.GetValues<WvTraceModalDurationFilter>())
 										{
-											<option value="@option">@option.ToDescriptionString()</option>
+											<option value="@option">@option.WvBTToDescriptionString()</option>
 										}
 									</InputSelect>
 								</th>
@@ -210,7 +210,7 @@
 										<option value="">no limit filter</option>
 										@foreach (var option in Enum.GetValues<WvTraceModalLimitsFilter>())
 										{
-											<option value="@option">@option.ToDescriptionString()</option>
+											<option value="@option">@option.WvBTToDescriptionString()</option>
 										}
 									</InputSelect>
 								</th>
@@ -276,7 +276,7 @@
 										<option value="">no call filter</option>
 										@foreach (var option in Enum.GetValues<WvTraceModalCallsFilter>())
 										{
-											<option value="@option">@option.ToDescriptionString()</option>
+											<option value="@option">@option.WvBTToDescriptionString()</option>
 										}
 									</InputSelect>
 								</th>
@@ -288,7 +288,7 @@
 							WvTraceModalLimitsFilter.ZeroLimitHits
 							})
 										{
-											<option value="@option">@option.ToDescriptionString()</option>
+											<option value="@option">@option.WvBTToDescriptionString()</option>
 										}
 									</InputSelect>
 								</th>

@@ -75,7 +75,7 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 		_loadResource();
 		if (!String.IsNullOrWhiteSpace(ButtonColor))
 			_buttonStyles = $"background-color:{ButtonColor};";
-		_buttonClasses = $" wv-trace-button {Position.ToDescriptionString()} ";
+		_buttonClasses = $" wv-trace-button {Position.WvBTToDescriptionString()} ";
 		_initMenu();
 		EnableRenderLock();
 	}

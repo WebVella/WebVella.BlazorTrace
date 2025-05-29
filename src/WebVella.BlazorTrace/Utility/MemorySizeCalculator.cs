@@ -97,9 +97,9 @@ public class MemorySizeCalculator
 		else if (type.IsValueType)
 		{
 			// Handle primitive value types directly
-			if (IsPrimitiveType(type))
+			if (WvBTIsPrimitiveType(type))
 			{
-				size += GetPrimitiveSize(measuredObject);
+				size += WvBTGetPrimitiveSize(measuredObject);
 			}
 			else
 			{
@@ -159,7 +159,7 @@ public class MemorySizeCalculator
 		//maxDepth is the component, maxDepth-1 are the props of it
 		if (size > 0 && currentDepth == maxDepth-1)
 		{
-			var memInfoId = WvTraceUtility.GetMemoryInfoId(type.Assembly.FullName!, valueLabel);
+			var memInfoId = WvTraceUtility.WvBTGetMemoryInfoId(type.Assembly.FullName!, valueLabel);
 			var memIndex = memoryDetails.FindIndex(x => x.Id == memInfoId);
 			if (memIndex < 0)
 			{
@@ -180,14 +180,14 @@ public class MemorySizeCalculator
 		return size;
 	}
 
-	private static bool IsPrimitiveType(Type type)
+	private static bool WvBTIsPrimitiveType(Type type)
 	{
 		return type.IsPrimitive ||
 			   type == typeof(string) ||
 			   type == typeof(decimal);
 	}
 
-	private static long GetPrimitiveSize(object value)
+	private static long WvBTGetPrimitiveSize(object value)
 	{
 		Type t = value.GetType();
 
