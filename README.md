@@ -54,7 +54,21 @@ builder.Services.AddBlazorTrace();
 ```
 6. Thats it. You can start reviewing the data by pressing the "F1" key or click on the red button on the top right corner of your screen.
 
+### Method OnEnter/OnExit call information
+
 ![BlazorTrace modal](/images/trace-modal-methods.png)
+
+### Log signals information
+
+![BlazorTrace modal](/images/trace-modal-signals.png)
+
+### Trace calls detail information
+
+![BlazorTrace modal](/images/trace-list-modal.png)
+
+### Memory detail information
+
+![BlazorTrace modal](/images/memory-modal.png)
 
 ## License
 BlazorTrace is distributed under the MIT license.
