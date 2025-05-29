@@ -5,7 +5,7 @@ using WebVella.BlazorTrace.Services;
 using WebVella.BlazorTrace.Utility;
 
 namespace WebVella.BlazorTrace;
-public partial class WvBlazorTrace : WvBlazorTraceComponentBase, IAsyncDisposable
+public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDisposable
 {
 	// INJECTS
 	//////////////////////////////////////////////////
@@ -26,13 +26,10 @@ public partial class WvBlazorTrace : WvBlazorTraceComponentBase, IAsyncDisposabl
 
 	// LOCAL VARIABLES
 	//////////////////////////////////////////////////
-#if !DEBUG
-private bool _visible = false;
-#else
-	private bool _visible = true;
-#endif
+
+	private bool _visible = false;
 	private Guid _componentId = Guid.NewGuid();
-	private DotNetObjectReference<WvBlazorTrace> _objectRef = default!;
+	private DotNetObjectReference<WvBlazorTraceBody> _objectRef = default!;
 	private bool _f1ListenerEnabled = false;
 	private bool _modalVisible = false;
 	private bool _loadingData = false;
@@ -73,14 +70,13 @@ private bool _visible = false;
 	protected override void OnInitialized()
 	{
 		base.OnInitialized();
+		_configuration = WvBlazorTraceConfigurationService.GetConfiguraion();
 		_objectRef = DotNetObjectReference.Create(this);
 		_loadResource();
 		if (!String.IsNullOrWhiteSpace(ButtonColor))
 			_buttonStyles = $"background-color:{ButtonColor};";
 		_buttonClasses = $" wv-trace-button {Position.ToDescriptionString()} ";
-		_configuration = WvBlazorTraceConfigurationService.GetConfiguraion();
 		_initMenu();
-
 		EnableRenderLock();
 	}
 	protected override async Task OnAfterRenderAsync(bool firstRender)

@@ -14,7 +14,19 @@
 
 <body>
     <div id="app"></div>
-    <script src="_framework/blazor.webassembly.js"></script>
+    <script src="_framework/blazor.webassembly.js" autostart="false"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            Blazor.start({
+                logLevel: 0,
+				circuit: {
+					configureSignalR: function (builder) {
+						builder.configureLogging(0);
+					}
+				}
+            });
+        });
+    </script>
     <script>navigator.serviceWorker.register('service-worker.js');</script>
 </body>
 

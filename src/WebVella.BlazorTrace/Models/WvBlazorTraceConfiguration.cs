@@ -5,7 +5,7 @@ namespace WebVella.BlazorTrace;
 public class WvBlazorTraceConfiguration
 {
 	/// <summary>
-	/// By default the tracing is enabled in DEBUG, but from this property you can stop the tracing globally
+	/// By default the tracing is enabled, but from this property you can stop the tracing globally
 	/// </summary>
 	public bool EnableTracing { get; set; } = true;
 

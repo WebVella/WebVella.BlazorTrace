@@ -79,9 +79,6 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		[CallerMemberName] string methodName = ""
 	)
 	{
-#if !DEBUG
-		return;
-#endif
 		if (!_configuration.EnableTracing) return;
 		lock (_onEnterLock)
 		{
@@ -111,10 +108,6 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		[CallerMemberName] string methodName = ""
 	)
 	{
-#if !DEBUG
-		return;
-#endif
-
 		if (!_configuration.EnableTracing) return;
 		lock (_onExitLock)
 		{
@@ -144,10 +137,6 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		[CallerMemberName] string methodName = ""
 		)
 	{
-#if !DEBUG
-		return;
-#endif
-
 		if (!_configuration.EnableTracing) return;
 		lock (_onExitLock)
 		{
