@@ -3,7 +3,7 @@
 [![GitHub Repo stars](https://img.shields.io/github/stars/WebVella/WebVella.BlazorTrace?style=for-the-badge)](https://github.com/WebVella/WebVella.BlazorTrace/stargazers)
 [![Nuget version](https://img.shields.io/nuget/v/WebVella.BlazorTrace?style=for-the-badge)](https://www.nuget.org/packages/WebVella.BlazorTrace)
 [![Nuget download](https://img.shields.io/nuget/dt/WebVella.BlazorTrace?style=for-the-badge)](https://www.nuget.org/packages/WebVella.BlazorTrace)
-[![WebVella Document Templates License](https://img.shields.io/badge/LICENSE%20MIT?style=for-the-badge)](https://github.com/WebVella/WebVella.BlazorTrace/blob/main/LICENSE)
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/WebVella/WebVella.BlazorTrace/blob/main/LICENSE)
 
 ## What is BlazorTrace?
 An easy to add library that will enable you to get detailed information about your Blazor components rerenders and memory, as well as compare it with different snapshots that you created. It is targeting Blazor UI developers and presents the information in a simple and focused way. BlazorTrace will help you build better, faster and more consistent user experience with your Blazor applications.
@@ -26,7 +26,7 @@ To start using BlazorTrace you need to do the following simple steps:
 builder.Services.AddBlazorTrace();
 ```
 3. Add the BlazorTrace component at the end of your ```App.razor`` component
-``` csharp
+``` razor
 <Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">
         <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
