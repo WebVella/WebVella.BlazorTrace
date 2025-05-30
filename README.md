@@ -55,6 +55,7 @@ builder.Services.AddBlazorTrace(new WvBlazorTraceConfiguration()
 <WvBlazorTrace/> @* <-- INSERT HERE *@
 ```
 4. Inject the service in your components
+You can inject this in the component directly, or in _Imports.razor to make it available in all components.(Thanks LlamaNL :))
 ``` csharp
 [Inject] protected IWvBlazorTraceService WvBlazorTraceService { get; set; }
 ```
