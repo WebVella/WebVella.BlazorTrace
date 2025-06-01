@@ -59,7 +59,7 @@ You can inject this in the component directly, or in _Imports.razor to make it a
 ``` csharp
 [Inject] protected IWvBlazorTraceService WvBlazorTraceService { get; set; }
 ```
-5. Add tracers in your methods. They will feed runtime data to the library. There are several arguments that you can call them with, but here is an example with the only required one (component):
+5. Add tracers in your methods (start from LifeCycle methods). They will feed runtime data to the library. There are several arguments that you can call them with, but here is an example with the only required one (component):
 
 ``` csharp
 	protected override void OnInitialized()
