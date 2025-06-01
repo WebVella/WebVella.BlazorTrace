@@ -70,6 +70,23 @@ You can inject this in the component directly, or in _Imports.razor to make it a
 		WvBlazorTraceService.OnExit(component: this);
 	}
 ```
+if there are many returns in the method you can also do it with try/finally block
+
+``` csharp
+	protected override void OnInitialized()
+	{
+		try
+		{
+			WvBlazorTraceService.OnEnter(component: this);
+			base.OnInitialized();
+			//Do something
+		}
+		finally
+		{
+			WvBlazorTraceService.OnExit(component: this);
+		}
+	}
+```
 
 6. Add signals in your methods. They are a way to track events in your components. There are several arguments that you can call them with, but here is an example with the only required one (component):
 
