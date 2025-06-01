@@ -59,7 +59,8 @@ You can inject this in the component directly, or in _Imports.razor to make it a
 ``` csharp
 [Inject] protected IWvBlazorTraceService WvBlazorTraceService { get; set; }
 ```
-5. Add tracers in your methods (start from LifeCycle methods). They will feed runtime data to the library. There are several arguments that you can call them with, but here is an example with the only required one (component):
+5. Add tracers in your methods (start from LifeCycle methods). They will feed runtime data to the library and reveal the broader picture or where to look into details for issues.
+There are several arguments that you can call them with, but here is an example with the only required one (component):
 
 ``` csharp
 	protected override void OnInitialized()
@@ -88,7 +89,8 @@ if there are many returns in the method you can also do it with try/finally bloc
 	}
 ```
 
-6. Add signals in your methods. They are a way to track events in your components. There are several arguments that you can call them with, but here is an example with the only required one (component):
+6. Add signals in your methods. They are a way to track events in your components or look in details about what and how is going on.
+There are several arguments that you can call them with, but here is an example with the only required one (component):
 
 ``` csharp
 	private void _countTest()
