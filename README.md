@@ -100,7 +100,7 @@ There are several arguments that you can call them with, but here is an example 
 	}
 ```
 
-7. Thats it. You can start reviewing the data by pressing the **F1** key or click on the red button on the top right corner of your screen.
+7. Thats it. You can start reviewing the data. PRO TIP: Use the F1 (show) and Esc (hide) to save time.
 
 ### Method OnEnter/OnExit call information
 
