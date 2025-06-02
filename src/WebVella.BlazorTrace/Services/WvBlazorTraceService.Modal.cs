@@ -128,10 +128,11 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 				result.MethodTraceRows = result.MethodTraceRows.OrderBy(x => $"{x.Module}{x.ComponentFullName}{x.Method}").ToList();
 			}
 		}
-		else if(result.Request.IsSignalMenu){ 
+		else if (result.Request.IsSignalMenu)
+		{
 			var signalTraceRows = primarySN.GenerateSignalTraceRows(
 				secondarySn: secondarySN
-			);		
+			);
 			foreach (var row in signalTraceRows)
 			{
 				if (!row.SignalNameMatches(result.Request.SignalsFilter.SignalNameFilter)) continue;
@@ -156,6 +157,24 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 			{
 				result.SignalTraceRows = result.SignalTraceRows.OrderBy(x => $"{x.SignalName}").ToList();
 			}
+		}
+		else if (result.Request.IsTraceMuteMenu)
+		{
+			var traceRows = await GetAllTraceMutesAsync();
+			foreach (var row in traceRows)
+			{
+				if (!row.IsTypeMatches(result.Request.MutedFilter.TypeFilter)) continue;
+				if (!row.ModuleMatches(result.Request.MutedFilter.ModuleFilter)) continue;
+				if (!row.ComponentMatches(result.Request.MutedFilter.ComponentFilter)) continue;
+				if (!row.InstanceTagMatches(result.Request.MutedFilter.InstanceTag)) continue;
+				if (!row.MethodMatches(result.Request.MutedFilter.MethodFilter)) continue;
+				if (!row.SignalMatches(result.Request.MutedFilter.SignalFilter)) continue;
+				if (!row.FieldMatches(result.Request.MutedFilter.FieldFilter)) continue;
+				if (!row.CustomDataMatches(result.Request.MutedFilter.CustomDataFilter)) continue;
+				if (!row.IsBookmarkedMatches(result.Request.MutedFilter.BookmarkFilter)) continue;
+				result.MutedTraceRows.Add(row);
+			}
+			result.MutedTraceRows = result.MutedTraceRows.OrderBy(x => $"{x.Id}").ToList();
 		}
 		return result;
 	}

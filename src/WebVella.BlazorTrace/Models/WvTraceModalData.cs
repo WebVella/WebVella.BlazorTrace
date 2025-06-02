@@ -177,6 +177,7 @@ public class WvTraceModalData
 	public List<WvSnapshotListItem> SnapshotList { get; set; } = new();
 	public List<WvMethodTraceRow> MethodTraceRows { get; set; } = new();
 	public List<WvSignalTraceRow> SignalTraceRows { get; set; } = new();
+	public List<WvTraceMute> MutedTraceRows { get; set; } = new();
 }
 public class WvTraceModalRequestMethodsFilter
 {
@@ -219,16 +220,28 @@ public class WvTraceModalRequestSignalsFilter
 
 public class WvTraceModalRequestMutedFilter
 {
+	public string? TypeFilter { get; set; } = null;
 	public string? ModuleFilter { get; set; } = null;
 	public string? ComponentFilter { get; set; } = null;
+	public string? InstanceTag { get; set; } = null;
 	public string? MethodFilter { get; set; } = null;
+	public string? SignalFilter { get; set; } = null;
+	public string? FieldFilter { get; set; } = null;
+	public string? CustomDataFilter { get; set; } = null;
+	public string? BookmarkFilter { get; set; } = null;
 
 	[JsonIgnore]
 	public bool HasFilter
 	{
-		get => !String.IsNullOrWhiteSpace(ModuleFilter)
+		get => !String.IsNullOrWhiteSpace(TypeFilter)
+		|| !String.IsNullOrWhiteSpace(ModuleFilter)
 		|| !String.IsNullOrWhiteSpace(ComponentFilter)
+		|| !String.IsNullOrWhiteSpace(InstanceTag)
 		|| !String.IsNullOrWhiteSpace(MethodFilter)
+		|| !String.IsNullOrWhiteSpace(SignalFilter)
+		|| !String.IsNullOrWhiteSpace(FieldFilter)
+		|| !String.IsNullOrWhiteSpace(CustomDataFilter)
+		|| !String.IsNullOrWhiteSpace(BookmarkFilter)
 		;
 	}
 }

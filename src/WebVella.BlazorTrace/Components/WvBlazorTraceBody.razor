@@ -386,10 +386,10 @@
 					<table>
 						<thead>
 							<tr class="wv-sticky" style="top:-10px;">
-								<th style="width:95px">
+								<th style="width:40px">
 									@if (_data?.Request is not null && _data.Request.MutedFilter.HasFilter)
 									{
-										<button type="button" class="icon wv-accent" @onclick="@(async () => await _clearFilter(typeof(WvTraceModalRequestMutedFilter)))" 
+										<button type="button" class="icon wv-accent" @onclick="@(async () => await _clearFilter(typeof(WvTraceModalRequestMutedFilter)))"
 												style="border-width:1px;">
 											<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
 												<path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
@@ -398,31 +398,88 @@
 									}
 								</th>
 								<th>
-									<InputText placeholder="signal name" autocomplete="new-password"
+									<InputText placeholder="type" autocomplete="new-password"
+											   @bind-Value=@_data!.Request.MutedFilter.TypeFilter
+											   @bind-Value:after=_submitFilter />
+								</th>
+								<th>
+									<InputText placeholder="module" autocomplete="new-password"
 											   @bind-Value=@_data!.Request.MutedFilter.ModuleFilter
 											   @bind-Value:after=_submitFilter />
 								</th>
+								<th>
+									<InputText placeholder="component" autocomplete="new-password"
+											   @bind-Value=@_data!.Request.MutedFilter.ComponentFilter
+											   @bind-Value:after=_submitFilter />
+								</th>
+								<th>
+									<InputText placeholder="instance tag" autocomplete="new-password"
+											   @bind-Value=@_data!.Request.MutedFilter.InstanceTag
+											   @bind-Value:after=_submitFilter />
+								</th>
+								<th>
+									<InputText placeholder="method" autocomplete="new-password"
+											   @bind-Value=@_data!.Request.MutedFilter.MethodFilter
+											   @bind-Value:after=_submitFilter />
+								</th>
+								<th>
+									<InputText placeholder="signal" autocomplete="new-password"
+											   @bind-Value=@_data!.Request.MutedFilter.SignalFilter
+											   @bind-Value:after=_submitFilter />
+								</th>
+								<th>
+									<InputText placeholder="field" autocomplete="new-password"
+											   @bind-Value=@_data!.Request.MutedFilter.FieldFilter
+											   @bind-Value:after=_submitFilter />
+								</th>
+								<th>
+									<InputText placeholder="custom data" autocomplete="new-password"
+											   @bind-Value=@_data!.Request.MutedFilter.CustomDataFilter
+											   @bind-Value:after=_submitFilter />
+								</th>
+								<th>
+									<InputText placeholder="bookmark" autocomplete="new-password"
+											   @bind-Value=@_data!.Request.MutedFilter.BookmarkFilter
+											   @bind-Value:after=_submitFilter />
+								</th>
+
 							</tr>
 						</thead>
 						<tbody>
-							<Virtualize Items="_currentMutes" Context="item" TItem="WvTraceMute">
+							<Virtualize Items="_data.MutedTraceRows" Context="item" TItem="WvTraceMute">
 								<tr @key=@item.Id>
 									<td class="wv-button">
-										<button type="button" class="icon wv-mute" title="mute trace">
+										<button type="button" class="icon wv-accent" title="unmute trace" @onclick=@(()=> _muteTraceChange(item))>
 											<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
-												<path d="M5.164 14H15c-.299-.199-.557-.553-.78-1-.9-1.8-1.22-5.12-1.22-6q0-.396-.06-.776l-.938.938c.02.708.157 2.154.457 3.58.161.767.377 1.566.663 2.258H6.164zm5.581-9.91a4 4 0 0 0-1.948-1.01L8 2.917l-.797.161A4 4 0 0 0 4 7c0 .628-.134 2.197-.459 3.742q-.075.358-.166.718l-1.653 1.653q.03-.055.059-.113C2.679 11.2 3 7.88 3 7c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0c.942.19 1.788.645 2.457 1.284zM10 15a2 2 0 1 1-4 0zm-9.375.625a.53.53 0 0 0 .75.75l14.75-14.75a.53.53 0 0 0-.75-.75z" />
+												<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+												<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708" />
 											</svg>
 										</button>
 									</td>
-									<td title="signal name">
-										<span>@item.Module</span>
+									<td>@((MarkupString)item.Type.WvBTToDescriptionString())</td>
+									<td>@((MarkupString)(String.IsNullOrWhiteSpace(item.Module) ? "<span class='wv-mute'>undefined</span>" : item.Module))</td>
+									<td>@((MarkupString)(String.IsNullOrWhiteSpace(item.Component) ? "<span class='wv-mute'>undefined</span>" : item.Component))</td>
+									<td>@((MarkupString)(String.IsNullOrWhiteSpace(item.InstanceTag) ? "<span class='wv-mute'>undefined</span>" : item.InstanceTag))</td>
+									<td>@((MarkupString)(String.IsNullOrWhiteSpace(item.Method) ? "<span class='wv-mute'>undefined</span>" : item.Method))</td>
+									<td>@((MarkupString)(String.IsNullOrWhiteSpace(item.Signal) ? "<span class='wv-mute'>undefined</span>" : item.Signal))</td>
+									<td>@((MarkupString)(String.IsNullOrWhiteSpace(item.Field) ? "<span class='wv-mute'>undefined</span>" : item.Field))</td>
+									<td>@((MarkupString)(String.IsNullOrWhiteSpace(item.CustomData) ? "<span class='wv-mute'>undefined</span>" : item.CustomData))</td>
+									<td>
+										@if (item.IsBookmarked is not null)
+										{
+											<span>@item.IsBookmarked.Value.ToString()</span>
+										}
+										else
+										{
+											<span class='wv-mute'>undefined</span>
+										}
 									</td>
 								</tr>
 							</Virtualize>
 							@if (_currentMutes.Count == 0)
 							{
 								<tr>
-									<td colspan="4" style="padding:30px;text-align:center;">No traces are muted yet</td>
+									<td colspan="10" style="padding:30px;text-align:center;">No traces are muted yet</td>
 								</tr>
 							}
 						</tbody>

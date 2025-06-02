@@ -97,10 +97,9 @@ public static class WvModalUtility
 		=> $"{signalName}";
 
 	public static string GenerateTraceMuteHash(WvTraceMute item)
-		=> $"{item.Type}$$${item.Module}$$${item.Component}$$${item.InstanceTag}$$${item.Method}" +
-		$"$$${item.Signal}$$${item.Field}$$${item.CustomData}" +
-		$"$$${(item.IsBookmarkedMethod is null ? "null" : item.IsBookmarkedMethod.Value.ToString())}" +
-		$"$$${(item.IsBookmarkedSignal is null ? "null" : item.IsBookmarkedSignal.Value.ToString())}";
+		=> $"{item.Type}$$${item.Module ?? "undefined"}$$${item.Component ?? "undefined"}$$${item.InstanceTag ?? "undefined"}$$${item.Method ?? "undefined"}" +
+		$"$$${item.Signal ?? "undefined"}$$${item.Field ?? "undefined"}$$${item.CustomData ?? "undefined"}" +
+		$"$$${(item.IsBookmarked is null ? "undefined" : item.IsBookmarked.Value.ToString())}";
 
 	public static void AddSnapshotToComparisonDictionary(this Dictionary<string, WvModuleUnionData> unionDict, Dictionary<string, WvSnapshotMethodComparison> methodComp,
 		Dictionary<string, WvSnapshotMemoryComparison> memoryComp,
