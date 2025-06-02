@@ -6,19 +6,23 @@ using WebVella.BlazorTrace.Services;
 using WebVella.BlazorTrace.Utility;
 
 namespace WebVella.BlazorTrace;
-public partial class WvBlazorSignalLimitModal : WvBlazorTraceComponentBase
+public partial class WvBlazorTraceLimitModal : WvBlazorTraceComponentBase
 {
 	// INJECTS
 	//////////////////////////////////////////////////
 	[Inject] protected IJSRuntime JSRuntimeSrv { get; set; } = default!;
 
+	// PARAMETERS
+	//////////////////////////////////////////////////
+	[Parameter] public int NestLevel { get; set; } = 1;
+
 	// LOCAL VARIABLES
 	//////////////////////////////////////////////////
 	private Guid _componentId = Guid.NewGuid();
-	private DotNetObjectReference<WvBlazorSignalLimitModal> _objectRef = default!;
+	private DotNetObjectReference<WvBlazorTraceLimitModal> _objectRef = default!;
 	private bool _escapeListenerEnabled = false;
 	private bool _modalVisible = false;
-	private WvSignalTraceRow? _row = null;
+	private WvMethodTraceRow? _row = null;
 
 	// LIFECYCLE
 	/// //////////////////////////////////////////////
@@ -37,7 +41,7 @@ public partial class WvBlazorSignalLimitModal : WvBlazorTraceComponentBase
 
 	// PUBLIC
 	//////////////////////////////////////////////////
-	public async Task Show(WvSignalTraceRow row)
+	public async Task Show(WvMethodTraceRow row)
 	{
 		await new JsService(JSRuntimeSrv).AddKeyEventListener(_objectRef, "OnShortcutKey", "Escape", _componentId.ToString());
 		_escapeListenerEnabled = true;
@@ -72,7 +76,13 @@ public partial class WvBlazorSignalLimitModal : WvBlazorTraceComponentBase
 		if (_row is null) return String.Empty;
 
 		var sb = new StringBuilder();
-		sb.Append($"<span>{_row.SignalName}</span>");
+		sb.Append($"<span>{_row.Component}</span>");
+		if (!String.IsNullOrWhiteSpace(_row.InstanceTag))
+		{
+			sb.Append($" <span class='wv-tag' style='margin-left:5px'>{_row.InstanceTag}</span>");
+		}
+		sb.Append("<span class='wv-trace-modal__divider'></span>");
+		sb.Append($"<span>{_row.Method}</span>");
 
 		return sb.ToString();
 	}

@@ -1,6 +1,6 @@
 ﻿.wv-trace-button {
   position: fixed;
-  z-index: 900;
+  z-index: 19000;
 }
 .wv-trace-button button {
   display: flex;
@@ -109,8 +109,19 @@
 .wv-trace-button.wv-trace-top-right button {
   border-radius: 0 0 50% 50%;
 }
+@keyframes highlight {
+  0% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: #fed7aa;
+  }
+  100% {
+    background-color: transparent;
+  }
+}
 .wv-trace-overlay {
-  z-index: 901;
+  z-index: 20000;
   position: fixed;
   top: 0;
   left: 0;
@@ -120,12 +131,9 @@
   cursor: pointer;
   backdrop-filter: blur(2px);
 }
-.wv-trace-overlay.secondary {
-  z-index: 1000;
-}
 .wv-trace-modal {
   position: fixed;
-  z-index: 902;
+  z-index: 20001;
   background: white;
   left: 5vw;
   top: 5vh;
@@ -138,23 +146,21 @@
   border-radius: 10px;
   font-family: Arial, Helvetica, sans-serif;
 }
-@keyframes highlight {
-  0% {
-    background-color: transparent;
-  }
-  50% {
-    background-color: #fed7aa;
-  }
-  100% {
-    background-color: transparent;
-  }
-}
-.wv-trace-modal.secondary {
-  z-index: 1002;
+.wv-trace-modal.medium {
   width: 75vw;
   height: 75vh;
   left: 12.5vw;
   top: 12.5vh;
+}
+.wv-trace-modal.small {
+  width: 1024px;
+  min-width: 1024px;
+  height: 600px;
+  min-height: 600px;
+  margin-left: calc((-1 * 1024px)/2);
+  margin-top: calc((-1 * 600px)/2);
+  left: 50vw;
+  top: 50vh;
 }
 .wv-trace-modal__header {
   display: flex;
@@ -239,6 +245,9 @@
   z-index: 1;
   width: 200px !important;
 }
+.wv-trace-modal__header__center__clear {
+  padding-right: 10px;
+}
 .wv-trace-modal__header__right {
   flex: 0 0 200px;
   display: flex;
@@ -297,10 +306,10 @@
   border-right: 1px solid transparent;
 }
 .wv-trace-modal__subheader .wv-trace-nav li > a:hover {
-  background-color: rgba(76, 5, 25, 0.35);
+  background-color: color-mix(in srgb, #be123c 10%, #0f172a 90%);
 }
 .wv-trace-modal__subheader .wv-trace-nav li.active > a {
-  background-color: rgba(76, 5, 25, 0.75);
+  background-color: #4c0519;
   border-color: #4c0519;
 }
 .wv-trace-modal__subheader .wv-trace-nav li svg {
@@ -323,7 +332,7 @@
 .wv-trace-modal__body table th,
 .wv-trace-modal__body table td {
   border: 1px solid #1f2937;
-  padding: 10px 5px;
+  padding: 10px;
 }
 .wv-trace-modal__body table th button,
 .wv-trace-modal__body table td button {
@@ -340,18 +349,21 @@
 .wv-trace-modal__body table td .wv-limits {
   white-space: nowrap;
 }
-.wv-trace-modal__body table th.button,
-.wv-trace-modal__body table td.button {
-  padding: 0 3px;
-  text-align: center;
+.wv-trace-modal__body table th.wv-button,
+.wv-trace-modal__body table td.wv-button {
+  white-space: nowrap;
 }
-.wv-trace-modal__body table th.clickable,
-.wv-trace-modal__body table td.clickable {
+.wv-trace-modal__body table th.wv-button button + button,
+.wv-trace-modal__body table td.wv-button button + button {
+  margin-left: 5px;
+}
+.wv-trace-modal__body table th.wv-clickable,
+.wv-trace-modal__body table td.wv-clickable {
   position: relative;
   padding-left: 30px;
 }
-.wv-trace-modal__body table th.clickable .icon,
-.wv-trace-modal__body table td.clickable .icon {
+.wv-trace-modal__body table th.wv-clickable .icon,
+.wv-trace-modal__body table td.wv-clickable .icon {
   color: #64748b;
   position: absolute;
   left: 0;
@@ -363,24 +375,37 @@
   justify-content: center;
   align-items: start;
 }
-.wv-trace-modal__body table th.clickable .icon svg,
-.wv-trace-modal__body table td.clickable .icon svg {
+.wv-trace-modal__body table th.wv-clickable .icon svg,
+.wv-trace-modal__body table td.wv-clickable .icon svg {
   width: 10px;
 }
-.wv-trace-modal__body table th.clickable:hover,
-.wv-trace-modal__body table td.clickable:hover {
+.wv-trace-modal__body table th.wv-clickable:hover,
+.wv-trace-modal__body table td.wv-clickable:hover {
   cursor: pointer;
   background: rgba(59, 130, 246, 0.25) !important;
 }
-.wv-trace-modal__body table thead tr.bookmark-row button.bookmarked {
+.wv-trace-modal__body table thead tr.wv-bookmark-row button.bookmarked {
   color: #06b6d4;
 }
-.wv-trace-modal__body table thead tr.bookmark-row:last-child th,
-.wv-trace-modal__body table thead tr.bookmark-row:last-child td {
-  border-bottom: 5px solid rgba(6, 182, 212, 0.15);
+.wv-trace-modal__body table thead tr.wv-bookmark-row:last-child th,
+.wv-trace-modal__body table thead tr.wv-bookmark-row:last-child td {
+  position: relative;
+  padding-bottom: calc(10px + 5px);
+}
+.wv-trace-modal__body table thead tr.wv-bookmark-row:last-child th:after,
+.wv-trace-modal__body table thead tr.wv-bookmark-row:last-child td:after {
+  position: absolute;
+  display: block;
+  content: "";
+  background: rgba(6, 182, 212, 0.15);
+  height: 5px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
 }
 .wv-trace-modal__body table thead th {
-  background: rgba(76, 5, 25, 0.35);
+  background: color-mix(in srgb, #be123c 10%, #0f172a 90%);
   padding: 5px;
   color: #64748b;
   font-weight: normal;
@@ -395,8 +420,15 @@
   color: #64748b;
 }
 .wv-trace-modal__body table tbody tr:hover td,
-.wv-trace-modal__body table thead tr.bookmark-row:hover td {
+.wv-trace-modal__body table thead tr.wv-bookmark-row:hover td {
   background-color: rgba(255, 255, 255, 0.05);
+}
+.wv-trace-modal__body table tr.wv-selected-row td,
+.wv-trace-modal__body table tr.wv-selected-row th {
+  background: rgba(6, 182, 212, 0.1);
+}
+.wv-trace-modal__body table tr.wv-selected-row:hover {
+  background: rgba(6, 182, 212, 0.2);
 }
 .wv-trace-modal__footer {
   flex: 0 0 40px;
@@ -447,19 +479,19 @@
   border: 1px solid transparent;
   border-radius: 5px;
   padding: 5px 10px;
-  display: flex;
+  display: inline-flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
   color: #e5e7eb;
 }
 .wv-trace-modal button:hover {
-  background: rgba(76, 5, 25, 0.35);
+  background: color-mix(in srgb, #be123c 10%, #0f172a 90%);
 }
 .wv-trace-modal button.wv-green {
   background: transparent;
   color: #15803d;
-  border: 2px solid #15803d;
+  border-color: #15803d;
 }
 .wv-trace-modal button.wv-green:hover {
   background: rgba(21, 128, 61, 0.35);
@@ -467,7 +499,7 @@
 .wv-trace-modal button.wv-mute {
   background: transparent;
   color: #64748b;
-  border: 2px solid #64748b;
+  border-color: #64748b;
 }
 .wv-trace-modal button.wv-mute:hover {
   background: rgba(100, 116, 139, 0.35);
@@ -475,18 +507,18 @@
 .wv-trace-modal button.wv-cyan {
   background: transparent;
   color: #06b6d4;
-  border: 2px solid #06b6d4;
+  border-color: #06b6d4;
 }
 .wv-trace-modal button.wv-cyan:hover {
-  background: rgba(6, 182, 212, 0.35);
+  background: rgba(6, 182, 212, 0.2);
 }
 .wv-trace-modal button.wv-accent {
   background: transparent;
   color: #be123c;
-  border: 2px solid #be123c;
+  border-color: #be123c;
 }
 .wv-trace-modal button.wv-accent:hover {
-  background: rgba(76, 5, 25, 0.35);
+  background: color-mix(in srgb, #be123c 10%, #0f172a 90%);
 }
 .wv-trace-modal button.circle {
   padding: 0;
@@ -531,6 +563,11 @@
 .wv-trace-modal .wv-number {
   text-align: right;
 }
+.wv-trace-modal .wv-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
 .wv-trace-nav {
   list-style-type: none;
   margin: 0;
@@ -540,12 +577,26 @@
 .wv-trace-nav li {
   float: left;
 }
-.wv-trace-nav li a,
-.wv-trace-nav li span {
+.wv-trace-nav li > a,
+.wv-trace-nav li > span {
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 0 10px;
+  padding: 0 7px;
   text-decoration: none;
+}
+.wv-trace-nav li > a .wv-badge,
+.wv-trace-nav li > span .wv-badge {
+  margin-left: 5px;
+  display: inline-flex;
+  padding: 0px 5px;
+  background: #be123c;
+  color: white;
+  font-size: 11px;
+  border-radius: 5px;
+}
+.wv-trace-nav li > a svg,
+.wv-trace-nav li > span svg {
+  margin-left: 5px;
 }

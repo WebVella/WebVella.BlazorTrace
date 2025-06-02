@@ -15,15 +15,9 @@ public class WvTraceModalRequest
 	public Guid? PrimarySnapshotId { get; set; } = null;
 	public Guid? SecondarySnapshotId { get; set; } = null;
 	public WvTraceModalMenu? Menu { get; set; } = null;
-	public bool SortAscending { get; set; } = true;
-	public string? ModuleFilter { get; set; } = null;
-	public string? ComponentFilter { get; set; } = null;
-	public string? SignalNameFilter { get; set; } = null;
-	public string? MethodFilter { get; set; } = null;
-	public WvTraceModalMemoryFilter? MemoryFilter { get; set; } = null;
-	public WvTraceModalDurationFilter? DurationFilter { get; set; } = null;
-	public WvTraceModalCallsFilter? CallsFilter { get; set; } = null;
-	public WvTraceModalLimitsFilter? LimitsFilter { get; set; } = null;
+	public WvTraceModalRequestMethodsFilter MethodsFilter { get; set; } = new();
+	public WvTraceModalRequestSignalsFilter SignalsFilter { get; set; } = new();
+	public WvTraceModalRequestMutedFilter MutedFilter { get; set; } = new();
 	public bool IsAutoRefresh { get; set; } = false;
 	[JsonIgnore]
 	public bool IsEmpty
@@ -32,42 +26,17 @@ public class WvTraceModalRequest
 		PrimarySnapshotId is null
 		&& SecondarySnapshotId is null
 		&& Menu == null
-		&& SortAscending
-		&& ModuleFilter is null
-		&& ComponentFilter is null
-		&& SignalNameFilter is null
-		&& MethodFilter is null
-		&& MemoryFilter is null
-		&& DurationFilter is null
-		&& CallsFilter is null
-		&& LimitsFilter is null
+		&& !MethodsFilter.HasFilter
+		&& !SignalsFilter.HasFilter
+		&& !MutedFilter.HasFilter
 		&& !IsAutoRefresh;
-	}
-	[JsonIgnore]
-	public bool HasMethodFilter
-	{
-		get => !String.IsNullOrWhiteSpace(ModuleFilter)
-		|| !String.IsNullOrWhiteSpace(ComponentFilter)
-		|| !String.IsNullOrWhiteSpace(MethodFilter)
-		|| MemoryFilter is not null
-		|| DurationFilter is not null
-		|| CallsFilter is not null
-		|| LimitsFilter is not null;
-	}
-	[JsonIgnore]
-	public bool HasSignalFilter
-	{
-		get => !String.IsNullOrWhiteSpace(ModuleFilter)
-		|| !String.IsNullOrWhiteSpace(SignalNameFilter)
-		|| CallsFilter is not null
-		|| LimitsFilter is not null;
 	}
 	[JsonIgnore]
 	public bool IsMethodMenu
 	{
 		get
 		{
-			if(
+			if (
 				Menu == WvTraceModalMenu.MethodCalls
 				|| Menu == WvTraceModalMenu.MethodMemory
 				|| Menu == WvTraceModalMenu.MethodDuration
@@ -84,7 +53,7 @@ public class WvTraceModalRequest
 	{
 		get
 		{
-			if(
+			if (
 				Menu == WvTraceModalMenu.SignalCalls
 				|| Menu == WvTraceModalMenu.SignalLimits
 				|| Menu == WvTraceModalMenu.SignalName
@@ -99,15 +68,26 @@ public class WvTraceModalRequest
 	{
 		get
 		{
-			if(
+			if (
 				Menu == WvTraceModalMenu.Snapshots
 			) return true;
 
 			return false;
 		}
 	}
-}
+	[JsonIgnore]
+	public bool IsTraceMuteMenu
+	{
+		get
+		{
+			if (
+				Menu == WvTraceModalMenu.TraceMutes
+			) return true;
 
+			return false;
+		}
+	}
+}
 public enum WvTraceModalMenu
 {
 	[Description("Calls")]
@@ -128,6 +108,8 @@ public enum WvTraceModalMenu
 	SignalName = 8,
 	[Description("Snapshots")]
 	Snapshots = 9,
+	[Description("Muted")]
+	TraceMutes = 10,
 }
 public enum WvTraceModalCallsFilter
 {
@@ -144,7 +126,6 @@ public enum WvTraceModalCallsFilter
 	[Description("no change")]
 	NoDelta = 5,
 }
-
 public enum WvTraceModalMemoryFilter
 {
 	[Description("<= 50 KB")]
@@ -160,7 +141,6 @@ public enum WvTraceModalMemoryFilter
 	[Description("no change")]
 	NoDelta = 5,
 }
-
 public enum WvTraceModalDurationFilter
 {
 	[Description("<= 50 ms")]
@@ -176,8 +156,6 @@ public enum WvTraceModalDurationFilter
 	[Description("no change")]
 	NoDelta = 5,
 }
-
-
 public enum WvTraceModalLimitsFilter
 {
 	[Description("has limits exceeded")]
@@ -193,7 +171,6 @@ public enum WvTraceModalLimitsFilter
 	[Description("exceeds duration limit")]
 	ExceedDuration = 5,
 }
-
 public class WvTraceModalData
 {
 	public WvTraceModalRequest Request { get; set; } = new();
@@ -201,4 +178,59 @@ public class WvTraceModalData
 	public List<WvMethodTraceRow> MethodTraceRows { get; set; } = new();
 	public List<WvSignalTraceRow> SignalTraceRows { get; set; } = new();
 }
+public class WvTraceModalRequestMethodsFilter
+{
+	public string? ModuleFilter { get; set; } = null;
+	public string? ComponentFilter { get; set; } = null;
+	public string? MethodFilter { get; set; } = null;
+	public WvTraceModalMemoryFilter? MemoryFilter { get; set; } = null;
+	public WvTraceModalDurationFilter? DurationFilter { get; set; } = null;
+	public WvTraceModalCallsFilter? CallsFilter { get; set; } = null;
+	public WvTraceModalLimitsFilter? LimitsFilter { get; set; } = null;
+	[JsonIgnore]
+	public bool HasFilter
+	{
+		get => !String.IsNullOrWhiteSpace(ModuleFilter)
+		|| !String.IsNullOrWhiteSpace(ComponentFilter)
+		|| !String.IsNullOrWhiteSpace(MethodFilter)
+		|| MemoryFilter is not null
+		|| DurationFilter is not null
+		|| CallsFilter is not null
+		|| LimitsFilter is not null;
+	}
+}
+
+public class WvTraceModalRequestSignalsFilter
+{
+	public string? ModuleFilter { get; set; } = null;
+	public string? SignalNameFilter { get; set; } = null;
+	public WvTraceModalCallsFilter? CallsFilter { get; set; } = null;
+	public WvTraceModalLimitsFilter? LimitsFilter { get; set; } = null;
+
+	[JsonIgnore]
+	public bool HasFilter
+	{
+		get => !String.IsNullOrWhiteSpace(ModuleFilter)
+		|| !String.IsNullOrWhiteSpace(SignalNameFilter)
+		|| CallsFilter is not null
+		|| LimitsFilter is not null;
+	}
+}
+
+public class WvTraceModalRequestMutedFilter
+{
+	public string? ModuleFilter { get; set; } = null;
+	public string? ComponentFilter { get; set; } = null;
+	public string? MethodFilter { get; set; } = null;
+
+	[JsonIgnore]
+	public bool HasFilter
+	{
+		get => !String.IsNullOrWhiteSpace(ModuleFilter)
+		|| !String.IsNullOrWhiteSpace(ComponentFilter)
+		|| !String.IsNullOrWhiteSpace(MethodFilter)
+		;
+	}
+}
+
 

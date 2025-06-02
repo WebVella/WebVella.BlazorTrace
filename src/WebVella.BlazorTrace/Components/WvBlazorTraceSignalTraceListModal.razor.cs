@@ -6,7 +6,7 @@ using WebVella.BlazorTrace.Services;
 using WebVella.BlazorTrace.Utility;
 
 namespace WebVella.BlazorTrace;
-public partial class WvBlazorTraceListModal : WvBlazorTraceComponentBase, IAsyncDisposable
+public partial class WvBlazorTraceSignalTraceListModal : WvBlazorTraceComponentBase, IAsyncDisposable
 {
 	// INJECTS
 	//////////////////////////////////////////////////
@@ -19,11 +19,10 @@ public partial class WvBlazorTraceListModal : WvBlazorTraceComponentBase, IAsync
 	// LOCAL VARIABLES
 	//////////////////////////////////////////////////
 	private Guid _componentId = Guid.NewGuid();
-	private DotNetObjectReference<WvBlazorTraceListModal> _objectRef = default!;
+	private DotNetObjectReference<WvBlazorTraceSignalTraceListModal> _objectRef = default!;
 	private bool _escapeListenerEnabled = false;
 	private bool _modalVisible = false;
-	private WvMethodTraceRow? _row = null;
-	private WvBlazorTraceMemoryModal? _memoryModal = null;
+	private WvSignalTraceRow? _row = null;
 
 	// LIFECYCLE
 	/// //////////////////////////////////////////////
@@ -42,7 +41,7 @@ public partial class WvBlazorTraceListModal : WvBlazorTraceComponentBase, IAsync
 
 	// PUBLIC
 	//////////////////////////////////////////////////
-	public async Task Show(WvMethodTraceRow row)
+	public async Task Show(WvSignalTraceRow row)
 	{
 		await new JsService(JSRuntimeSrv).AddKeyEventListener(_objectRef, "OnShortcutKey", "Escape", _componentId.ToString());
 		_escapeListenerEnabled = true;
@@ -77,21 +76,9 @@ public partial class WvBlazorTraceListModal : WvBlazorTraceComponentBase, IAsync
 		if (_row is null) return String.Empty;
 
 		var sb = new StringBuilder();
-		sb.Append($"<span>{_row.Component}</span>");
-		if (!String.IsNullOrWhiteSpace(_row.InstanceTag))
-		{
-			sb.Append($" <span class='wv-tag' style='margin-left:5px'>{_row.InstanceTag}</span>");
-		}
-		sb.Append("<span class='wv-trace-modal__divider'></span>");
-		sb.Append($"<span>{_row.Method}</span>");
+		sb.Append($"<span>{_row.SignalName}</span>");
 
 		return sb.ToString();
-	}
-
-	private async Task _showMemoryModal(List<WvTraceMemoryInfo>? memInfo)
-	{
-		if (_memoryModal is null || _row is null) return;
-		await _memoryModal.Show(_row, memInfo.ToMemoryDataFields());
 	}
 
 

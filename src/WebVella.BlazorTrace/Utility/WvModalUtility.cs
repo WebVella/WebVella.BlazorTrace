@@ -96,6 +96,12 @@ public static class WvModalUtility
 	public static string GenerateSignalHash(string? signalName)
 		=> $"{signalName}";
 
+	public static string GenerateTraceMuteHash(WvTraceMute item)
+		=> $"{item.Type}$$${item.Module}$$${item.Component}$$${item.InstanceTag}$$${item.Method}" +
+		$"$$${item.Signal}$$${item.Field}$$${item.CustomData}" +
+		$"$$${(item.IsBookmarkedMethod is null ? "null" : item.IsBookmarkedMethod.Value.ToString())}" +
+		$"$$${(item.IsBookmarkedSignal is null ? "null" : item.IsBookmarkedSignal.Value.ToString())}";
+
 	public static void AddSnapshotToComparisonDictionary(this Dictionary<string, WvModuleUnionData> unionDict, Dictionary<string, WvSnapshotMethodComparison> methodComp,
 		Dictionary<string, WvSnapshotMemoryComparison> memoryComp,
 		WvSnapshot? snapshot,
@@ -182,12 +188,12 @@ public static class WvModalUtility
 			if (sc is not null)
 			{
 				compData.TraceListChange += sc.TraceList.Count;
-				compData.LastDurationChangeMS += sc.LastDurationMS;
+				compData.LastDurationChangeMS += sc.LastDurationMS ?? 0;
 			}
 			if (pr is not null)
 			{
 				compData.TraceListChange -= pr.TraceList.Count;
-				compData.LastDurationChangeMS -= pr.LastDurationMS;
+				compData.LastDurationChangeMS -= pr.LastDurationMS ?? 0;
 			}
 		}
 
@@ -241,8 +247,6 @@ public static class WvModalUtility
 			}
 		}
 	}
-
-
 	public static void ProcessSignalComparisonDictionary(this Dictionary<string, WvSignalUnionData> unionDict, Dictionary<string, WvSnapshotSignalComparison> signalDict)
 	{
 		if (unionDict is null) unionDict = new();
@@ -265,7 +269,6 @@ public static class WvModalUtility
 			}
 		}
 	}
-
 	public static List<WvSnapshotMemoryComparisonDataField> ToMemoryDataFields(this List<WvTraceMemoryInfo>? memInfo)
 	{
 		var result = new List<WvSnapshotMemoryComparisonDataField>();
@@ -283,7 +286,6 @@ public static class WvModalUtility
 		}
 		return result;
 	}
-
 	private static void SetModuleUnionData(this Dictionary<string, WvModuleUnionData> unionDict,
 		string moduleName,
 		WvTraceSessionModule module,
@@ -367,5 +369,75 @@ public static class WvModalUtility
 			matchedInstanceUnionData.MethodDict[methodHash].Primary = method;
 		else
 			matchedInstanceUnionData.MethodDict[methodHash].Secondary = method;
+	}
+
+	public static string GenerateMuteDescriptionHtml(this WvTraceMuteType muteType, object trace)
+	{
+		string? module = null;
+		string? component = null;
+		string? instanceTag = null;
+		string? method = null;
+		string? field = null;
+		string? customData = null;
+		string? signalName = null;
+		WvTraceSessionLimitType? limitType = null;
+		if (trace is WvMethodTraceRow)
+		{
+			var item = (WvMethodTraceRow)trace;
+			module = item.Module;
+			component = item.Component;
+			instanceTag = item.InstanceTag;
+			method = item.Method;
+		}
+		else if (trace is WvSignalTraceRow)
+		{
+			var item = (WvSignalTraceRow)trace;
+			signalName = item.SignalName;
+		}
+		string moduleHtml = !String.IsNullOrWhiteSpace(module) ? $"<span>{module}</span>" : "<span>undefined</span>";
+		string componentHtml = !String.IsNullOrWhiteSpace(component) ? $"<span>{component}</span>" : "<span>undefined</span>";
+		string instanceTagHtml = !String.IsNullOrWhiteSpace(instanceTag) ? $"<span>{instanceTag}</span>" : "<span>undefined</span>";
+		string methodHtml = !String.IsNullOrWhiteSpace(method) ? $"<span>{method}</span>" : "<span>undefined</span>";
+		string signalNameHtml = !String.IsNullOrWhiteSpace(signalName) ? $"<span>{signalName}</span>" : "<span>undefined</span>";
+		string fieldHtml = !String.IsNullOrWhiteSpace(field) ? $"<span>{field}</span>" : "<span>undefined</span>";
+		string customDataHtml = !String.IsNullOrWhiteSpace(customData) ? $"<span>{customData}</span>" : "<span>undefined</span>";
+		string limitTypeHtml = limitType is not null ? $"<span>{limitType.Value.WvBTToDescriptionString()}</span>" : "<span>undefined</span>";
+		switch (muteType)
+		{
+			case WvTraceMuteType.Module:
+				return $"<span class='wv-mute'>module</span> {moduleHtml}";
+			case WvTraceMuteType.Component:
+				return $"<span class='wv-mute'>component</span> {componentHtml} <span class='wv-mute'>(all instances)</span>";
+			case WvTraceMuteType.ComponentInstance:
+				return $"<span class='wv-mute'>component</span> {componentHtml} <span class='wv-mute'>instance</span> {instanceTagHtml}";
+			case WvTraceMuteType.Method:
+				return $"<span class='wv-mute'>method</span> {methodHtml}";
+			case WvTraceMuteType.MethodInModule:
+				return $"<span class='wv-mute'>method</span> {methodHtml} <span class='wv-mute'>module</span> {moduleHtml}";
+			case WvTraceMuteType.MethodInComponent:
+				return $"<span class='wv-mute'>method</span> {methodHtml} <span class='wv-mute'>component</span> {componentHtml} <span class='wv-mute'>(all instances)</span>";
+			case WvTraceMuteType.MethodInComponentInstance:
+				return $"<span class='wv-mute'>method</span> {methodHtml} <span class='wv-mute'>component</span> {componentHtml} <span class='wv-mute'>instance</span> {instanceTagHtml}";
+			case WvTraceMuteType.Signal:
+				return $"<span class='wv-mute'>signal</span> {signalNameHtml}";
+			case WvTraceMuteType.Field:
+				return $"<span class='wv-mute'>field</span> {fieldHtml}";
+			case WvTraceMuteType.CustomData:
+				return $"<span class='wv-mute'>custom data</span> {customDataHtml}";
+			case WvTraceMuteType.Limit:
+				return $"<span class='wv-mute'>limit</span> {limitTypeHtml}";
+			case WvTraceMuteType.NotBookmarkedMethods:
+				return "<span>not bookmarked</span> <span class='wv-mute'>methods</span>";
+			case WvTraceMuteType.BookmarkedMethods:
+				return "<span>bookmarked</span> <span class='wv-mute'>methods</span>";
+			case WvTraceMuteType.NotBookmarkedSignals:
+				return "<span>not bookmarked</span> <span class='wv-mute'>signals</span>";
+			case WvTraceMuteType.BookmarkedSignals:
+				return "<span>bookmarked</span> <span class='wv-mute'>signals</span>";
+			default:
+				break;
+		}
+
+		return String.Empty;
 	}
 }

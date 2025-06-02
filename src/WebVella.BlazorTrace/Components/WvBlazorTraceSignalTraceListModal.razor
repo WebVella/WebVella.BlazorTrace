@@ -3,8 +3,9 @@
 @inherits WvBlazorTraceComponentBase
 @if (_row is not null && _modalVisible)
 {
-	<div title="click to close (Esc)" class="wv-trace-overlay secondary" @onclick=@(()=> Hide(false))></div>
-	<div class="wv-trace-modal secondary">
+	var style = $"z-index:{(20000 + (2 * NestLevel))}";
+	<WvBlazorTraceModalOverlay NestLevel="@NestLevel" OnHide="@(()=> Hide(false))" />
+	<div class="wv-trace-modal medium" style="@style">
 		<div class="wv-trace-modal__header">
 			<div class="wv-trace-modal__header__left" style="flex:1 1 auto;">@((MarkupString)_getTitle())</div>
 			<div class="wv-trace-modal__header__right">
@@ -24,8 +25,8 @@
 					</tr>
 				</thead>
 				<tbody>
-					@foreach (var item in _row.TraceList.OrderBy(x => x.SendOn))
-					{
+					<Virtualize Items="_row.TraceList.OrderBy(x => x.SendOn).ToList()" Context="item"
+								TItem="WvTraceSessionSignalTrace">
 						<tr @key="@Guid.NewGuid()">
 							<td>@item.SendOn.ToString("yyyy-MMM-dd HH:mm:ss")</td>
 							<td>@item.ModuleName</td>
@@ -34,8 +35,7 @@
 							<td class="wv-tag">@item.CustomData</td>
 							<td>@((MarkupString)item.LimitHtml)</td>
 						</tr>
-					}
-
+					</Virtualize>
 					@if (_row.TraceList.Count == 0)
 					{
 						<tr>

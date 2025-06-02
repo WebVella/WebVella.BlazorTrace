@@ -1,0 +1,56 @@
+﻿@namespace WebVella.BlazorTrace
+@using WebVella.BlazorTrace.Utility
+@inherits WvBlazorTraceComponentBase
+@if (_modalVisible && _row is not null)
+{
+	var style = $"z-index:{(20000 + (2 * NestLevel))}";
+	<WvBlazorTraceModalOverlay NestLevel="@NestLevel" OnHide="@(()=> Hide(false))" />
+	<div class="wv-trace-modal small" style="@style">
+		<div class="wv-trace-modal__header">
+			<div class="wv-trace-modal__header__left" style="flex:1 1 auto;">@((MarkupString)_getTitle())</div>
+			<div class="wv-trace-modal__header__right">
+				<button title="Close [Esc]" type="button" class="circle icon" @onclick=@(()=> Hide(false))>X</button>
+			</div>
+		</div>
+		<div class="wv-trace-modal__body">
+			<table>
+				<thead>
+					<tr>
+						<th style="width:120px"></th>
+						<th style="width:220px">scope</th>
+						<th>muted traces description</th> 
+					</tr>
+				</thead>
+				<tbody>
+					@foreach (var item in _applicableTypes)
+					{
+						var selected = TraceMutes.Any(x=> x.Id == item.Id);
+						<tr @key=@item class="@(selected ? "wv-selected-row" : "")">
+							<td>
+								@if (selected)
+								{
+									<button class="wv-cyan" style="width:100%" @onclick=@(()=>_typeClick(item))>selected</button>
+								}
+								else
+								{
+									<button class="wv-mute" style="width:100%" @onclick=@(()=>_typeClick(item))>not selected</button>
+								
+								}
+							</td>
+							<td>@((MarkupString)item.Type.WvBTToDescriptionString())</td>
+							<td>@((MarkupString)item.Type.GenerateMuteDescriptionHtml(_row))</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+
+		</div>
+		<div class="wv-trace-modal__footer">
+			<button title="Close [Esc]" type="button" @onclick=@(()=> Hide(false))>Close [Esc]</button>
+		</div>
+	</div>
+}
+
+
+
+

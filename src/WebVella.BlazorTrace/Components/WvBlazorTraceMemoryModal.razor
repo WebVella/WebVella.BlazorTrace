@@ -1,0 +1,54 @@
+﻿@namespace WebVella.BlazorTrace
+@using WebVella.BlazorTrace.Utility
+@inherits WvBlazorTraceComponentBase
+@if (_modalVisible && _row is not null)
+{
+	var style = $"z-index:{(20000 + (2 * NestLevel))}";
+	<WvBlazorTraceModalOverlay NestLevel="@NestLevel" OnHide="@(()=> Hide(false))" />
+	<div class="wv-trace-modal medium" style="@style">
+		<div class="wv-trace-modal__header">
+			<div class="wv-trace-modal__header__left" style="flex:1 1 auto;">@((MarkupString)_getTitle())</div>
+			<div class="wv-trace-modal__header__right">
+				<button title="Close [Esc]" type="button" class="circle icon" @onclick=@(()=> Hide(false))>X</button>
+			</div>
+		</div>
+		<div class="wv-trace-modal__body">
+			<table>
+				<thead>
+					<tr>
+						<th>field</th>
+						<th>type</th>
+						<th>assembly</th>
+						<th>memory</th>
+						<th>change</th>
+					</tr>
+				</thead>
+				<tbody>
+					<Virtualize Items="_items.OrderByDescending(x => x.SecondarySnapshotBytes).ToList()" Context="item"
+								TItem="WvSnapshotMemoryComparisonDataField">
+						<tr @key="@Guid.NewGuid()">
+							<td>@item.FieldName</td>
+							<td class="wv-tag">@item.TypeName</td>
+							<td>@item.AssemblyName</td>
+							<td class="wv-number">@item.SecondarySnapshotBytes.WvBTToKilobytesString()</td>
+							<td class="wv-number">@((MarkupString)item.ChangeKBHtml)</td>
+						</tr>
+					</Virtualize>
+					@if (_items.Count == 0)
+					{
+						<tr>
+							<td colspan="5" style="padding:30px;text-align:center;">Memory info is presented only if the current snapshot is selected as secondary</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+		<div class="wv-trace-modal__footer">
+			<button title="Close [Esc]" type="button" @onclick=@(()=> Hide(false))>Close [Esc]</button>
+		</div>
+	</div>
+}
+
+
+
+

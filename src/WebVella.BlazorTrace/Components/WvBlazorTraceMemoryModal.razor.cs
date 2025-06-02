@@ -6,7 +6,7 @@ using WebVella.BlazorTrace.Services;
 using WebVella.BlazorTrace.Utility;
 
 namespace WebVella.BlazorTrace;
-public partial class WvBlazorTraceListModal : WvBlazorTraceComponentBase, IAsyncDisposable
+public partial class WvBlazorTraceMemoryModal : WvBlazorTraceComponentBase
 {
 	// INJECTS
 	//////////////////////////////////////////////////
@@ -19,11 +19,11 @@ public partial class WvBlazorTraceListModal : WvBlazorTraceComponentBase, IAsync
 	// LOCAL VARIABLES
 	//////////////////////////////////////////////////
 	private Guid _componentId = Guid.NewGuid();
-	private DotNetObjectReference<WvBlazorTraceListModal> _objectRef = default!;
+	private DotNetObjectReference<WvBlazorTraceMemoryModal> _objectRef = default!;
 	private bool _escapeListenerEnabled = false;
 	private bool _modalVisible = false;
 	private WvMethodTraceRow? _row = null;
-	private WvBlazorTraceMemoryModal? _memoryModal = null;
+	private List<WvSnapshotMemoryComparisonDataField> _items = new();
 
 	// LIFECYCLE
 	/// //////////////////////////////////////////////
@@ -42,11 +42,15 @@ public partial class WvBlazorTraceListModal : WvBlazorTraceComponentBase, IAsync
 
 	// PUBLIC
 	//////////////////////////////////////////////////
-	public async Task Show(WvMethodTraceRow row)
+	public async Task Show(WvMethodTraceRow row, List<WvSnapshotMemoryComparisonDataField>? items = null)
 	{
 		await new JsService(JSRuntimeSrv).AddKeyEventListener(_objectRef, "OnShortcutKey", "Escape", _componentId.ToString());
 		_escapeListenerEnabled = true;
 		_row = row;
+		if (items is not null)
+			_items = items;
+		else
+			_items = _row.MemoryComparison.Fields;
 		_modalVisible = true;
 		RegenRenderLock();
 		await InvokeAsync(StateHasChanged);
@@ -56,6 +60,7 @@ public partial class WvBlazorTraceListModal : WvBlazorTraceComponentBase, IAsync
 		await new JsService(JSRuntimeSrv).RemoveKeyEventListener("Escape", _componentId.ToString());
 		_escapeListenerEnabled = false;
 		_row = null;
+		_items = new();
 		_modalVisible = false;
 		RegenRenderLock();
 		if (invokeStateChanged)
@@ -87,12 +92,5 @@ public partial class WvBlazorTraceListModal : WvBlazorTraceComponentBase, IAsync
 
 		return sb.ToString();
 	}
-
-	private async Task _showMemoryModal(List<WvTraceMemoryInfo>? memInfo)
-	{
-		if (_memoryModal is null || _row is null) return;
-		await _memoryModal.Show(_row, memInfo.ToMemoryDataFields());
-	}
-
 
 }

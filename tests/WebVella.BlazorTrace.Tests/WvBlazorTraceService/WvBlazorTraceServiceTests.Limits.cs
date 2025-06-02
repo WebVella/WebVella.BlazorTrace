@@ -60,7 +60,7 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 			var limitHit = method.LimitHits.First();
 			Assert.Equal(WvTraceSessionLimitType.Duration,limitHit.Type);
 			Assert.Equal(options.DurationLimitMS,limitHit.Limit);
-			Assert.Equal(false,limitHit.IsOnEnter);
+			Assert.False(limitHit.IsOnEnter);
 		}
 	}
 

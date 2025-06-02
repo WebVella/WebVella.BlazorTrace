@@ -28,7 +28,7 @@ public class WvSnapshotMethodComparisonData
 			return $"<span class='wv-positive'>+{TraceListChange}</span>";
 		}
 	}
-	public long? LastDurationChangeMS { get; set; }
+	public long LastDurationChangeMS { get; set; }
 	public string LastDurationChangeMSHtml
 	{
 		get

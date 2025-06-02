@@ -20,6 +20,8 @@ namespace WebVella.BlazorTrace;
 public partial interface IWvBlazorTraceService
 {
 	Dictionary<string, WvTraceSessionModule> GetModuleDict();
+	Dictionary<string, WvTraceSessionSignal> GetSignalDict();
+	void ClearCurrentSession();
 }
 public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 {
@@ -27,6 +29,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 	private const string _snapshotStoreKey = "wvbtstore";
 	private Dictionary<string, WvTraceSessionModule> _moduleDict = new();
 	private Dictionary<string, WvTraceSessionSignal> _signalDict = new();
+	private List<WvTraceMute>? _traceMutes = null;
 	private WvBlazorTraceConfiguration _configuration = new();
 	private readonly ConcurrentQueue<WvTraceQueueAction> _traceQueue = new();
 	private int _infiniteLoopDelaySeconds = 1;
@@ -43,16 +46,22 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 			_infiniteLoopCancellationTokenSource.Cancel();
 	}
 
-	public WvBlazorTraceService(IJSRuntime jSRuntime, 
+	public WvBlazorTraceService(IJSRuntime jSRuntime,
 		IWvBlazorTraceConfigurationService configurationService,
 		bool triggerQueueProcessing = true)
 	{
 		this._jSRuntime = jSRuntime;
 		this._configuration = configurationService.GetConfiguraion();
-		if(triggerQueueProcessing)
+		if (triggerQueueProcessing)
 			_processQueue();
 	}
 	public Dictionary<string, WvTraceSessionModule> GetModuleDict() => _moduleDict;
 	public Dictionary<string, WvTraceSessionSignal> GetSignalDict() => _signalDict;
+
+	public void ClearCurrentSession()
+	{
+		_moduleDict = new();
+		_signalDict = new();
+	}
 }
 

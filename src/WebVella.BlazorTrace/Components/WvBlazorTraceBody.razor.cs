@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using System.Threading.Tasks;
 using WebVella.BlazorTrace.Models;
 using WebVella.BlazorTrace.Services;
 using WebVella.BlazorTrace.Utility;
@@ -27,7 +28,6 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 	// LOCAL VARIABLES
 	//////////////////////////////////////////////////
 
-	private bool _visible = false;
 	private Guid _componentId = Guid.NewGuid();
 	private DotNetObjectReference<WvBlazorTraceBody> _objectRef = default!;
 	private bool _f1ListenerEnabled = false;
@@ -43,19 +43,22 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 	private CancellationTokenSource? _infiniteLoopCancellationTokenSource;
 	private WvBlazorTraceConfiguration _configuration = default!;
 	private WvBlazorTraceListModal? _traceListModal = null;
-	private WvBlazorSignalTraceListModal? _signalTraceListModal = null;
-	private WvBlazorMemoryModal? _memoryModal = null;
-	private WvBlazorLimitModal? _limitModal = null;
-	private WvBlazorSignalLimitModal? _signalLimitModal = null;
+	private WvBlazorTraceSignalTraceListModal? _signalTraceListModal = null;
+	private WvBlazorTraceMemoryModal? _memoryModal = null;
+	private WvBlazorTraceLimitModal? _limitModal = null;
+	private WvBlazorTraceSignalLimitModal? _signalLimitModal = null;
+	private WvBlazorTraceMuteMethodModal? _traceMuteModal = null;
+	private WvBlazorTraceMuteSignalModal? _signalMuteModal = null;
 	private string? _primarySnHighlightClass = null;
 
 	private List<WvTraceModalMenuItem> _methodMenu = new();
 	private List<WvTraceModalMenuItem> _signalMenu = new();
-	private List<WvTraceModalMenuItem> _snapshotMenu = new();
+	private List<WvTraceModalMenuItem> _asideMenu = new();
 	private string _helpLink = "https://github.com/WebVella/WebVella.BlazorTrace/wiki/Methods-Modal";
 
 	private WvSnapshotSavingState _savingState = WvSnapshotSavingState.NotSaving;
 
+	private List<WvTraceMute> _currentMutes = new();
 
 	//LIFECYCLE
 	//////////////////////////////////////////////////
@@ -68,7 +71,7 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 		if (_infiniteLoopCancellationTokenSource is not null)
 			_infiniteLoopCancellationTokenSource.Cancel();
 	}
-	protected override void OnInitialized()
+	protected override async Task OnInitializedAsync()
 	{
 		base.OnInitialized();
 		_configuration = WvBlazorTraceConfigurationService.GetConfiguraion();
@@ -77,6 +80,7 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 		if (!String.IsNullOrWhiteSpace(ButtonColor))
 			_buttonStyles = $"background-color:{ButtonColor};";
 		_buttonClasses = $" wv-trace-button {Position.WvBTToDescriptionString()} ";
+		_currentMutes = await WvBlazorTraceService.GetAllTraceMutesAsync();
 		_initMenu();
 		EnableRenderLock();
 	}
@@ -150,17 +154,18 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 		RegenRenderLock();
 		await _getData();
 	}
-	private async Task _clearFilter()
+	private async Task _clearFilter(Type filterType)
 	{
 		if (_data is null) return;
-		_data.Request.ModuleFilter = null;
-		_data.Request.ComponentFilter = null;
-		_data.Request.SignalNameFilter = null;
-		_data.Request.MethodFilter = null;
-		_data.Request.MemoryFilter = null;
-		_data.Request.DurationFilter = null;
-		_data.Request.CallsFilter = null;
-		_data.Request.LimitsFilter = null;
+		if(filterType == typeof(WvTraceModalRequestMethodsFilter)){ 
+			_data.Request.MethodsFilter = new();
+		}
+		else if(filterType == typeof(WvTraceModalRequestSignalsFilter)){ 
+			_data.Request.SignalsFilter = new();
+		}
+		else if(filterType == typeof(WvTraceModalRequestMutedFilter)){ 
+			_data.Request.MutedFilter = new();
+		}
 		RegenRenderLock();
 		await _submitFilter();
 	}
@@ -189,7 +194,8 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 			new WvTraceModalMenuItem{ Id = WvTraceModalMenu.SignalLimits},
 			new WvTraceModalMenuItem{ Id = WvTraceModalMenu.SignalName}
 		};
-		_snapshotMenu = new(){
+		_asideMenu = new(){
+			new WvTraceModalMenuItem{ Id = WvTraceModalMenu.TraceMutes, Counter = _currentMutes.Count},
 			new WvTraceModalMenuItem{ Id = WvTraceModalMenu.Snapshots},
 		};
 
@@ -200,25 +206,28 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 		foreach (var item in _signalMenu)
 			item.OnClick = async () => await _menuClick(item);
 
-		foreach (var item in _snapshotMenu)
+		foreach (var item in _asideMenu)
 			item.OnClick = async () => await _menuClick(item);
 	}
 	private async Task _getData(bool fromLoop = false)
 	{
 		if (_loadingData) return;
-		_loadingData = true;
-		RegenRenderLock();
-		await InvokeAsync(StateHasChanged);
+		if (!fromLoop)
+		{
+			_loadingData = true;
+			RegenRenderLock();
+			await InvokeAsync(StateHasChanged);
+		}
 		try
 		{
 			if (!fromLoop)
 			{
-				_data = await WvBlazorTraceService.GetModalData(_data?.Request);
+				_data = await WvBlazorTraceService.GetModalDataAsync(_data?.Request);
 				_initSnapshotActions();
 			}
 			else
 			{
-				var data = await WvBlazorTraceService.GetModalData(_data?.Request);
+				var data = await WvBlazorTraceService.GetModalDataAsync(_data?.Request);
 				_data!.MethodTraceRows = data.MethodTraceRows;
 			}
 		}
@@ -228,7 +237,8 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 		}
 		finally
 		{
-			_loadingData = false;
+			if (!fromLoop)
+				_loadingData = false;
 			RegenRenderLock();
 			await InvokeAsync(StateHasChanged);
 		}
@@ -322,6 +332,21 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 		}
 	}
 
+	private async Task _showTraceMuteModal(object row)
+	{
+		if (row == null) return;
+		if (row is WvMethodTraceRow)
+		{
+			if (_traceMuteModal is null) return;
+			await _traceMuteModal.Show((WvMethodTraceRow)row);
+		}
+		else if (row is WvSignalTraceRow)
+		{
+			if (_signalMuteModal is null) return;
+			await _signalMuteModal.Show((WvSignalTraceRow)row);
+		}
+	}
+
 	private async Task _bookmarkClicked(object rowObject)
 	{
 		if (rowObject is WvMethodTraceRow)
@@ -386,7 +411,6 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 			RegenRenderLock();
 			await InvokeAsync(StateHasChanged);
 			await Task.Delay(1);
-			await Task.Delay(1000);
 		}
 		catch (Exception ex)
 		{
@@ -395,6 +419,24 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 		finally
 		{
 			_savingState = WvSnapshotSavingState.NotSaving;
+			RegenRenderLock();
+			await InvokeAsync(StateHasChanged);
+		}
+	}
+
+	private async Task _clearCurrent()
+	{
+		try
+		{
+			WvBlazorTraceService.ClearCurrentSession();
+			await _getData();
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine(ex.ToString());
+		}
+		finally
+		{
 			RegenRenderLock();
 			await InvokeAsync(StateHasChanged);
 		}
@@ -470,5 +512,16 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 			RegenRenderLock();
 			await InvokeAsync(StateHasChanged);
 		}
+	}
+
+	private async Task _muteTraceChange(WvTraceMute item)
+	{
+		if (item is null) return;
+		await WvBlazorTraceService.ToggleTraceMuteAsync(item);
+		_currentMutes = await WvBlazorTraceService.GetAllTraceMutesAsync();
+		await _getData();
+		_initMenu();
+		RegenRenderLock();
+		//await InvokeAsync(StateHasChanged);
 	}
 }

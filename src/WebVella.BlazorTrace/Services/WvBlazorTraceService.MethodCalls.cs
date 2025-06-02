@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using Backport.System.Threading;
+using Microsoft.AspNetCore.Components;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using Backport.System.Threading;
 using WebVella.BlazorTrace.Models;
 using WebVella.BlazorTrace.Utility;
 

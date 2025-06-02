@@ -18,7 +18,7 @@ using WebVella.BlazorTrace.Utility;
 namespace WebVella.BlazorTrace;
 public partial interface IWvBlazorTraceService
 {
-	Task<WvTraceModalData> GetModalData(WvTraceModalRequest? request);
+	Task<WvTraceModalData> GetModalDataAsync(WvTraceModalRequest? request);
 }
 public partial class WvBlazorTraceService : IWvBlazorTraceService
 {
@@ -28,11 +28,11 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 	/// <param name="request"></param>
 	/// <returns></returns>
 	/// <exception cref="Exception"></exception>
-	public async Task<WvTraceModalData> GetModalData(WvTraceModalRequest? request)
+	public async Task<WvTraceModalData> GetModalDataAsync(WvTraceModalRequest? request)
 	{
 		ForceProcessQueue();
 		var result = new WvTraceModalData();
-		var store = await GetSnapshotStoreAsync();
+		var store = await GetLocalStoreAsync();
 		//Init request
 		if (request is null || request.IsEmpty)
 		{
@@ -93,13 +93,13 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 			);
 			foreach (var row in traceRows)
 			{
-				if (!row.ModuleMatches(result.Request.ModuleFilter)) continue;
-				if (!row.ComponentMatches(result.Request.ComponentFilter)) continue;
-				if (!row.MethodMatches(result.Request.MethodFilter)) continue;
-				if (!row.CallsMatches(result.Request.CallsFilter)) continue;
-				if (!row.MemoryMatches(result.Request.MemoryFilter)) continue;
-				if (!row.DurationMatches(result.Request.DurationFilter)) continue;
-				if (!row.LimitMatches(result.Request.LimitsFilter)) continue;
+				if (!row.ModuleMatches(result.Request.MethodsFilter.ModuleFilter)) continue;
+				if (!row.ComponentMatches(result.Request.MethodsFilter.ComponentFilter)) continue;
+				if (!row.MethodMatches(result.Request.MethodsFilter.MethodFilter)) continue;
+				if (!row.CallsMatches(result.Request.MethodsFilter.CallsFilter)) continue;
+				if (!row.MemoryMatches(result.Request.MethodsFilter.MemoryFilter)) continue;
+				if (!row.DurationMatches(result.Request.MethodsFilter.DurationFilter)) continue;
+				if (!row.LimitMatches(result.Request.MethodsFilter.LimitsFilter)) continue;
 
 				if (store.Bookmarked.Contains(row.Id))
 					row.IsBookmarked = true;
@@ -134,9 +134,9 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 			);		
 			foreach (var row in signalTraceRows)
 			{
-				if (!row.SignalNameMatches(result.Request.SignalNameFilter)) continue;
-				if (!row.CallsMatches(result.Request.CallsFilter)) continue;
-				if (!row.LimitMatches(result.Request.LimitsFilter)) continue;
+				if (!row.SignalNameMatches(result.Request.SignalsFilter.SignalNameFilter)) continue;
+				if (!row.CallsMatches(result.Request.SignalsFilter.CallsFilter)) continue;
+				if (!row.LimitMatches(result.Request.SignalsFilter.LimitsFilter)) continue;
 
 				if (store.Bookmarked.Contains(row.Id))
 					row.IsBookmarked = true;

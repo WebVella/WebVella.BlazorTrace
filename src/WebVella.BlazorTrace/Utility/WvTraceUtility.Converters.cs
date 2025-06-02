@@ -49,7 +49,6 @@ public static partial class WvTraceUtility
 	{
 		return $"{duration} ms";
 	}
-
 	public static string GetLimitValueAsString(this long limit, WvTraceSessionLimitType type)
 	{
 		switch (type)

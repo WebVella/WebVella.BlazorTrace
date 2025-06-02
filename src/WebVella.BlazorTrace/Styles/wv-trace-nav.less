@@ -3,17 +3,32 @@
 	margin: 0;
 	padding: 0;
 	overflow: hidden;
+	@color-accent: #be123c;
 
 	li {
 		float: left;
 
-		a, span {
+		& > a, & > span {
 			display: flex;
 			align-items: center;
 			justify-content: center;
 			text-align: center;
-			padding: 0 10px;
+			padding: 0 7px;
 			text-decoration: none;
+
+			.wv-badge {
+				margin-left: 5px;
+				display: inline-flex;
+				padding: 0px 5px;
+				background: @color-accent;
+				color: white;
+				font-size: 11px;
+				border-radius: 5px;
+			}
+
+			svg {
+				margin-left: 5px;
+			}
 		}
 	}
 }

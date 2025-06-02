@@ -6,19 +6,27 @@ using WebVella.BlazorTrace.Services;
 using WebVella.BlazorTrace.Utility;
 
 namespace WebVella.BlazorTrace;
-public partial class WvBlazorSignalTraceListModal : WvBlazorTraceComponentBase, IAsyncDisposable
+public partial class WvBlazorTraceMuteSignalModal : WvBlazorTraceComponentBase
 {
 	// INJECTS
 	//////////////////////////////////////////////////
 	[Inject] protected IJSRuntime JSRuntimeSrv { get; set; } = default!;
+	[Inject] public IWvBlazorTraceService WvBlazorTraceService { get; set; } = default!;
+
+	// PARAMETERS
+	//////////////////////////////////////////////////
+	[Parameter] public int NestLevel { get; set; } = 1;
+	[Parameter] public EventCallback<WvTraceMute> OnChange { get; set; }
+	[Parameter] public List<WvTraceMute> TraceMutes { get; set; } = new();
 
 	// LOCAL VARIABLES
 	//////////////////////////////////////////////////
 	private Guid _componentId = Guid.NewGuid();
-	private DotNetObjectReference<WvBlazorSignalTraceListModal> _objectRef = default!;
+	private DotNetObjectReference<WvBlazorTraceMuteSignalModal> _objectRef = default!;
 	private bool _escapeListenerEnabled = false;
 	private bool _modalVisible = false;
 	private WvSignalTraceRow? _row = null;
+	private List<WvTraceMute> _applicableTypes = new();
 
 	// LIFECYCLE
 	/// //////////////////////////////////////////////
@@ -35,6 +43,12 @@ public partial class WvBlazorSignalTraceListModal : WvBlazorTraceComponentBase, 
 		EnableRenderLock();
 	}
 
+	protected override void OnParametersSet()
+	{
+		base.OnParametersSet();
+		RegenRenderLock();
+	}
+
 	// PUBLIC
 	//////////////////////////////////////////////////
 	public async Task Show(WvSignalTraceRow row)
@@ -42,6 +56,7 @@ public partial class WvBlazorSignalTraceListModal : WvBlazorTraceComponentBase, 
 		await new JsService(JSRuntimeSrv).AddKeyEventListener(_objectRef, "OnShortcutKey", "Escape", _componentId.ToString());
 		_escapeListenerEnabled = true;
 		_row = row;
+		_initMuteOptions();
 		_modalVisible = true;
 		RegenRenderLock();
 		await InvokeAsync(StateHasChanged);
@@ -72,10 +87,25 @@ public partial class WvBlazorSignalTraceListModal : WvBlazorTraceComponentBase, 
 		if (_row is null) return String.Empty;
 
 		var sb = new StringBuilder();
-		sb.Append($"<span>{_row.SignalName}</span>");
+		sb.Append($"<span>Mute signal</span>");
 
 		return sb.ToString();
 	}
 
+	private async Task _typeClick(WvTraceMute item) => await OnChange.InvokeAsync(item);
 
+	private void _initMuteOptions()
+	{
+		_applicableTypes = new();
+		if (_row is not null)
+		{
+			_applicableTypes = new(){
+			new WvTraceMute(WvTraceMuteType.Signal,_row),
+		};
+			if (_row!.IsBookmarked)
+				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.BookmarkedSignals, _row));
+			else
+				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.NotBookmarkedSignals, _row));
+		}
+	}
 }

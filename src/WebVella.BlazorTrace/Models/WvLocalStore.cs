@@ -5,9 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace WebVella.BlazorTrace.Models;
-public class WvSnapshotStore
+public class WvLocalStore
 {
 	public List<string> Bookmarked { get; set; } = new();
+	public List<WvTraceMute> TraceMutes { get; set; } = new();
 	public WvTraceModalRequest? LastModalRequest { get; set; } = null;
 	public List<WvSnapshot> Snapshots { get; set; } = new();
 }

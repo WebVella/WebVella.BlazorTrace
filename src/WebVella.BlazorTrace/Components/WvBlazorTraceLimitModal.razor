@@ -3,8 +3,9 @@
 @inherits WvBlazorTraceComponentBase
 @if (_modalVisible && _row is not null)
 {
-	<div title="click to close [Esc]" class="wv-trace-overlay secondary" @onclick=@(()=> Hide(false))></div>
-	<div class="wv-trace-modal secondary">
+	var style = $"z-index:{(20000 + (2 * NestLevel))}";
+	<WvBlazorTraceModalOverlay NestLevel="@NestLevel" OnHide="@(()=> Hide(false))"/>
+	<div class="wv-trace-modal medium" style="@style">
 		<div class="wv-trace-modal__header">
 			<div class="wv-trace-modal__header__left" style="flex:1 1 auto;">@((MarkupString)_getTitle())</div>
 			<div class="wv-trace-modal__header__right">
@@ -22,16 +23,14 @@
 					</tr>
 				</thead>
 				<tbody>
-					@foreach (var item in _row.LimitHits)
-					{
+					<Virtualize Items="_row.LimitHits" Context="item" TItem="WvTraceSessionLimitHit">
 						<tr @key="@Guid.NewGuid()">
 							<td>@item.Type.WvBTToDescriptionString()</td>
 							<td>@(item.IsOnEnter ? "onEnter" : "OnExit")</td>
 							<td class="wv-number">@item.Limit.GetLimitValueAsString(item.Type)</td>
 							<td class="wv-number">@item.Actual.GetLimitValueAsString(item.Type)</td>
 						</tr>
-					}
-
+					</Virtualize>
 					@if (_row.LimitHits.Count == 0)
 					{
 						<tr>

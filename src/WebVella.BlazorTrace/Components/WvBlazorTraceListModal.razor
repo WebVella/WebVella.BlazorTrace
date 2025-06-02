@@ -3,8 +3,9 @@
 @inherits WvBlazorTraceComponentBase
 @if (_row is not null && _modalVisible)
 {
-	<div title="click to close (Esc)" class="wv-trace-overlay secondary" @onclick=@(()=> Hide(false))></div>
-	<div class="wv-trace-modal secondary">
+	var style = $"z-index:{(20000 + (2 * NestLevel))}";
+	<WvBlazorTraceModalOverlay NestLevel="@NestLevel" OnHide="@(()=> Hide(false))" />
+	<div class="wv-trace-modal medium" style="@style">
 		<div class="wv-trace-modal__header">
 			<div class="wv-trace-modal__header__left" style="flex:1 1 auto;">@((MarkupString)_getTitle())</div>
 			<div class="wv-trace-modal__header__right">
@@ -33,12 +34,12 @@
 					</tr>
 				</thead>
 				<tbody>
-					@foreach (var item in _row.TraceList.OrderByDescending(x => x.DurationMs))
-					{
+					<Virtualize Items="_row.TraceList.OrderByDescending(x => x.DurationMs).ToList()" Context="item"
+								TItem="WvTraceSessionTrace">
 						<tr @key="@Guid.NewGuid()">
 							<td class="wv-number">@item.DurationMs.WvBTToDurationMSString()</td>
 							<td class="wv-number">@item.EnteredOn?.ToString(WvConstants.TimestampFormat) ms</td>
-							<td class="wv-number clickable" @onclick=@(() => _showMemoryModal(item.OnEnterMemoryInfo))>
+							<td class="wv-number wv-clickable" @onclick=@(() => _showMemoryModal(item.OnEnterMemoryInfo))>
 								<div class="icon">
 									<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-box-arrow-up-right" viewBox="0 0 16 16">
 										<path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5" />
@@ -53,7 +54,7 @@
 							<td>@item.OnEnterFirstRender.WvBTGetFirstRenderString()</td>
 							<td>@((MarkupString)item.OnEnterLimitsHTML)</td>
 							<td class="wv-number">@item.ExitedOn?.ToString(WvConstants.TimestampFormat) ms</td>
-							<td class="wv-number clickable" @onclick=@(() => _showMemoryModal(item.OnExitMemoryInfo))>
+							<td class="wv-number wv-clickable" @onclick=@(() => _showMemoryModal(item.OnExitMemoryInfo))>
 								<div class="icon">
 									<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-box-arrow-up-right" viewBox="0 0 16 16">
 										<path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5" />
@@ -68,8 +69,7 @@
 							<td>@item.OnExitFirstRender.WvBTGetFirstRenderString()</td>
 							<td>@((MarkupString)item.OnExitLimitsHTML)</td>
 						</tr>
-					}
-
+					</Virtualize>
 					@if (_row.TraceList.Count == 0)
 					{
 						<tr>
@@ -83,7 +83,7 @@
 			<button title="Close [Esc]" type="button" @onclick=@(()=> Hide(false))>Close [Esc]</button>
 		</div>
 	</div>
-	<WvBlazorMemoryModal @ref=_memoryModal />
+	<WvBlazorTraceMemoryModal @ref=_memoryModal NestLevel="@(NestLevel+1)" />
 }
 
 

@@ -61,6 +61,13 @@
 						</InputSelect>
 					</div>
 					<div class="wv-trace-modal__divider"></div>
+					<div class="wv-trace-modal__header__center__clear">
+						<button class="wv-mute" type="button"
+								@onclick=_clearCurrent
+								title="clears logged data for the current session">
+							Clear Current
+						</button>
+					</div>
 					<div class="wv-trace-modal__header__center__save">
 						@if (_savingState == WvSnapshotSavingState.NotSaving)
 						{
@@ -130,10 +137,13 @@
 					}
 				</div>
 				<ul class="wv-trace-nav" style="margin-left:20px;">
-					@foreach (var item in _snapshotMenu)
+					@foreach (var item in _asideMenu)
 					{
 						<li class="@(_data?.Request?.Menu == item.Id ? "active" : "")">
-							<a href="#" @onclick=@item.OnClick @onclick:preventDefault>@item.Id.WvBTToDescriptionString()</a>
+							<a href="#" @onclick=@item.OnClick @onclick:preventDefault>
+								<span>@item.Id.WvBTToDescriptionString()</span>
+								@((MarkupString)item.CounterHtml)
+							</a>
 						</li>
 					}
 					<li>
@@ -156,11 +166,12 @@
 				{
 					<table>
 						<thead>
-							<tr>
-								<th style="width:40px">
-									@if (_data?.Request is not null && _data.Request.HasMethodFilter)
+							<tr class="wv-sticky" style="top:-10px;">
+								<th style="width:95px">
+									@if (_data?.Request is not null && _data.Request.MethodsFilter.HasFilter)
 									{
-										<button type="button" class="icon wv-accent" @onclick=_clearFilter style="border-width:1px;">
+										<button type="button" class="icon wv-accent" @onclick="@(async () => await _clearFilter(typeof(WvTraceModalRequestMethodsFilter)))"
+												style="border-width:1px;">
 											<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
 												<path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
 											</svg>
@@ -169,21 +180,21 @@
 								</th>
 								<th>
 									<InputText placeholder="module" autocomplete="new-password"
-											   @bind-Value=@_data!.Request.ModuleFilter
+											   @bind-Value=@_data!.Request.MethodsFilter.ModuleFilter
 											   @bind-Value:after=_submitFilter />
 								</th>
 								<th>
 									<InputText placeholder="component" autocomplete="new-password"
-											   @bind-Value=@_data!.Request.ComponentFilter
+											   @bind-Value=@_data!.Request.MethodsFilter.ComponentFilter
 											   @bind-Value:after=_submitFilter />
 								</th>
 								<th>
 									<InputText placeholder="method" autocomplete="new-password"
-											   @bind-Value=@_data!.Request.MethodFilter
+											   @bind-Value=@_data!.Request.MethodsFilter.MethodFilter
 											   @bind-Value:after=_submitFilter />
 								</th>
 								<th>
-									<InputSelect @bind-Value="@_data!.Request.CallsFilter" @bind-Value:after="_submitFilter">
+									<InputSelect @bind-Value="@_data!.Request.MethodsFilter.CallsFilter" @bind-Value:after="_submitFilter">
 										<option value="">no call filter</option>
 										@foreach (var option in Enum.GetValues<WvTraceModalCallsFilter>())
 										{
@@ -192,7 +203,7 @@
 									</InputSelect>
 								</th>
 								<th>
-									<InputSelect TValue="WvTraceModalMemoryFilter?" @bind-Value="@_data.Request.MemoryFilter"
+									<InputSelect TValue="WvTraceModalMemoryFilter?" @bind-Value="@_data.Request.MethodsFilter.MemoryFilter"
 												 @bind-Value:after="_submitFilter">
 										<option value="">no memory filter</option>
 										@foreach (var option in Enum.GetValues<WvTraceModalMemoryFilter>())
@@ -202,7 +213,7 @@
 									</InputSelect>
 								</th>
 								<th>
-									<InputSelect @bind-Value="@_data.Request.DurationFilter" @bind-Value:after="_submitFilter">
+									<InputSelect @bind-Value="@_data.Request.MethodsFilter.DurationFilter" @bind-Value:after="_submitFilter">
 										<option value="">no duration filter</option>
 										@foreach (var option in Enum.GetValues<WvTraceModalDurationFilter>())
 										{
@@ -211,7 +222,7 @@
 									</InputSelect>
 								</th>
 								<th>
-									<InputSelect @bind-Value="@_data.Request.LimitsFilter" @bind-Value:after="_submitFilter">
+									<InputSelect @bind-Value="@_data.Request.MethodsFilter.LimitsFilter" @bind-Value:after="_submitFilter">
 										<option value="">no limit filter</option>
 										@foreach (var option in Enum.GetValues<WvTraceModalLimitsFilter>())
 										{
@@ -222,11 +233,12 @@
 							</tr>
 							@foreach (var item in _data.MethodTraceRows.Where(x => x.IsBookmarked))
 							{
-								<WvBlazorTraceRow @key=item.Id Item="item" Class="bookmark-row"
+								<WvBlazorTraceRow @key=item.Id Item="item" Class="wv-bookmark-row wv-selected-row"
 												  OnTraceListView="_showTraceListModal"
 												  OnMemoryView="_showMemoryModal"
 												  OnBookmark="_bookmarkClicked"
-												  OnLimitView="_showLimitModal" />
+												  OnLimitView="_showLimitModal"
+												  OnMute="_showTraceMuteModal" />
 							}
 						</thead>
 						<tbody>
@@ -238,14 +250,14 @@
 							}
 							else
 							{
-								@foreach (var item in _data.MethodTraceRows.Where(x => !x.IsBookmarked))
-								{
-									<WvBlazorTraceRow @key=item.Id Item="item"
+								<Virtualize Items="_data.MethodTraceRows.Where(x => !x.IsBookmarked).ToList()" Context="item" TItem="WvMethodTraceRow">
+									<WvBlazorTraceRow @key=@item.Id Item="@item"
 													  OnTraceListView="_showTraceListModal"
 													  OnMemoryView="_showMemoryModal"
 													  OnBookmark="_bookmarkClicked"
-													  OnLimitView="_showLimitModal" />
-								}
+													  OnLimitView="_showLimitModal"
+													  OnMute="_showTraceMuteModal" />
+								</Virtualize>
 								@if (_data.MethodTraceRows.Count == 0)
 								{
 									<tr>
@@ -260,11 +272,12 @@
 				{
 					<table>
 						<thead>
-							<tr>
-								<th style="width:40px">
-									@if (_data?.Request is not null && _data.Request.HasSignalFilter)
+							<tr class="wv-sticky" style="top:-10px;">
+								<th style="width:95px">
+									@if (_data?.Request is not null && _data.Request.SignalsFilter.HasFilter)
 									{
-										<button type="button" class="icon wv-accent" @onclick=_clearFilter style="border-width:1px;">
+										<button type="button" class="icon wv-accent" @onclick="@(async () => await _clearFilter(typeof(WvTraceModalRequestSignalsFilter)))"
+												style="border-width:1px;">
 											<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
 												<path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
 											</svg>
@@ -273,11 +286,11 @@
 								</th>
 								<th>
 									<InputText placeholder="signal name" autocomplete="new-password"
-											   @bind-Value=@_data!.Request.SignalNameFilter
+											   @bind-Value=@_data!.Request.SignalsFilter.SignalNameFilter
 											   @bind-Value:after=_submitFilter />
 								</th>
 								<th>
-									<InputSelect @bind-Value="@_data!.Request.CallsFilter" @bind-Value:after="_submitFilter">
+									<InputSelect @bind-Value="@_data!.Request.SignalsFilter.CallsFilter" @bind-Value:after="_submitFilter">
 										<option value="">no call filter</option>
 										@foreach (var option in Enum.GetValues<WvTraceModalCallsFilter>())
 										{
@@ -286,7 +299,7 @@
 									</InputSelect>
 								</th>
 								<th>
-									<InputSelect @bind-Value="@_data.Request.LimitsFilter" @bind-Value:after="_submitFilter">
+									<InputSelect @bind-Value="@_data.Request.SignalsFilter.LimitsFilter" @bind-Value:after="_submitFilter">
 										<option value="">no limit filter</option>
 										@foreach (var option in new List<WvTraceModalLimitsFilter> {
 							WvTraceModalLimitsFilter.HasLimitHits,
@@ -300,10 +313,11 @@
 							</tr>
 							@foreach (var item in _data.SignalTraceRows.Where(x => x.IsBookmarked))
 							{
-								<WvBlazorTraceSignalRow @key=item.Id Item="item" Class="bookmark-row"
+								<WvBlazorTraceSignalRow @key=item.Id Item="item" Class="wv-bookmark-row wv-selected-row"
 														OnTraceListView="_showTraceListModal"
 														OnBookmark="_bookmarkClicked"
-														OnLimitView="_showLimitModal" />
+														OnLimitView="_showLimitModal"
+														OnMute="_showTraceMuteModal" />
 							}
 						</thead>
 						<tbody>
@@ -315,13 +329,13 @@
 							}
 							else
 							{
-								@foreach (var item in _data.SignalTraceRows.Where(x => !x.IsBookmarked))
-								{
+								<Virtualize Items="_data.SignalTraceRows.Where(x => !x.IsBookmarked).ToList()" Context="item" TItem="WvSignalTraceRow">
 									<WvBlazorTraceSignalRow @key=item.Id Item="item"
 															OnTraceListView="_showTraceListModal"
 															OnBookmark="_bookmarkClicked"
-															OnLimitView="_showLimitModal" />
-								}
+															OnLimitView="_showLimitModal"
+															OnMute="_showTraceMuteModal" />
+								</Virtualize>
 								@if (_data.SignalTraceRows.Count == 0)
 								{
 									<tr>
@@ -367,6 +381,53 @@
 						</tbody>
 					</table>
 				}
+				else if (_data.Request!.IsTraceMuteMenu)
+				{
+					<table>
+						<thead>
+							<tr class="wv-sticky" style="top:-10px;">
+								<th style="width:95px">
+									@if (_data?.Request is not null && _data.Request.MutedFilter.HasFilter)
+									{
+										<button type="button" class="icon wv-accent" @onclick="@(async () => await _clearFilter(typeof(WvTraceModalRequestMutedFilter)))" 
+												style="border-width:1px;">
+											<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+												<path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+											</svg>
+										</button>
+									}
+								</th>
+								<th>
+									<InputText placeholder="signal name" autocomplete="new-password"
+											   @bind-Value=@_data!.Request.MutedFilter.ModuleFilter
+											   @bind-Value:after=_submitFilter />
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							<Virtualize Items="_currentMutes" Context="item" TItem="WvTraceMute">
+								<tr @key=@item.Id>
+									<td class="wv-button">
+										<button type="button" class="icon wv-mute" title="mute trace">
+											<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+												<path d="M5.164 14H15c-.299-.199-.557-.553-.78-1-.9-1.8-1.22-5.12-1.22-6q0-.396-.06-.776l-.938.938c.02.708.157 2.154.457 3.58.161.767.377 1.566.663 2.258H6.164zm5.581-9.91a4 4 0 0 0-1.948-1.01L8 2.917l-.797.161A4 4 0 0 0 4 7c0 .628-.134 2.197-.459 3.742q-.075.358-.166.718l-1.653 1.653q.03-.055.059-.113C2.679 11.2 3 7.88 3 7c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0c.942.19 1.788.645 2.457 1.284zM10 15a2 2 0 1 1-4 0zm-9.375.625a.53.53 0 0 0 .75.75l14.75-14.75a.53.53 0 0 0-.75-.75z" />
+											</svg>
+										</button>
+									</td>
+									<td title="signal name">
+										<span>@item.Module</span>
+									</td>
+								</tr>
+							</Virtualize>
+							@if (_currentMutes.Count == 0)
+							{
+								<tr>
+									<td colspan="4" style="padding:30px;text-align:center;">No traces are muted yet</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				}
 			}
 		</div>
 		<div class="wv-trace-modal__footer">
@@ -374,11 +435,13 @@
 		</div>
 	</div>
 
-	<WvBlazorTraceListModal @ref=_traceListModal />
-	<WvBlazorSignalTraceListModal @ref=_signalTraceListModal />
-	<WvBlazorMemoryModal @ref=_memoryModal />
-	<WvBlazorLimitModal @ref=_limitModal />
-	<WvBlazorSignalLimitModal @ref=_signalLimitModal />
+	<WvBlazorTraceListModal @ref=_traceListModal NestLevel="1" />
+	<WvBlazorTraceSignalTraceListModal @ref=_signalTraceListModal NestLevel="1" />
+	<WvBlazorTraceMemoryModal @ref=_memoryModal NestLevel="1" />
+	<WvBlazorTraceLimitModal @ref=_limitModal NestLevel="1" />
+	<WvBlazorTraceSignalLimitModal @ref=_signalLimitModal NestLevel="1" />
+	<WvBlazorTraceMuteMethodModal @ref=_traceMuteModal NestLevel="1" OnChange="_muteTraceChange" TraceMutes="_currentMutes" />
+	<WvBlazorTraceMuteSignalModal @ref=_signalMuteModal NestLevel="1" OnChange="_muteTraceChange" TraceMutes="_currentMutes" />
 }
 
 

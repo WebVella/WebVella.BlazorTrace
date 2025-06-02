@@ -1,0 +1,15 @@
+﻿@namespace WebVella.BlazorTrace
+@using WebVella.BlazorTrace.Utility
+
+<div title="click to close [Esc]"
+class="wv-trace-overlay"
+	 style="@_style"
+@onclick=@_hideClick></div>
+@code {
+	[Parameter] public EventCallback OnHide { get; set; }
+	[Parameter] public int NestLevel { get; set; } = 0;
+	private string _style { get => $"z-index:{(20000 + (2*NestLevel))}"; }
+	private async Task _hideClick()
+		=> await OnHide.InvokeAsync();
+
+}

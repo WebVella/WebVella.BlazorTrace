@@ -6,20 +6,28 @@ using WebVella.BlazorTrace.Services;
 using WebVella.BlazorTrace.Utility;
 
 namespace WebVella.BlazorTrace;
-public partial class WvBlazorMemoryModal : WvBlazorTraceComponentBase
+public partial class WvBlazorTraceMuteMethodModal : WvBlazorTraceComponentBase
 {
 	// INJECTS
 	//////////////////////////////////////////////////
 	[Inject] protected IJSRuntime JSRuntimeSrv { get; set; } = default!;
+	[Inject] public IWvBlazorTraceService WvBlazorTraceService { get; set; } = default!;
+
+	// PARAMETERS
+	//////////////////////////////////////////////////
+	[Parameter] public int NestLevel { get; set; } = 1;
+	[Parameter] public EventCallback<WvTraceMute> OnChange { get; set; }
+	[Parameter] public List<WvTraceMute> TraceMutes { get; set; } = new();
+
 
 	// LOCAL VARIABLES
 	//////////////////////////////////////////////////
 	private Guid _componentId = Guid.NewGuid();
-	private DotNetObjectReference<WvBlazorMemoryModal> _objectRef = default!;
+	private DotNetObjectReference<WvBlazorTraceMuteMethodModal> _objectRef = default!;
 	private bool _escapeListenerEnabled = false;
 	private bool _modalVisible = false;
 	private WvMethodTraceRow? _row = null;
-	private List<WvSnapshotMemoryComparisonDataField> _items = new();
+	private List<WvTraceMute> _applicableTypes = new();
 
 	// LIFECYCLE
 	/// //////////////////////////////////////////////
@@ -36,17 +44,20 @@ public partial class WvBlazorMemoryModal : WvBlazorTraceComponentBase
 		EnableRenderLock();
 	}
 
+	protected override void OnParametersSet()
+	{
+		base.OnParametersSet();
+		RegenRenderLock();
+	}
+
 	// PUBLIC
 	//////////////////////////////////////////////////
-	public async Task Show(WvMethodTraceRow row, List<WvSnapshotMemoryComparisonDataField>? items = null)
+	public async Task Show(WvMethodTraceRow row)
 	{
 		await new JsService(JSRuntimeSrv).AddKeyEventListener(_objectRef, "OnShortcutKey", "Escape", _componentId.ToString());
 		_escapeListenerEnabled = true;
 		_row = row;
-		if (items is not null)
-			_items = items;
-		else
-			_items = _row.MemoryComparison.Fields;
+		_initMuteOptions();
 		_modalVisible = true;
 		RegenRenderLock();
 		await InvokeAsync(StateHasChanged);
@@ -56,7 +67,6 @@ public partial class WvBlazorMemoryModal : WvBlazorTraceComponentBase
 		await new JsService(JSRuntimeSrv).RemoveKeyEventListener("Escape", _componentId.ToString());
 		_escapeListenerEnabled = false;
 		_row = null;
-		_items = new();
 		_modalVisible = false;
 		RegenRenderLock();
 		if (invokeStateChanged)
@@ -78,15 +88,31 @@ public partial class WvBlazorMemoryModal : WvBlazorTraceComponentBase
 		if (_row is null) return String.Empty;
 
 		var sb = new StringBuilder();
-		sb.Append($"<span>{_row.Component}</span>");
-		if (!String.IsNullOrWhiteSpace(_row.InstanceTag))
-		{
-			sb.Append($" <span class='wv-tag' style='margin-left:5px'>{_row.InstanceTag}</span>");
-		}
-		sb.Append("<span class='wv-trace-modal__divider'></span>");
-		sb.Append($"<span>{_row.Method}</span>");
+		sb.Append($"<span>Mute method trace</span>");
 
 		return sb.ToString();
 	}
 
+	private async Task _typeClick(WvTraceMute item) =>	await OnChange.InvokeAsync(item);
+
+	private void _initMuteOptions()
+	{
+		_applicableTypes = new();
+		if (_row is not null)
+		{
+			_applicableTypes = new(){
+			new WvTraceMute(WvTraceMuteType.MethodInComponentInstance,_row),
+			new WvTraceMute(WvTraceMuteType.MethodInComponent,_row),
+			new WvTraceMute(WvTraceMuteType.MethodInModule,_row),
+			new WvTraceMute(WvTraceMuteType.Method,_row),
+			new WvTraceMute(WvTraceMuteType.ComponentInstance,_row),
+			new WvTraceMute(WvTraceMuteType.Component,_row),
+			new WvTraceMute(WvTraceMuteType.Module,_row),
+		};
+			if (_row!.IsBookmarked)
+				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.BookmarkedMethods, _row));
+			else
+				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.NotBookmarkedMethods, _row));
+		}
+	}
 }

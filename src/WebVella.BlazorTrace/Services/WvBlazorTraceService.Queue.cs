@@ -13,7 +13,6 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using Backport.System.Threading;
 using WebVella.BlazorTrace.Models;
 using WebVella.BlazorTrace.Utility;
 
@@ -37,6 +36,8 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		_infiniteLoopCancellationTokenSource = new CancellationTokenSource();
 		_infiniteLoop = Task.Run(async () =>
 		{
+			//Just to be sure that local tracemutes are loaded
+			var traceMutes = await GetAllTraceMutesAsync();
 			while (!_infiniteLoopCancellationTokenSource.IsCancellationRequested)
 			{
 				await Task.Delay(_infiniteLoopDelaySeconds * 1000);

@@ -201,6 +201,8 @@ public class MemorySizeCalculator
 		else if (t == typeof(string))
 			return ((string)value).Length * 2 + 16; // Approximation for string memory including header
 
-		throw new InvalidOperationException($"Unsupported primitive type: {t.FullName}");
+		//return 0 rather than throwing exception as these are rarely used directly by the component
+		//throw new InvalidOperationException($"Unsupported primitive type: {t.FullName}");
+		return 0;
 	}
 }

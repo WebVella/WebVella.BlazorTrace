@@ -3,8 +3,9 @@
 @inherits WvBlazorTraceComponentBase
 @if (_modalVisible && _row is not null)
 {
-	<div title="click to close [Esc]" class="wv-trace-overlay secondary" @onclick=@(()=> Hide(false))></div>
-	<div class="wv-trace-modal secondary">
+	var style = $"z-index:{(20000 + (2 * NestLevel))}";
+	<WvBlazorTraceModalOverlay NestLevel="@NestLevel" OnHide="@(()=> Hide(false))" />
+	<div class="wv-trace-modal medium" style="@style">
 		<div class="wv-trace-modal__header">
 			<div class="wv-trace-modal__header__left" style="flex:1 1 auto;">@((MarkupString)_getTitle())</div>
 			<div class="wv-trace-modal__header__right">
@@ -15,29 +16,24 @@
 			<table>
 				<thead>
 					<tr>
-						<th>field</th>
-						<th>type</th>
-						<th>assembly</th>
-						<th>memory</th>
-						<th>change</th>
+						<th>limit type</th>
+						<th class="wv-number">limit</th>
+						<th class="wv-number">actual</th>
 					</tr>
 				</thead>
 				<tbody>
-					@foreach (var item in _items.OrderByDescending(x => x.SecondarySnapshotBytes))
-					{
+					<Virtualize Items="_row.LimitHits" Context="item"
+								TItem="WvTraceSessionLimitHit">
 						<tr @key="@Guid.NewGuid()">
-							<td>@item.FieldName</td>
-							<td class="wv-tag">@item.TypeName</td>
-							<td>@item.AssemblyName</td>
-							<td class="wv-number">@item.SecondarySnapshotBytes.WvBTToKilobytesString()</td>
-							<td class="wv-number">@((MarkupString)item.ChangeKBHtml)</td>
+							<td>@item.Type.WvBTToDescriptionString()</td>
+							<td class="wv-number">@item.Limit.GetLimitValueAsString(item.Type)</td>
+							<td class="wv-number">@item.Actual.GetLimitValueAsString(item.Type)</td>
 						</tr>
-					}
-
-					@if (_items.Count == 0)
+					</Virtualize>
+					@if (_row.LimitHits.Count == 0)
 					{
 						<tr>
-							<td colspan="5" style="padding:30px;text-align:center;">Memory info is presented only if the current snapshot is selected as secondary</td>
+							<td colspan="3" style="padding:30px;text-align:center;">No tracers are logged yet for this method</td>
 						</tr>
 					}
 				</tbody>
