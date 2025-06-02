@@ -13,6 +13,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Backport.System.Threading;
 using WebVella.BlazorTrace.Models;
 using WebVella.BlazorTrace.Utility;
 
@@ -26,7 +27,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 {
 	public ConcurrentQueue<WvTraceQueueAction> GetQueue() => _traceQueue;
 	// Because of the force process the queue process could be triggered from two methods
-	public Lock _queueProcessLock = new();
+	public Lock _queueProcessLock = LockFactory.Create();
 	private void _addToQueue(WvTraceQueueAction trace)
 	{
 		_traceQueue.Enqueue(trace);
