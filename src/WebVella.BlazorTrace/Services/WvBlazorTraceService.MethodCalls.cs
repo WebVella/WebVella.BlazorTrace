@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using Backport.System.Threading;
 using WebVella.BlazorTrace.Models;
 using WebVella.BlazorTrace.Utility;
 
@@ -67,8 +68,8 @@ public partial interface IWvBlazorTraceService
 }
 public partial class WvBlazorTraceService : IWvBlazorTraceService
 {
-	private readonly Lock _onEnterLock = new Lock();
-	private readonly Lock _onExitLock = new Lock();
+	private readonly Lock _onEnterLock = LockFactory.Create();
+	private readonly Lock _onExitLock = LockFactory.Create();
 	public void OnEnter(
 		ComponentBase component,
 		Guid? traceId = null,
