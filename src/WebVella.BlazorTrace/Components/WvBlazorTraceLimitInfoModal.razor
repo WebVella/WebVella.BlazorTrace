@@ -1,0 +1,51 @@
+﻿@namespace WebVella.BlazorTrace
+@using WebVella.BlazorTrace.Utility
+@inherits WvBlazorTraceComponentBase
+@if (_modalVisible && _options is not null)
+{
+	var style = $"z-index:{(20000 + (2 * NestLevel))}";
+	<WvBlazorTraceModalOverlay NestLevel="@NestLevel" OnHide="@(()=> Hide(false))"/>
+	<div class="wv-trace-modal small" style="@style">
+		<div class="wv-trace-modal__header">
+			<div class="wv-trace-modal__header__left" style="flex:1 1 auto;">@((MarkupString)_getTitle())</div>
+			<div class="wv-trace-modal__header__right">
+				<button title="Close [Esc]" type="button" class="circle icon" @onclick=@(()=> Hide(false))>X</button>
+			</div>
+		</div>
+		<div class="wv-trace-modal__body">
+			<table>
+				<thead>
+					<tr>
+						<th>option</th>
+						<th style="width:220px">value</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>call limit</td>
+						<td>@_options.CallLimit</td>
+					</tr>
+					<tr>
+						<td>total memory limit</td>
+						<td>@_options.MemoryLimitTotalBytes.WvBTToKilobytesString()</td>
+					</tr>
+					<tr>
+						<td>new/delta memory limit</td>
+						<td>@_options.MemoryLimitDeltaBytes.WvBTToKilobytesString()</td>
+					</tr>
+					<tr>
+						<td>duration limit</td>
+						<td>@_options.DurationLimitMS.WvBTToDurationMSString()</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<div class="wv-trace-modal__footer">
+			<button title="Close [Esc]" type="button" @onclick=@(()=> Hide(false))>Close [Esc]</button>
+		</div>
+	</div>
+}
+
+
+
+

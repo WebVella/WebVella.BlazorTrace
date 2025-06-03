@@ -18,6 +18,7 @@ public partial class WvBlazorTraceMemoryModal : WvBlazorTraceComponentBase
 	[CascadingParameter(Name = "WvBlazorTraceBody")]
 	public WvBlazorTraceBody WvBlazorTraceBody { get; set; } = default!;
 	[Parameter] public int NestLevel { get; set; } = 1;
+	[Parameter] public EventCallback OnChange { get; set; }
 
 	// LOCAL VARIABLES
 	//////////////////////////////////////////////////
@@ -92,6 +93,8 @@ public partial class WvBlazorTraceMemoryModal : WvBlazorTraceComponentBase
 		var row = data.MethodTraceRows.FirstOrDefault(x => x.Id == _row.Id);
 		if (row is null) return;
 		_initData(row, _traceId, _isOnEnter);
+
+		await OnChange.InvokeAsync();
 		RegenRenderLock();
 		await InvokeAsync(StateHasChanged);
 	}

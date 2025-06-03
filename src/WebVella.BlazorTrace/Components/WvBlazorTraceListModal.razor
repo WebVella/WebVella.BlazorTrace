@@ -25,12 +25,12 @@
 						<th>memory</th>
 						<th>custom data</th>
 						<th>first render</th>
-						<th>limits</th>
+						<th style="width:90px">limits</th>
 						<th>timestamp</th>
 						<th>memory</th>
 						<th>custom data</th>
 						<th>first render</th>
-						<th>limits</th>
+						<th style="width:90px">limits</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -38,7 +38,7 @@
 								TItem="WvTraceSessionMethodTrace">
 						<tr @key="@Guid.NewGuid()">
 							<td class="wv-number">@item.DurationMs.WvBTToDurationMSString()</td>
-							<td class="wv-number">@item.EnteredOn?.ToString(WvConstants.TimestampFormat) ms</td>
+							<td class="wv-number">@item.EnteredOn?.WvBTToTimeString()</td>
 							<td class="wv-number wv-clickable" @onclick=@(() => _showMemoryModal(item.TraceId,true))>
 								<div class="icon">
 									<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-box-arrow-up-right" viewBox="0 0 16 16">
@@ -52,8 +52,10 @@
 							</td>
 							<td class="wv-tag">@item.OnEnterCustomData</td>
 							<td>@item.OnEnterFirstRender.WvBTGetFirstRenderString()</td>
-							<td>@((MarkupString)item.OnEnterLimitsHTML)</td>
-							<td class="wv-number">@item.ExitedOn?.ToString(WvConstants.TimestampFormat) ms</td>
+							<td>
+								<button class="wv-mute" @onclick=@(()=> _showLimitInfoModal(item,true))>limit info</button>
+							</td>
+							<td class="wv-number">@item.ExitedOn?.WvBTToTimeString()</td>
 							<td class="wv-number wv-clickable" @onclick=@(() => _showMemoryModal(item.TraceId,false))>
 								<div class="icon">
 									<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-box-arrow-up-right" viewBox="0 0 16 16">
@@ -67,7 +69,9 @@
 							</td>
 							<td class="wv-tag">@item.OnExitCustomData</td>
 							<td>@item.OnExitFirstRender.WvBTGetFirstRenderString()</td>
-							<td>@((MarkupString)item.OnExitLimitsHTML)</td>
+							<td>
+								<button class="wv-mute" @onclick=@(()=> _showLimitInfoModal(item,false))>limit info</button>
+							</td>
 						</tr>
 					</Virtualize>
 					@if (_row.TraceList.Count == 0)
@@ -83,7 +87,8 @@
 			<button title="Close [Esc]" type="button" @onclick=@(()=> Hide(false))>Close [Esc]</button>
 		</div>
 	</div>
-	<WvBlazorTraceMemoryModal @ref=_memoryModal NestLevel="@(NestLevel+1)" />
+	<WvBlazorTraceMemoryModal @ref=_memoryModal NestLevel="@(NestLevel+1)" OnChange="_muteChanged" />
+	<WvBlazorTraceLimitInfoModal @ref=_limitInfoModal NestLevel="@(NestLevel+1)" />
 }
 
 

@@ -15,10 +15,10 @@ public static partial class WvTraceUtility
 	public static string WvBTToKilobytesString(this long? bytes)
 	{
 		if (bytes == null) return "n/a";
-			
+
 		if (bytes < 0) return "err"; // Handle invalid input
-		if(bytes == 0) return "0 KB";
-		if(bytes <= 15) return bytes.ToString() + " bytes";
+		if (bytes == 0) return "0 KB";
+		if (bytes <= 15) return bytes.ToString() + " bytes";
 		const double kilobyteFactor = 1024.0;
 		var kb = Math.Round((double)bytes / kilobyteFactor, 2, MidpointRounding.AwayFromZero);
 		return kb.ToString() + " KB";
@@ -26,8 +26,8 @@ public static partial class WvTraceUtility
 	public static string WvBTToKilobytesString(this long bytes)
 	{
 		if (bytes < 0) return "err"; // Handle invalid input
-		if(bytes == 0) return "0 KB";
-		if(bytes <= 15) return bytes.ToString() + " bytes";
+		if (bytes == 0) return "0 KB";
+		if (bytes <= 15) return bytes.ToString() + " bytes";
 		const double kilobyteFactor = 1024.0;
 		var kb = Math.Round((double)bytes / kilobyteFactor, 2, MidpointRounding.AwayFromZero);
 		return kb.ToString() + " KB";
@@ -61,5 +61,15 @@ public static partial class WvTraceUtility
 			default:
 				return limit.ToString();
 		}
+	}
+
+	public static string WvBTToTimeString(this DateTimeOffset? timestamp)
+	{
+		if (timestamp == null) return "n/a";
+		return $"{timestamp.Value.ToString(WvConstants.TimestampFormat)} ms";
+	}
+	public static string WvBTToTimeString(this DateTimeOffset timestamp)
+	{
+		return $"{timestamp.ToString(WvConstants.TimestampFormat)} ms";
 	}
 }

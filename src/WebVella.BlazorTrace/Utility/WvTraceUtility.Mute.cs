@@ -98,7 +98,9 @@ public static partial class WvTraceUtility
 		{
 			if (item.IsMuted(muteList)) continue;
 			item.OnEnterMemoryInfo = item.OnEnterMemoryInfo.ProcessMemoryInfoList(muteList);
+			item.OnEnterMemoryBytes = item.OnEnterMemoryInfo?.Sum(x=> x.Size);
 			item.OnExitMemoryInfo = item.OnExitMemoryInfo.ProcessMemoryInfoList(muteList);
+			item.OnExitMemoryBytes = item.OnExitMemoryInfo?.Sum(x=> x.Size);
 			result.Add(item);
 		}
 		return result;

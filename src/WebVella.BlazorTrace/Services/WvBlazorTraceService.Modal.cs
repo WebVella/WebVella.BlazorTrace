@@ -88,13 +88,6 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 
 		if (result.Request.IsMethodMenu)
 		{
-			Console.WriteLine($"****");
-			checkModuleDict(_moduleDictInternal);
-			Console.WriteLine($"****");
-			checkModuleDict(primarySN.ModuleDict);
-			Console.WriteLine($"****");
-			checkModuleDict(secondarySN.ModuleDict);
-
 			var traceRows = primarySN.GenerateMethodTraceRows(
 				secondarySn: secondarySN,
 				muteTraces:store.MutedTraces,
