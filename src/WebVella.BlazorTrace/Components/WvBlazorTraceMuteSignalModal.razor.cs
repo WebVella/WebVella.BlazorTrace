@@ -102,10 +102,10 @@ public partial class WvBlazorTraceMuteSignalModal : WvBlazorTraceComponentBase
 			_applicableTypes = new(){
 			new WvTraceMute(WvTraceMuteType.Signal,_row),
 		};
-			if (_row!.IsBookmarked)
-				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.BookmarkedSignals, _row));
+			if (_row!.IsPinned)
+				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.PinnedSignals, _row));
 			else
-				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.NotBookmarkedSignals, _row));
+				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.NotPinnedSignals, _row));
 		}
 	}
 }

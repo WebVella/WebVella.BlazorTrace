@@ -228,7 +228,7 @@ public class WvTraceModalRequestMutedFilter
 	public string? SignalFilter { get; set; } = null;
 	public string? FieldFilter { get; set; } = null;
 	public string? CustomDataFilter { get; set; } = null;
-	public string? BookmarkFilter { get; set; } = null;
+	public string? PinFilter { get; set; } = null;
 
 	[JsonIgnore]
 	public bool HasFilter
@@ -241,7 +241,7 @@ public class WvTraceModalRequestMutedFilter
 		|| !String.IsNullOrWhiteSpace(SignalFilter)
 		|| !String.IsNullOrWhiteSpace(FieldFilter)
 		|| !String.IsNullOrWhiteSpace(CustomDataFilter)
-		|| !String.IsNullOrWhiteSpace(BookmarkFilter)
+		|| !String.IsNullOrWhiteSpace(PinFilter)
 		;
 	}
 }

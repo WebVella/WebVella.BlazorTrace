@@ -12,7 +12,7 @@ using WebVella.BlazorTrace.Models;
 namespace WebVella.BlazorTrace.Utility;
 public static partial class WvTraceUtility
 {
-	public static long? GetDurationMS(this WvTraceSessionTrace method)
+	public static long? GetDurationMS(this WvTraceSessionMethodTrace method)
 	{
 		if (method.EnteredOn is null || method.ExitedOn is null)
 			return null;
@@ -258,7 +258,7 @@ public static partial class WvTraceUtility
 		return result;
 	}
 
-	public static string CalculateLimitsHTML(this WvTraceSessionTrace trace, bool isOnEnter)
+	public static string CalculateLimitsHTML(this WvTraceSessionMethodTrace trace, bool isOnEnter)
 	{
 		var list = new List<string>();
 		if (isOnEnter && trace.OnEnterOptions is not null)

@@ -11,74 +11,23 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 		lock (_locker)
 		{
 			//given
-			var options = new WvTraceMethodOptions
-			{
-				DurationLimitMS = 1
-			};
-			var firstRender = true;
-			var moduleName = "WebVella.BlazorTrace.Tests";
-			var componentName = "TestComponent";
-			var componentFullName = moduleName + "." + componentName;
-			var methodName = "OnInitialized";
-			var traceId = Guid.NewGuid();
-			var instanceTag = Guid.NewGuid().ToString();
-			var customData = Guid.NewGuid().ToString();
-
-			var primarySN = new WvSnapshot()
-			{
-				Id = Guid.NewGuid(),
-				CreatedOn = DateTimeOffset.Now,
-				Name = "Test",
-				ModuleDict = new Dictionary<string, WvTraceSessionModule> {
-					{moduleName,new WvTraceSessionModule{
-						ComponentDict = new Dictionary<string, WvTraceSessionComponent>{
-							{componentFullName, new WvTraceSessionComponent{
-								Name = componentName,
-								TaggedInstances = new List<WvTraceSessionComponentTaggedInstance>{
-									new WvTraceSessionComponentTaggedInstance{
-										Tag = instanceTag,
-										OnInitialized = new WvTraceSessionMethod{
-											Name = methodName,
-											TraceList = new List<WvTraceSessionTrace>{
-												new WvTraceSessionTrace{
-													TraceId = traceId,
-													OnEnterCustomData = customData,
-													OnExitCustomData = customData,
-													EnteredOn = DateTimeOffset.Now,
-													ExitedOn = DateTimeOffset.Now.AddMilliseconds(15),
-													OnEnterFirstRender = firstRender,
-													OnExitFirstRender = firstRender,
-													OnEnterMemoryBytes = null,
-													OnEnterMemoryInfo = null,
-													OnExitMemoryBytes = null,
-													OnExitMemoryInfo = null,
-													OnEnterOptions = options,
-													OnExitOptions = options
-												}
-											}
-										}
-									}
-								}
-							}}
-						}
-					}}
-				}
-			};
-
+			var primarySN = GetSnapshot();
+			var mutedTraces = new List<WvTraceMute>();
+			var pins = new List<string>();
 
 			//when
 			var result = new List<WvMethodTraceRow>();
-			Action action = () => result = primarySN.GenerateMethodTraceRows(primarySN);
+			Action action = () => result = primarySN.GenerateMethodTraceRows(primarySN, mutedTraces,pins);
 			var ex = Record.Exception(action);
 			Assert.Null(ex);
 			Assert.Single(result);
 			var trRow = CheckTraceRowExists(
 				traceRows: result,
-				moduleName: moduleName,
-				componentFullName: componentFullName,
-				componentName: componentName,
-				instanceTag: instanceTag,
-				methodName: methodName
+				moduleName: ModuleName,
+				componentFullName: ComponentFullName,
+				componentName: ComponentName,
+				instanceTag: InstanceTag,
+				methodName: MethodName
 			);
 			Assert.Single(trRow.TraceList);
 			Assert.NotNull(trRow.MethodComparison);
@@ -96,177 +45,65 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 		lock (_locker)
 		{
 			//given
-			var options = new WvTraceMethodOptions
-			{
-				DurationLimitMS = 1
-			};
-			var firstRender = true;
-			var moduleName = "WebVella.BlazorTrace.Tests";
-			var componentName = "TestComponent";
-			var componentFullName = moduleName + "." + componentName;
-			var methodName = "OnInitialized";
-			var traceId = Guid.NewGuid();
-			var instanceTag = Guid.NewGuid().ToString();
-			var customData = Guid.NewGuid().ToString();
-			var timestamp = DateTimeOffset.Now;
-			var timestamp2 = DateTimeOffset.Now.AddSeconds(2);
-			int delayMS = 200;
-			string memoryFieldName = "_test";
 			long extraMemoryBytes = 2048;
-			var primarySN = new WvSnapshot()
-			{
-				Id = Guid.NewGuid(),
-				CreatedOn = DateTimeOffset.Now,
-				Name = "Test",
-				ModuleDict = new Dictionary<string, WvTraceSessionModule> {
-					{moduleName,new WvTraceSessionModule{
-						ComponentDict = new Dictionary<string, WvTraceSessionComponent>{
-							{componentFullName, new WvTraceSessionComponent{
-								Name = componentName,
-								TaggedInstances = new List<WvTraceSessionComponentTaggedInstance>{
-									new WvTraceSessionComponentTaggedInstance{
-										Tag = instanceTag,
-										OnInitialized = new WvTraceSessionMethod{
-											Name = methodName,
-											TraceList = new List<WvTraceSessionTrace>{
-												new WvTraceSessionTrace{
-													TraceId = traceId,
-													OnEnterCustomData = customData,
-													OnExitCustomData = customData,
-													EnteredOn = timestamp,
-													ExitedOn = timestamp,
-													OnEnterFirstRender = firstRender,
-													OnExitFirstRender = firstRender,
-													OnEnterMemoryBytes = 0,
-													OnEnterMemoryInfo = new List<WvTraceMemoryInfo>{
+			var primarySN = GetSnapshot();
+			var secondarySN = GetSnapshot();
+			secondarySN.Id = Guid.NewGuid();
+			secondarySN.Name = "secondary";
+			var secondaryMethod = secondarySN.ModuleDict[ModuleName]
+				.ComponentDict[ComponentFullName]
+				.TaggedInstances[0]
+				.OnInitialized;
+			secondaryMethod.TraceList.Add(new WvTraceSessionMethodTrace
+				{
+					TraceId = Guid.NewGuid(),
+					OnEnterCustomData = CustomData,
+					OnExitCustomData = CustomData,
+					EnteredOn = TimeStamp.AddSeconds(30),
+					ExitedOn = TimeStamp2.AddSeconds(30).AddMilliseconds(DelayMS),
+					OnEnterFirstRender = FirstRender,
+					OnExitFirstRender = FirstRender,
+					OnEnterMemoryBytes = 0,
+					OnEnterMemoryInfo = new List<WvTraceMemoryInfo>{
 														new WvTraceMemoryInfo{
-														AssemblyName = moduleName,
-														FieldName = memoryFieldName,
+														AssemblyName = ModuleName,
+														FieldName = FieldName,
 														Size = 0
 														}
 													},
-													OnExitMemoryBytes = 0,
-													OnExitMemoryInfo = new List<WvTraceMemoryInfo>{
+					OnExitMemoryBytes = extraMemoryBytes,
+					OnExitMemoryInfo = new List<WvTraceMemoryInfo>{
 														new WvTraceMemoryInfo{
-														AssemblyName = moduleName,
-														FieldName = memoryFieldName,
-														Size = 0
-														}
-													},
-													OnEnterOptions = options,
-													OnExitOptions = options
-												}
-											}
-										}
-									}
-								}
-							}}
-						}
-					}}
-				}
-			};
-
-			var secondarySN = new WvSnapshot()
-			{
-				Id = Guid.NewGuid(),
-				CreatedOn = DateTimeOffset.Now,
-				Name = "Test 2",
-				ModuleDict = new Dictionary<string, WvTraceSessionModule> {
-					{moduleName,new WvTraceSessionModule{
-						ComponentDict = new Dictionary<string, WvTraceSessionComponent>{
-							{componentFullName, new WvTraceSessionComponent{
-								Name = componentName,
-								TaggedInstances = new List<WvTraceSessionComponentTaggedInstance>{
-									new WvTraceSessionComponentTaggedInstance{
-										Tag = instanceTag,
-										OnInitialized = new WvTraceSessionMethod{
-											Name = methodName,
-											TraceList = new List<WvTraceSessionTrace>{
-												new WvTraceSessionTrace{
-													TraceId = traceId,
-													OnEnterCustomData = customData,
-													OnExitCustomData = customData,
-													EnteredOn = timestamp,
-													ExitedOn = timestamp,
-													OnEnterFirstRender = firstRender,
-													OnExitFirstRender = firstRender,
-													OnEnterMemoryBytes = 0,
-													OnEnterMemoryInfo = new List<WvTraceMemoryInfo>{
-														new WvTraceMemoryInfo{
-														AssemblyName = moduleName,
-														FieldName = memoryFieldName,
-														Size = 0
-														}
-													},
-													OnExitMemoryBytes = 0,
-													OnExitMemoryInfo = new List<WvTraceMemoryInfo>{
-														new WvTraceMemoryInfo{
-														AssemblyName = moduleName,
-														FieldName = memoryFieldName,
-														Size = 0
-														}
-													},
-													OnEnterOptions = options,
-													OnExitOptions = options
-												},
-												new WvTraceSessionTrace{
-													TraceId = traceId,
-													OnEnterCustomData = customData,
-													OnExitCustomData = customData,
-													EnteredOn = timestamp2,
-													ExitedOn = timestamp2.AddMilliseconds(delayMS),
-													OnEnterFirstRender = firstRender,
-													OnExitFirstRender = firstRender,
-													OnEnterMemoryBytes = 0,
-													OnEnterMemoryInfo = new List<WvTraceMemoryInfo>{
-														new WvTraceMemoryInfo{
-														AssemblyName = moduleName,
-														FieldName = memoryFieldName,
-														Size = 0
-														}
-													},
-													OnExitMemoryBytes = extraMemoryBytes,
-													OnExitMemoryInfo = new List<WvTraceMemoryInfo>{
-														new WvTraceMemoryInfo{
-														AssemblyName = moduleName,
-														FieldName = memoryFieldName,
+														AssemblyName = ModuleName,
+														FieldName = FieldName,
 														Size = extraMemoryBytes
 														}
 													},
-													OnEnterOptions = options,
-													OnExitOptions = options
-												}
-											}
-										}
-									}
-								}
-							}}
-						}
-					}}
-				}
-			};
-
-
+					OnEnterOptions = Options,
+					OnExitOptions = Options
+				});
+			var mutedTraces = new List<WvTraceMute>();
+			var pins = new List<string>();
 			//when
 			var result = new List<WvMethodTraceRow>();
-			Action action = () => result = primarySN.GenerateMethodTraceRows(secondarySN);
+			Action action = () => result = primarySN.GenerateMethodTraceRows(secondarySN, mutedTraces, pins);
 			var ex = Record.Exception(action);
 			Assert.Null(ex);
 			Assert.Single(result);
 			var trRow = CheckTraceRowExists(
 				traceRows: result,
-				moduleName: moduleName,
-				componentFullName: componentFullName,
-				componentName: componentName,
-				instanceTag: instanceTag,
-				methodName: methodName
+				moduleName: ModuleName,
+				componentFullName: ComponentFullName,
+				componentName: ComponentName,
+				instanceTag: InstanceTag,
+				methodName: MethodName
 			);
-			Assert.Equal(2,trRow.TraceList.Count);
-			Assert.Equal(extraMemoryBytes,trRow.LastMemoryBytes);
-			Assert.Equal(delayMS,trRow.LastDurationMS);
+			Assert.Equal(2, trRow.TraceList.Count);
+			Assert.Equal(extraMemoryBytes, trRow.LastMemoryBytes);
+			Assert.Equal(DelayMS * 2, trRow.LastDurationMS);
 			Assert.NotNull(trRow.MethodComparison);
 			Assert.Equal(1, trRow.MethodComparison.TraceListChange);
-			Assert.Equal(delayMS, trRow.MethodComparison.LastDurationChangeMS);
+			Assert.Equal(DelayMS, trRow.MethodComparison.LastDurationChangeMS);
 
 			Assert.NotNull(trRow.MemoryComparison);
 			Assert.Equal(extraMemoryBytes, trRow.MemoryComparison.LastMemoryChangeBytes);

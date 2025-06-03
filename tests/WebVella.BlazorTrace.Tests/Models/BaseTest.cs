@@ -19,6 +19,21 @@ public class BaseTest
 	public Mock<WvBlazorTraceService> WvBlazorTraceServiceMock;
 	public TestComponent Component;
 
+	public WvTraceMethodOptions Options { get; set; } = new();
+	public bool FirstRender { get; set; } = true;
+	public string ModuleName { get; set; } = "WebVella.BlazorTrace.Tests";
+	public string ComponentName { get; set; } = "TestComponent";
+	public string ComponentFullName { get => ModuleName + ComponentName; }
+	public string MethodName { get; set; } = "OnInitialized";
+	public Guid TraceId { get; set; } = Guid.NewGuid();
+	public string InstanceTag { get; set; } = Guid.NewGuid().ToString();
+	public string CustomData { get; set; } = Guid.NewGuid().ToString();
+	public string FieldName { get; set; } = "_test";
+	public long ExtraMemoryBytes { get; set; } = 2048;
+	public int DelayMS { get; set; } = 200;
+	public DateTimeOffset TimeStamp { get; set; } = DateTimeOffset.Now;
+	public DateTimeOffset TimeStamp2 { get => TimeStamp.AddMilliseconds(DelayMS); }
+
 	public BaseTest()
 	{
 		this.WvBlazorTraceConfigurationServiceMock = new Mock<IWvBlazorTraceConfigurationService>();
@@ -31,7 +46,7 @@ public class BaseTest
 		this.Component = new TestComponent();
 	}
 
-	public (WvTraceSessionMethod, WvTraceSessionTrace) CheckTraceExists(
+	public (WvTraceSessionMethod, WvTraceSessionMethodTrace) CheckTraceExists(
 		Dictionary<string, WvTraceSessionModule> moduleDict,
 		string moduleName,
 		string componentFullName,
@@ -41,7 +56,7 @@ public class BaseTest
 		Guid? traceId)
 	{
 		WvTraceSessionMethod? method = null;
-		WvTraceSessionTrace? trace = null;
+		WvTraceSessionMethodTrace? trace = null;
 
 		Assert.Single(moduleDict.Keys);
 		Assert.NotNull(moduleDict.Keys.SingleOrDefault(x => x == moduleName));
@@ -60,7 +75,7 @@ public class BaseTest
 			InstanceTag = instanceTag,
 			ModuleName = moduleName
 		};
-		var traceList = new List<WvTraceSessionTrace>();
+		var traceList = new List<WvTraceSessionMethodTrace>();
 		if (traceInfo.IsOnInitialized)
 		{
 			method = compInstance.OnInitialized;
@@ -105,13 +120,13 @@ public class BaseTest
 		return (method, trace);
 	}
 
-		public (WvTraceSessionSignal, WvTraceSessionSignalTrace) CheckSignalTraceExists(
-		Dictionary<string, WvTraceSessionSignal> signalDict,
-		string moduleName,
-		string signalName,
-		string componentFullName,
-		string instanceTag,
-		string methodName)
+	public (WvTraceSessionSignal, WvTraceSessionSignalTrace) CheckSignalTraceExists(
+	Dictionary<string, WvTraceSessionSignal> signalDict,
+	string moduleName,
+	string signalName,
+	string componentFullName,
+	string instanceTag,
+	string methodName)
 	{
 		WvTraceSessionSignal? signal = null;
 		WvTraceSessionSignalTrace? trace = null;
@@ -119,7 +134,7 @@ public class BaseTest
 		Assert.NotNull(signalDict.Keys.SingleOrDefault(x => x == signalName));
 		signal = signalDict[signalName];
 		Assert.NotEmpty(signal.TraceList);
-		trace = signal.TraceList.FirstOrDefault(x => 
+		trace = signal.TraceList.FirstOrDefault(x =>
 			x.ComponentFullName == componentFullName
 			&& x.InstanceTag == instanceTag
 			&& x.MethodName == methodName
@@ -150,4 +165,62 @@ public class BaseTest
 			&& x.InstanceTag == instanceTag
 			&& x.Method == methodName);
 	}
+
+	public WvSnapshot GetSnapshot()
+	{
+		var snapshot = new WvSnapshot()
+		{
+			Id = Guid.NewGuid(),
+			CreatedOn = DateTimeOffset.Now,
+			Name = "Snapshot",
+			ModuleDict = new Dictionary<string, WvTraceSessionModule> {
+					{ModuleName,new WvTraceSessionModule{
+						ComponentDict = new Dictionary<string, WvTraceSessionComponent>{
+							{ComponentFullName, new WvTraceSessionComponent{
+								Name = ComponentName,
+								TaggedInstances = new List<WvTraceSessionComponentTaggedInstance>{
+									new WvTraceSessionComponentTaggedInstance{
+										Tag = InstanceTag,
+										OnInitialized = new WvTraceSessionMethod{
+											Name = MethodName,
+											TraceList = new List<WvTraceSessionMethodTrace>{
+												new WvTraceSessionMethodTrace{
+													TraceId = TraceId,
+													OnEnterCustomData = CustomData,
+													OnExitCustomData = CustomData,
+													EnteredOn = TimeStamp,
+													ExitedOn = TimeStamp2,
+													OnEnterFirstRender = FirstRender,
+													OnExitFirstRender = FirstRender,
+													OnEnterMemoryBytes = 0,
+													OnEnterMemoryInfo = new List<WvTraceMemoryInfo>{
+														new WvTraceMemoryInfo{
+														AssemblyName = ModuleName,
+														FieldName = FieldName,
+														Size = 0
+														}
+													},
+													OnExitMemoryBytes = 0,
+													OnExitMemoryInfo = new List<WvTraceMemoryInfo>{
+														new WvTraceMemoryInfo{
+														AssemblyName = ModuleName,
+														FieldName = FieldName,
+														Size = 0
+														}
+													},
+													OnEnterOptions = Options,
+													OnExitOptions = Options
+												}
+											}
+										}
+									}
+								}
+							}}
+						}
+					}}
+				}
+		};
+		return snapshot;
+	}
+
 }

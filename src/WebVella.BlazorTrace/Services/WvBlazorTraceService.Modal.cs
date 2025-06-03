@@ -89,7 +89,9 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		if (result.Request.IsMethodMenu)
 		{
 			var traceRows = primarySN.GenerateMethodTraceRows(
-				secondarySn: secondarySN
+				secondarySn: secondarySN,
+				muteTraces:store.MutedTraces,
+				pins:store.Pins
 			);
 			foreach (var row in traceRows)
 			{
@@ -101,10 +103,10 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 				if (!row.DurationMatches(result.Request.MethodsFilter.DurationFilter)) continue;
 				if (!row.LimitMatches(result.Request.MethodsFilter.LimitsFilter)) continue;
 
-				if (store.Bookmarked.Contains(row.Id))
-					row.IsBookmarked = true;
+				if (store.Pins.Contains(row.Id))
+					row.IsPinned = true;
 				else
-					row.IsBookmarked = false;
+					row.IsPinned = false;
 				result.MethodTraceRows.Add(row);
 			}
 			if (result.Request.Menu == WvTraceModalMenu.MethodCalls)
@@ -139,10 +141,10 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 				if (!row.CallsMatches(result.Request.SignalsFilter.CallsFilter)) continue;
 				if (!row.LimitMatches(result.Request.SignalsFilter.LimitsFilter)) continue;
 
-				if (store.Bookmarked.Contains(row.Id))
-					row.IsBookmarked = true;
+				if (store.Pins.Contains(row.Id))
+					row.IsPinned = true;
 				else
-					row.IsBookmarked = false;
+					row.IsPinned = false;
 				result.SignalTraceRows.Add(row);
 			}
 			if (result.Request.Menu == WvTraceModalMenu.SignalCalls)
@@ -171,7 +173,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 				if (!row.SignalMatches(result.Request.MutedFilter.SignalFilter)) continue;
 				if (!row.FieldMatches(result.Request.MutedFilter.FieldFilter)) continue;
 				if (!row.CustomDataMatches(result.Request.MutedFilter.CustomDataFilter)) continue;
-				if (!row.IsBookmarkedMatches(result.Request.MutedFilter.BookmarkFilter)) continue;
+				if (!row.IsPinnedMatches(result.Request.MutedFilter.PinFilter)) continue;
 				result.MutedTraceRows.Add(row);
 			}
 			result.MutedTraceRows = result.MutedTraceRows.OrderBy(x => $"{x.Id}").ToList();

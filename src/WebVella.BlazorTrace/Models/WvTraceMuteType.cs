@@ -30,12 +30,12 @@ public enum WvTraceMuteType
 	Limit = 9,
 	[Description("<span>Custom Data</span>")]
 	CustomData = 10,
-	[Description("<span>Not Bookmarked</span> methods")]
-	NotBookmarkedMethods = 11,
-	[Description("<span>Bookmarked</span> methods")]
-	BookmarkedMethods = 12,
-	[Description("<span>Not Bookmarked</span> signals")]
-	NotBookmarkedSignals = 13,
-	[Description("<span>Bookmarked</span> signals")]
-	BookmarkedSignals = 14,
+	[Description("<span>Not Pinned</span> methods")]
+	NotPinnedMethods = 11,
+	[Description("<span>Pinned</span> methods")]
+	PinnedMethods = 12,
+	[Description("<span>Not Pinned</span> signals")]
+	NotPinnedSignals = 13,
+	[Description("<span>Pinned</span> signals")]
+	PinnedSignals = 14,
 }

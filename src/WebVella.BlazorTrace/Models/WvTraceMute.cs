@@ -11,13 +11,18 @@ public class WvTraceMute
 	public string Id { get => WvModalUtility.GenerateTraceMuteHash(this); }
 	public WvTraceMuteType Type { get; set; } = WvTraceMuteType.Module;
 	public string? Module { get; set; }
-	public string? Component { get; set; }
+	public string? ComponentFullName { get; set; }
+	/// <summary>
+	/// NOTE: Component name is just for presentational purposes. 
+	/// ComponentFullName is used in the match process.
+	/// </summary>
+	public string? ComponentName { get; set; }
 	public string? InstanceTag { get; set; }
 	public string? Method { get; set; }
 	public string? Signal { get; set; }
 	public string? Field { get; set; }
 	public string? CustomData { get; set; }
-	public bool? IsBookmarked { get; set; }
+	public bool? IsPinned { get; set; }
 	public WvTraceMute()
 	{
 	}
@@ -31,10 +36,12 @@ public class WvTraceMute
 				Module = row.Module;
 				break;
 			case WvTraceMuteType.Component:
-				Component = row.Component;
+				ComponentName = row.Component;
+				ComponentFullName = row.ComponentFullName;
 				break;
 			case WvTraceMuteType.ComponentInstance:
-				Component = row.Component;
+				ComponentName = row.Component;
+				ComponentFullName = row.ComponentFullName;
 				InstanceTag = row.InstanceTag;
 				break;
 			case WvTraceMuteType.Method:
@@ -45,21 +52,23 @@ public class WvTraceMute
 				Method = row.Method;
 				break;
 			case WvTraceMuteType.MethodInComponent:
-				Component = row.Component;
+				ComponentName = row.Component;
+				ComponentFullName = row.ComponentFullName;
 				Method = row.Method;
 				break;
 			case WvTraceMuteType.MethodInComponentInstance:
-				Component = row.Component;
+				ComponentName = row.Component;
+				ComponentFullName = row.ComponentFullName;
 				InstanceTag = row.InstanceTag;
 				Method = row.Method;
 				break;
-			case WvTraceMuteType.NotBookmarkedMethods:
-			case WvTraceMuteType.NotBookmarkedSignals:
-				IsBookmarked = false;
+			case WvTraceMuteType.NotPinnedMethods:
+			case WvTraceMuteType.NotPinnedSignals:
+				IsPinned = false;
 				break;
-			case WvTraceMuteType.BookmarkedMethods:
-			case WvTraceMuteType.BookmarkedSignals:
-				IsBookmarked = true;
+			case WvTraceMuteType.PinnedMethods:
+			case WvTraceMuteType.PinnedSignals:
+				IsPinned = true;
 				break;
 			default:
 				break;
@@ -70,11 +79,11 @@ public class WvTraceMute
 		Type = type;
 		switch (type)
 		{
-			case WvTraceMuteType.NotBookmarkedMethods:
-				IsBookmarked = false;
+			case WvTraceMuteType.NotPinnedMethods:
+				IsPinned = false;
 				break;
-			case WvTraceMuteType.BookmarkedMethods:
-				IsBookmarked = true;
+			case WvTraceMuteType.PinnedMethods:
+				IsPinned = true;
 				break;
 			case WvTraceMuteType.Signal:
 				Signal = row.SignalName;
@@ -100,9 +109,9 @@ public class WvTraceMute
 
 		if (string.IsNullOrWhiteSpace(search)) return true;
 		var searchLower = search.Trim().ToLowerInvariant();
-		if ("undefined".Contains(searchLower) && String.IsNullOrWhiteSpace(Component))
+		if ("undefined".Contains(searchLower) && String.IsNullOrWhiteSpace(ComponentName))
 			return true;
-		if ((Component ?? String.Empty).ToLowerInvariant().Contains(searchLower))
+		if ((ComponentName ?? String.Empty).ToLowerInvariant().Contains(searchLower))
 			return true;
 
 		return false;
@@ -168,23 +177,23 @@ public class WvTraceMute
 
 		return false;
 	}
-	public bool IsBookmarkedMatches(string? search)
+	public bool IsPinnedMatches(string? search)
 	{
-		if (!(Type == WvTraceMuteType.BookmarkedMethods
-			|| Type == WvTraceMuteType.NotBookmarkedMethods
-			|| Type == WvTraceMuteType.BookmarkedSignals
-			|| Type == WvTraceMuteType.NotBookmarkedSignals
+		if (!(Type == WvTraceMuteType.PinnedMethods
+			|| Type == WvTraceMuteType.NotPinnedMethods
+			|| Type == WvTraceMuteType.PinnedSignals
+			|| Type == WvTraceMuteType.NotPinnedSignals
 			)) return true;
 
 		if (string.IsNullOrWhiteSpace(search)) return true;
 		var searchLower = search.Trim().ToLowerInvariant();
-		if ("undefined".Contains(searchLower) && IsBookmarked is null)
+		if ("undefined".Contains(searchLower) && IsPinned is null)
 			return true;
 
-		if ("true".Contains(searchLower) && IsBookmarked.HasValue && IsBookmarked.Value)
+		if ("true".Contains(searchLower) && IsPinned.HasValue && IsPinned.Value)
 			return true;
 
-		if ("false".Contains(searchLower) && IsBookmarked.HasValue && !IsBookmarked.Value)
+		if ("false".Contains(searchLower) && IsPinned.HasValue && !IsPinned.Value)
 			return true;
 
 		return false;

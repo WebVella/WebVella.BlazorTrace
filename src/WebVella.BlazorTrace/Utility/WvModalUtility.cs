@@ -13,14 +13,14 @@ namespace WebVella.BlazorTrace.Utility;
 public static class WvModalUtility
 {
 	public static List<WvMethodTraceRow> GenerateMethodTraceRows(this WvSnapshot primarySn,
-		WvSnapshot secondarySn)
+		WvSnapshot secondarySn, List<WvTraceMute> muteTraces, List<string> pins)
 	{
 		//Generate data on secondarySN (which should be the newest in the default case
 		var unionDataDict = new Dictionary<string, WvModuleUnionData>();
 		var methodComparisonDict = new Dictionary<string, WvSnapshotMethodComparison>();
 		var memoryComparisonDict = new Dictionary<string, WvSnapshotMemoryComparison>();
-		unionDataDict.AddSnapshotToComparisonDictionary(methodComparisonDict, memoryComparisonDict, primarySn, true);
-		unionDataDict.AddSnapshotToComparisonDictionary(methodComparisonDict, memoryComparisonDict, secondarySn, false);
+		unionDataDict.AddSnapshotToComparisonDictionary(methodComparisonDict, memoryComparisonDict, primarySn, muteTraces, true);
+		unionDataDict.AddSnapshotToComparisonDictionary(methodComparisonDict, memoryComparisonDict, secondarySn, muteTraces, false);
 		unionDataDict.ProcessComparisonDictionary(methodComparisonDict, memoryComparisonDict);
 		var result = new List<WvMethodTraceRow>();
 
@@ -50,6 +50,9 @@ public static class WvModalUtility
 							MethodComparison = methodComparisonDict[methodHash].ComparisonData,
 							MemoryComparison = memoryComparisonDict[methodHash].ComparisonData,
 						};
+
+						if(row.IsMuted(muteTraces,pins)) continue;
+
 						result.Add(row);
 					}
 				}
@@ -97,13 +100,15 @@ public static class WvModalUtility
 		=> $"{signalName}";
 
 	public static string GenerateTraceMuteHash(WvTraceMute item)
-		=> $"{item.Type}$$${item.Module ?? "undefined"}$$${item.Component ?? "undefined"}$$${item.InstanceTag ?? "undefined"}$$${item.Method ?? "undefined"}" +
+		=> $"{item.Type}$$${item.Module ?? "undefined"}$$${item.ComponentFullName ?? "undefined"}$$${item.InstanceTag ?? "undefined"}$$${item.Method ?? "undefined"}" +
 		$"$$${item.Signal ?? "undefined"}$$${item.Field ?? "undefined"}$$${item.CustomData ?? "undefined"}" +
-		$"$$${(item.IsBookmarked is null ? "undefined" : item.IsBookmarked.Value.ToString())}";
+		$"$$${(item.IsPinned is null ? "undefined" : item.IsPinned.Value.ToString())}";
 
-	public static void AddSnapshotToComparisonDictionary(this Dictionary<string, WvModuleUnionData> unionDict, Dictionary<string, WvSnapshotMethodComparison> methodComp,
+	public static void AddSnapshotToComparisonDictionary(this Dictionary<string, WvModuleUnionData> unionDict,
+		Dictionary<string, WvSnapshotMethodComparison> methodComp,
 		Dictionary<string, WvSnapshotMemoryComparison> memoryComp,
 		WvSnapshot? snapshot,
+		List<WvTraceMute> muteList,
 		bool isPrimary = true)
 	{
 		if (unionDict is null) unionDict = new();
@@ -112,22 +117,40 @@ public static class WvModalUtility
 		if (snapshot is null) return;
 		foreach (var moduleName in snapshot.ModuleDict.Keys)
 		{
+			if (moduleName.IsModuleMuted(muteList: muteList)) continue;
 			var module = snapshot.ModuleDict[moduleName];
 			unionDict.SetModuleUnionData(moduleName, module, isPrimary);
 
 			foreach (var componentFullName in module.ComponentDict.Keys)
 			{
+				if (componentFullName.IsComponentMuted(muteList: muteList)) continue;
 				var component = module.ComponentDict[componentFullName];
 				unionDict.SetComponentUnionData(moduleName, componentFullName, component, isPrimary);
 
 				foreach (var componentTaggedInstance in component.TaggedInstances)
 				{
+					if (componentTaggedInstance.Tag.IsComponentInstanceMuted(
+						componentFullName: componentFullName,
+						muteList: muteList)) continue;
+
 					unionDict.SetTaggedInstanceUnionData(moduleName, componentFullName, componentTaggedInstance, isPrimary);
 
 					foreach (var method in componentTaggedInstance.MethodsTotal())
 					{
+						if (method.Name.IsMethodMuted(
+						moduleName: moduleName,
+						componentFullName: componentFullName,
+						instanceTag: componentTaggedInstance.Tag,
+						muteList: muteList
+						)) continue;
+
 						var methodHash = method.GenerateHash(moduleName, componentFullName, componentTaggedInstance.Tag);
+						var unmutedTraceList = method.TraceList.GetUnmuted(muteList);
+
+						if (unmutedTraceList.Count == 0) continue;
+						method.TraceList = unmutedTraceList;
 						unionDict.SetMethodUnionData(moduleName, componentFullName, componentTaggedInstance.Tag, methodHash, method, isPrimary);
+
 						//Method comparison
 						if (!methodComp.ContainsKey(methodHash))
 							methodComp[methodHash] = new();
@@ -425,14 +448,14 @@ public static class WvModalUtility
 				return $"<span class='wv-mute'>custom data</span> {customDataHtml}";
 			case WvTraceMuteType.Limit:
 				return $"<span class='wv-mute'>limit</span> {limitTypeHtml}";
-			case WvTraceMuteType.NotBookmarkedMethods:
-				return "<span>not bookmarked</span> <span class='wv-mute'>methods</span>";
-			case WvTraceMuteType.BookmarkedMethods:
-				return "<span>bookmarked</span> <span class='wv-mute'>methods</span>";
-			case WvTraceMuteType.NotBookmarkedSignals:
-				return "<span>not bookmarked</span> <span class='wv-mute'>signals</span>";
-			case WvTraceMuteType.BookmarkedSignals:
-				return "<span>bookmarked</span> <span class='wv-mute'>signals</span>";
+			case WvTraceMuteType.NotPinnedMethods:
+				return "<span>not pinned</span> <span class='wv-mute'>methods</span>";
+			case WvTraceMuteType.PinnedMethods:
+				return "<span>pinned</span> <span class='wv-mute'>methods</span>";
+			case WvTraceMuteType.NotPinnedSignals:
+				return "<span>not pinned</span> <span class='wv-mute'>signals</span>";
+			case WvTraceMuteType.PinnedSignals:
+				return "<span>pinned</span> <span class='wv-mute'>signals</span>";
 			default:
 				break;
 		}

@@ -35,7 +35,7 @@
 				</thead>
 				<tbody>
 					<Virtualize Items="_row.TraceList.OrderByDescending(x => x.DurationMs).ToList()" Context="item"
-								TItem="WvTraceSessionTrace">
+								TItem="WvTraceSessionMethodTrace">
 						<tr @key="@Guid.NewGuid()">
 							<td class="wv-number">@item.DurationMs.WvBTToDurationMSString()</td>
 							<td class="wv-number">@item.EnteredOn?.ToString(WvConstants.TimestampFormat) ms</td>

@@ -23,8 +23,8 @@ public partial interface IWvBlazorTraceService
 	Task<WvLocalStore> GetLocalStoreAsync();
 	Task<WvSnapshot?> GetSnapshotAsync(Guid id);
 	Task RemoveSnapshotAsync(Guid id);
-	Task AddBookmarkAsync(string id);
-	Task RemoveBookmarkAsync(string id);
+	Task AddPinAsync(string id);
+	Task RemovePinAsync(string id);
 
 	Task<List<WvTraceMute>> GetAllTraceMutesAsync();
 	Task ToggleTraceMuteAsync(WvTraceMute traceMute);
@@ -94,20 +94,20 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		await _setUnprotectedLocalStorageAsync(_snapshotStoreKey, JsonSerializer.Serialize(store));
 	}
 
-	public async Task AddBookmarkAsync(string id)
+	public async Task AddPinAsync(string id)
 	{
 		var store = await GetLocalStoreAsync();
-		if (!store.Bookmarked.Any(x => x == id))
+		if (!store.Pins.Any(x => x == id))
 		{
-			store.Bookmarked.Add(id);
+			store.Pins.Add(id);
 			await _setUnprotectedLocalStorageAsync(_snapshotStoreKey, JsonSerializer.Serialize(store));
 		}
 	}
 
-	public async Task RemoveBookmarkAsync(string id)
+	public async Task RemovePinAsync(string id)
 	{
 		var store = await GetLocalStoreAsync();
-		store.Bookmarked = store.Bookmarked.Where(x => x != id).ToList();
+		store.Pins = store.Pins.Where(x => x != id).ToList();
 		await _setUnprotectedLocalStorageAsync(_snapshotStoreKey, JsonSerializer.Serialize(store));
 	}
 
@@ -123,7 +123,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		if (_traceMutes is null)
 		{
 			var store = await GetLocalStoreAsync();
-			_traceMutes = store.TraceMutes;
+			_traceMutes = store.MutedTraces;
 		}
 		if (_traceMutes is null)
 			_traceMutes = new();
@@ -143,19 +143,19 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 	{
 		var store = await GetLocalStoreAsync();
 
-		if (!store.TraceMutes.Any(x => x.Id == traceMute.Id))
+		if (!store.MutedTraces.Any(x => x.Id == traceMute.Id))
 		{
-			store.TraceMutes.Add(traceMute);
+			store.MutedTraces.Add(traceMute);
 			await _setUnprotectedLocalStorageAsync(_snapshotStoreKey, JsonSerializer.Serialize(store));
 		}
-		_traceMutes = store.TraceMutes;
+		_traceMutes = store.MutedTraces;
 	}
 	public async Task RemoveTraceMuteAsync(WvTraceMute traceMute)
 	{
 		var store = await GetLocalStoreAsync();
-		store.TraceMutes = store.TraceMutes.Where(x => x.Id != traceMute.Id).ToList();
+		store.MutedTraces = store.MutedTraces.Where(x => x.Id != traceMute.Id).ToList();
 		await _setUnprotectedLocalStorageAsync(_snapshotStoreKey, JsonSerializer.Serialize(store));
-		_traceMutes = store.TraceMutes;
+		_traceMutes = store.MutedTraces;
 	}
 
 }

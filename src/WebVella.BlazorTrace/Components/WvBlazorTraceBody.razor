@@ -231,12 +231,12 @@
 									</InputSelect>
 								</th>
 							</tr>
-							@foreach (var item in _data.MethodTraceRows.Where(x => x.IsBookmarked))
+							@foreach (var item in _data.MethodTraceRows.Where(x => x.IsPinned))
 							{
-								<WvBlazorTraceRow @key=item.Id Item="item" Class="wv-bookmark-row wv-selected-row"
+								<WvBlazorTraceRow @key=item.Id Item="item" Class="wv-pinned-row wv-selected-row"
 												  OnTraceListView="_showTraceListModal"
 												  OnMemoryView="_showMemoryModal"
-												  OnBookmark="_bookmarkClicked"
+												  OnPin="_pinClicked"
 												  OnLimitView="_showLimitModal"
 												  OnMute="_showTraceMuteModal" />
 							}
@@ -250,11 +250,11 @@
 							}
 							else
 							{
-								<Virtualize Items="_data.MethodTraceRows.Where(x => !x.IsBookmarked).ToList()" Context="item" TItem="WvMethodTraceRow">
+								<Virtualize Items="_data.MethodTraceRows.Where(x => !x.IsPinned).ToList()" Context="item" TItem="WvMethodTraceRow">
 									<WvBlazorTraceRow @key=@item.Id Item="@item"
 													  OnTraceListView="_showTraceListModal"
 													  OnMemoryView="_showMemoryModal"
-													  OnBookmark="_bookmarkClicked"
+													  OnPin="_pinClicked"
 													  OnLimitView="_showLimitModal"
 													  OnMute="_showTraceMuteModal" />
 								</Virtualize>
@@ -311,11 +311,11 @@
 									</InputSelect>
 								</th>
 							</tr>
-							@foreach (var item in _data.SignalTraceRows.Where(x => x.IsBookmarked))
+							@foreach (var item in _data.SignalTraceRows.Where(x => x.IsPinned))
 							{
-								<WvBlazorTraceSignalRow @key=item.Id Item="item" Class="wv-bookmark-row wv-selected-row"
+								<WvBlazorTraceSignalRow @key=item.Id Item="item" Class="wv-pinned-row wv-selected-row"
 														OnTraceListView="_showTraceListModal"
-														OnBookmark="_bookmarkClicked"
+														OnPin="_pinClicked"
 														OnLimitView="_showLimitModal"
 														OnMute="_showTraceMuteModal" />
 							}
@@ -329,10 +329,10 @@
 							}
 							else
 							{
-								<Virtualize Items="_data.SignalTraceRows.Where(x => !x.IsBookmarked).ToList()" Context="item" TItem="WvSignalTraceRow">
+								<Virtualize Items="_data.SignalTraceRows.Where(x => !x.IsPinned).ToList()" Context="item" TItem="WvSignalTraceRow">
 									<WvBlazorTraceSignalRow @key=item.Id Item="item"
 															OnTraceListView="_showTraceListModal"
-															OnBookmark="_bookmarkClicked"
+															OnPin="_pinClicked"
 															OnLimitView="_showLimitModal"
 															OnMute="_showTraceMuteModal" />
 								</Virtualize>
@@ -438,8 +438,8 @@
 											   @bind-Value:after=_submitFilter />
 								</th>
 								<th>
-									<InputText placeholder="bookmark" autocomplete="new-password"
-											   @bind-Value=@_data!.Request.MutedFilter.BookmarkFilter
+									<InputText placeholder="pin" autocomplete="new-password"
+											   @bind-Value=@_data!.Request.MutedFilter.PinFilter
 											   @bind-Value:after=_submitFilter />
 								</th>
 
@@ -458,16 +458,16 @@
 									</td>
 									<td>@((MarkupString)item.Type.WvBTToDescriptionString())</td>
 									<td>@((MarkupString)(String.IsNullOrWhiteSpace(item.Module) ? "<span class='wv-mute'>undefined</span>" : item.Module))</td>
-									<td>@((MarkupString)(String.IsNullOrWhiteSpace(item.Component) ? "<span class='wv-mute'>undefined</span>" : item.Component))</td>
+									<td>@((MarkupString)(String.IsNullOrWhiteSpace(item.ComponentName) ? "<span class='wv-mute'>undefined</span>" : item.ComponentName))</td>
 									<td>@((MarkupString)(String.IsNullOrWhiteSpace(item.InstanceTag) ? "<span class='wv-mute'>undefined</span>" : item.InstanceTag))</td>
 									<td>@((MarkupString)(String.IsNullOrWhiteSpace(item.Method) ? "<span class='wv-mute'>undefined</span>" : item.Method))</td>
 									<td>@((MarkupString)(String.IsNullOrWhiteSpace(item.Signal) ? "<span class='wv-mute'>undefined</span>" : item.Signal))</td>
 									<td>@((MarkupString)(String.IsNullOrWhiteSpace(item.Field) ? "<span class='wv-mute'>undefined</span>" : item.Field))</td>
 									<td>@((MarkupString)(String.IsNullOrWhiteSpace(item.CustomData) ? "<span class='wv-mute'>undefined</span>" : item.CustomData))</td>
 									<td>
-										@if (item.IsBookmarked is not null)
+										@if (item.IsPinned is not null)
 										{
-											<span>@item.IsBookmarked.Value.ToString()</span>
+											<span>@item.IsPinned.Value.ToString()</span>
 										}
 										else
 										{

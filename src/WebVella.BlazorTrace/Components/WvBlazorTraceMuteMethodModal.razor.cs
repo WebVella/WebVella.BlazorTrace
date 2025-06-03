@@ -109,10 +109,10 @@ public partial class WvBlazorTraceMuteMethodModal : WvBlazorTraceComponentBase
 			new WvTraceMute(WvTraceMuteType.Component,_row),
 			new WvTraceMute(WvTraceMuteType.Module,_row),
 		};
-			if (_row!.IsBookmarked)
-				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.BookmarkedMethods, _row));
+			if (_row!.IsPinned)
+				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.PinnedMethods, _row));
 			else
-				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.NotBookmarkedMethods, _row));
+				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.NotPinnedMethods, _row));
 		}
 	}
 }

@@ -52,7 +52,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 				component.TaggedInstances.Add(new WvTraceSessionComponentTaggedInstance() { Tag = traceInfo.InstanceTag });
 
 			var componentTaggedInstance = component.TaggedInstances.Single(x => x.Tag == traceInfo.InstanceTag);
-			var trace = new WvTraceSessionTrace()
+			var trace = new WvTraceSessionMethodTrace()
 			{
 				TraceId = traceInfo.TraceId,
 				OnEnterMemoryInfo = new List<WvTraceMemoryInfo>(),
@@ -136,7 +136,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 				component.TaggedInstances.Add(new WvTraceSessionComponentTaggedInstance() { Tag = traceInfo.InstanceTag });
 
 			var componentTaggedInstance = component.TaggedInstances.Single(x => x.Tag == traceInfo.InstanceTag);
-			WvTraceSessionTrace? trace = null;
+			WvTraceSessionMethodTrace? trace = null;
 			if (traceInfo.IsOnInitialized)
 			{
 				componentTaggedInstance.OnInitialized.Name = traceInfo.MethodName;
@@ -144,7 +144,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 					.FirstOrDefault(x => x.ExitedOn is null && x.TraceId == traceInfo.TraceId);
 				if (firstNotExitedTrace is null)
 				{
-					trace = new WvTraceSessionTrace();
+					trace = new WvTraceSessionMethodTrace();
 					componentTaggedInstance.OnInitialized.TraceList.Add(trace);
 				}
 				else
@@ -157,7 +157,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 					.FirstOrDefault(x => x.ExitedOn is null && x.TraceId == traceInfo.TraceId);
 				if (firstNotExitedTrace is null)
 				{
-					trace = new WvTraceSessionTrace();
+					trace = new WvTraceSessionMethodTrace();
 					componentTaggedInstance.OnParameterSet.TraceList.Add(trace);
 				}
 				else
@@ -170,7 +170,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 					.FirstOrDefault(x => x.ExitedOn is null && x.TraceId == traceInfo.TraceId);
 				if (firstNotExitedTrace is null)
 				{
-					trace = new WvTraceSessionTrace();
+					trace = new WvTraceSessionMethodTrace();
 					componentTaggedInstance.OnAfterRender.TraceList.Add(trace);
 				}
 				else
@@ -183,7 +183,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 					.FirstOrDefault(x => x.ExitedOn is null && x.TraceId == traceInfo.TraceId);
 				if (firstNotExitedTrace is null)
 				{
-					trace = new WvTraceSessionTrace();
+					trace = new WvTraceSessionMethodTrace();
 					componentTaggedInstance.ShouldRender.TraceList.Add(trace);
 				}
 				else
@@ -196,7 +196,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 					.FirstOrDefault(x => x.ExitedOn is null && x.TraceId == traceInfo.TraceId);
 				if (firstNotExitedTrace is null)
 				{
-					trace = new WvTraceSessionTrace();
+					trace = new WvTraceSessionMethodTrace();
 					componentTaggedInstance.Dispose.TraceList.Add(trace);
 				}
 				else
@@ -214,7 +214,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 					.FirstOrDefault(x => x.ExitedOn is null && x.TraceId == traceInfo.TraceId);
 				if (firstNotExitedTrace is null)
 				{
-					trace = new WvTraceSessionTrace();
+					trace = new WvTraceSessionMethodTrace();
 					otherMethod.TraceList.Add(trace);
 				}
 				else

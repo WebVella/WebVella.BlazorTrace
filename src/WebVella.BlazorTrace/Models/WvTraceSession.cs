@@ -84,9 +84,9 @@ public class WvTraceSessionMethod
 	public long MaxCallsCount { get => this.GetMaxCallsCount(); }
 	[JsonIgnore]
 	public long CompletedCallsCount { get => this.CompletedCallsCount(); }
-	public List<WvTraceSessionTrace> TraceList { get; set; } = new();
+	public List<WvTraceSessionMethodTrace> TraceList { get; set; } = new();
 	[JsonIgnore]
-	public WvTraceSessionTrace? LastExitedTrace
+	public WvTraceSessionMethodTrace? LastExitedTrace
 	{
 		get => TraceList.Where(x => x.ExitedOn is not null).OrderByDescending(x => x.ExitedOn).FirstOrDefault();
 	}
@@ -99,7 +99,7 @@ public class WvTraceSessionMethod
 }
 
 
-public class WvTraceSessionTrace
+public class WvTraceSessionMethodTrace
 {
 	public Guid? TraceId { get; set; } = null;
 	public DateTimeOffset? EnteredOn { get; set; } = null;

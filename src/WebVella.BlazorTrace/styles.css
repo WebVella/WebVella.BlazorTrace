@@ -384,16 +384,16 @@
   cursor: pointer;
   background: rgba(59, 130, 246, 0.25) !important;
 }
-.wv-trace-modal__body table thead tr.wv-bookmark-row button.bookmarked {
+.wv-trace-modal__body table thead tr.wv-pinned-row button.pinned {
   color: #06b6d4;
 }
-.wv-trace-modal__body table thead tr.wv-bookmark-row:last-child th,
-.wv-trace-modal__body table thead tr.wv-bookmark-row:last-child td {
+.wv-trace-modal__body table thead tr.wv-pinned-row:last-child th,
+.wv-trace-modal__body table thead tr.wv-pinned-row:last-child td {
   position: relative;
   padding-bottom: calc(10px + 5px);
 }
-.wv-trace-modal__body table thead tr.wv-bookmark-row:last-child th:after,
-.wv-trace-modal__body table thead tr.wv-bookmark-row:last-child td:after {
+.wv-trace-modal__body table thead tr.wv-pinned-row:last-child th:after,
+.wv-trace-modal__body table thead tr.wv-pinned-row:last-child td:after {
   position: absolute;
   display: block;
   content: "";
@@ -420,7 +420,7 @@
   color: #64748b;
 }
 .wv-trace-modal__body table tbody tr:hover td,
-.wv-trace-modal__body table thead tr.wv-bookmark-row:hover td {
+.wv-trace-modal__body table thead tr.wv-pinned-row:hover td {
   background-color: rgba(255, 255, 255, 0.05);
 }
 .wv-trace-modal__body table tr.wv-selected-row td,

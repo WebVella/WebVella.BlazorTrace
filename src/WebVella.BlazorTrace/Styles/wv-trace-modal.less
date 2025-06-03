@@ -344,13 +344,13 @@
 			}
 
 			thead {
-				tr.wv-bookmark-row {
-					button.bookmarked {
+				tr.wv-pinned-row {
+					button.pinned {
 						color: @cyan;
 					}
 				}
 
-				tr.wv-bookmark-row:last-child {
+				tr.wv-pinned-row:last-child {
 					th, td {
 						position: relative;
 						padding-bottom: calc(@cell-padding + @separator-height);
@@ -361,10 +361,10 @@
 							content: "";
 							background: rgba(@cyan,0.15);
 							height: @separator-height;
-							bottom:0;
-							left:0;
-							right:0;
-							z-index:2;
+							bottom: 0;
+							left: 0;
+							right: 0;
+							z-index: 2;
 						}
 					}
 				}
@@ -388,7 +388,7 @@
 			}
 
 			tbody tr:hover,
-			thead tr.wv-bookmark-row:hover {
+			thead tr.wv-pinned-row:hover {
 				td {
 					background-color: rgba(255,255,255,0.05);
 				}

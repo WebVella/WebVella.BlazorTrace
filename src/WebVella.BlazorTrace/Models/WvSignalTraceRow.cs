@@ -10,7 +10,7 @@ public class WvSignalTraceRow
 {
 	public string Id { get => WvModalUtility.GenerateSignalHash(SignalName); }
 	public string? SignalName { get; set; }
-	public bool IsBookmarked { get; set; } = false;
+	public bool IsPinned { get; set; } = false;
 	public List<WvTraceSessionSignalTrace> TraceList { get; set; } = new();
 	public List<WvTraceSessionLimitHit> LimitHits { get; set; } = new();
 	public string LimitsHint

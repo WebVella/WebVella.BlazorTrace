@@ -229,6 +229,7 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 			{
 				var data = await WvBlazorTraceService.GetModalDataAsync(_data?.Request);
 				_data!.MethodTraceRows = data.MethodTraceRows;
+				_data!.SignalTraceRows = data.SignalTraceRows;
 			}
 		}
 		catch (Exception ex)
@@ -347,34 +348,34 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 		}
 	}
 
-	private async Task _bookmarkClicked(object rowObject)
+	private async Task _pinClicked(object rowObject)
 	{
 		if (rowObject is WvMethodTraceRow)
 		{
 			var row = (WvMethodTraceRow)rowObject;
-			if (row.IsBookmarked)
+			if (row.IsPinned)
 			{
-				await WvBlazorTraceService.RemoveBookmarkAsync(row.Id);
-				row.IsBookmarked = false;
+				await WvBlazorTraceService.RemovePinAsync(row.Id);
+				row.IsPinned = false;
 			}
 			else
 			{
-				await WvBlazorTraceService.AddBookmarkAsync(row.Id);
-				row.IsBookmarked = true;
+				await WvBlazorTraceService.AddPinAsync(row.Id);
+				row.IsPinned = true;
 			}
 		}
 		else if (rowObject is WvSignalTraceRow)
 		{
 			var row = (WvSignalTraceRow)rowObject;
-			if (row.IsBookmarked)
+			if (row.IsPinned)
 			{
-				await WvBlazorTraceService.RemoveBookmarkAsync(row.Id);
-				row.IsBookmarked = false;
+				await WvBlazorTraceService.RemovePinAsync(row.Id);
+				row.IsPinned = false;
 			}
 			else
 			{
-				await WvBlazorTraceService.AddBookmarkAsync(row.Id);
-				row.IsBookmarked = true;
+				await WvBlazorTraceService.AddPinAsync(row.Id);
+				row.IsPinned = true;
 			}
 		}
 

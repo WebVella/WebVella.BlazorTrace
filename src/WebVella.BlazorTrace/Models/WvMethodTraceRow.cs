@@ -14,8 +14,8 @@ public class WvMethodTraceRow
 	public string? ComponentFullName { get; set; }
 	public string? InstanceTag { get; set; }
 	public string? Method { get; set; }
-	public bool IsBookmarked { get; set; } = false;
-	public List<WvTraceSessionTrace> TraceList { get; set; } = new();
+	public bool IsPinned { get; set; } = false;
+	public List<WvTraceSessionMethodTrace> TraceList { get; set; } = new();
 	public long? LastMemoryBytes { get; set; }
 	public long? LastDurationMS { get; set; }
 	public List<WvTraceSessionLimitHit> LimitHits { get; set; } = new();
