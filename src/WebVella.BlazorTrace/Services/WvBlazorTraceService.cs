@@ -22,14 +22,15 @@ public partial interface IWvBlazorTraceService
 	Dictionary<string, WvTraceSessionModule> GetModuleDict();
 	Dictionary<string, WvTraceSessionSignal> GetSignalDict();
 	void ClearCurrentSession();
+	Task<List<WvTraceMute>> GetTraceMutes();
 }
 public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 {
 	private IJSRuntime _jSRuntime;
 	private const string _snapshotStoreKey = "wvbtstore";
-	private Dictionary<string, WvTraceSessionModule> _moduleDict = new();
-	private Dictionary<string, WvTraceSessionSignal> _signalDict = new();
-	private List<WvTraceMute>? _traceMutes = null;
+	private Dictionary<string, WvTraceSessionModule> _moduleDictInternal = new();
+	private Dictionary<string, WvTraceSessionSignal> _signalDictInternal = new();
+	private List<WvTraceMute>? _traceMutesInternal = null;
 	private WvBlazorTraceConfiguration _configuration = new();
 	private readonly ConcurrentQueue<WvTraceQueueAction> _traceQueue = new();
 	private int _infiniteLoopDelaySeconds = 1;
@@ -55,13 +56,28 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 		if (triggerQueueProcessing)
 			_processQueue();
 	}
-	public Dictionary<string, WvTraceSessionModule> GetModuleDict() => _moduleDict;
-	public Dictionary<string, WvTraceSessionSignal> GetSignalDict() => _signalDict;
+	public Dictionary<string, WvTraceSessionModule> GetModuleDict()
+	{
+		return _moduleDictInternal.Clone();
+	}
+	public Dictionary<string, WvTraceSessionSignal> GetSignalDict()
+	{
+		return _signalDictInternal.Clone();
+	}
 
+	public async Task<List<WvTraceMute>> GetTraceMutes()
+	{
+		if (_traceMutesInternal is null)
+		{
+			var store = await GetLocalStoreAsync();
+			_traceMutesInternal = store.MutedTraces ?? new();
+		}
+		return _traceMutesInternal.Clone();
+	}
 	public void ClearCurrentSession()
 	{
-		_moduleDict = new();
-		_signalDict = new();
+		_moduleDictInternal = new();
+		_signalDictInternal = new();
 	}
 }
 

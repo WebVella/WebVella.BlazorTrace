@@ -34,12 +34,10 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 
 			if (String.IsNullOrWhiteSpace(traceInfo.MethodName))
 				throw new ArgumentNullException(nameof(traceInfo), "MethodName is required");
+			if (!_moduleDictInternal.ContainsKey(traceInfo.ModuleName))
+				_moduleDictInternal[traceInfo.ModuleName] = new();
 
-
-			if (!_moduleDict.ContainsKey(traceInfo.ModuleName))
-				_moduleDict[traceInfo.ModuleName] = new();
-
-			var module = _moduleDict[traceInfo.ModuleName];
+			var module = _moduleDictInternal[traceInfo.ModuleName];
 			if (!module.ComponentDict.ContainsKey(traceInfo.ComponentFullName))
 			{
 				module.ComponentDict[traceInfo.ComponentFullName] = new()
@@ -54,7 +52,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 			var componentTaggedInstance = component.TaggedInstances.Single(x => x.Tag == traceInfo.InstanceTag);
 			var trace = new WvTraceSessionMethodTrace()
 			{
-				TraceId = traceInfo.TraceId,
+				TraceId = traceInfo.TraceId ?? Guid.NewGuid(),
 				OnEnterMemoryInfo = new List<WvTraceMemoryInfo>(),
 				EnteredOn = action.Timestamp,
 				OnEnterFirstRender = action.FirstRender,
@@ -66,7 +64,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 				OnExitFirstRender = null,
 				OnExitMemoryBytes = null,
 				OnExitMemoryInfo = null,
-				OnExitOptions = default!
+				OnExitOptions = new()
 			};
 			trace.OnEnterMemoryBytes = action.Caller.GetSize(trace.OnEnterMemoryInfo, _configuration);
 
@@ -120,10 +118,10 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 				throw new ArgumentNullException(nameof(traceInfo), "MethodName is required");
 
 
-			if (!_moduleDict.ContainsKey(traceInfo.ModuleName))
-				_moduleDict[traceInfo.ModuleName] = new();
+			if (!_moduleDictInternal.ContainsKey(traceInfo.ModuleName))
+				_moduleDictInternal[traceInfo.ModuleName] = new();
 
-			var module = _moduleDict[traceInfo.ModuleName];
+			var module = _moduleDictInternal[traceInfo.ModuleName];
 			if (!module.ComponentDict.ContainsKey(traceInfo.ComponentFullName))
 			{
 				module.ComponentDict[traceInfo.ComponentFullName] = new()
@@ -226,7 +224,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 			if (trace is null)
 				throw new Exception("trace could not be initialized or found");
 
-			trace.TraceId = action.TraceId;
+			trace.TraceId = action.TraceId ?? Guid.NewGuid();
 			trace.OnExitMemoryInfo = new List<WvTraceMemoryInfo>();
 			trace.ExitedOn = action.Timestamp;
 			trace.OnExitCustomData = action.CustomData;
@@ -239,11 +237,11 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 		{
 			if (String.IsNullOrWhiteSpace(action.SignalName))
 				throw new ArgumentNullException(nameof(action), "SignalName is required");
-			if (!_signalDict.ContainsKey(action.SignalName))
+			if (!_signalDictInternal.ContainsKey(action.SignalName))
 			{
-				_signalDict[action.SignalName] = new();
+				_signalDictInternal[action.SignalName] = new();
 			}
-			var signal = _signalDict[action.SignalName];
+			var signal = _signalDictInternal[action.SignalName];
 			signal.TraceList.Add(new WvTraceSessionSignalTrace
 			{
 				SendOn = action.Timestamp,
@@ -273,6 +271,22 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 		return await _jSRuntime.InvokeAsync<string>("localStorage.getItem", key);
 	}
 
+	private void checkModuleDict(Dictionary<string, WvTraceSessionModule> moduleDict){ 
+		var module = moduleDict[moduleDict.Keys.First()];
+		Console.WriteLine($"++++++ module HASH: {module.GetHashCode()}");
+		var component = module.ComponentDict[module.ComponentDict.Keys.First()];
+		Console.WriteLine($"++++++ component HASH: {component.GetHashCode()}");
+		var instance = component.TaggedInstances.First();
+		Console.WriteLine($"++++++ instance HASH: {instance.GetHashCode()}");
+		var method = instance.OnInitialized;
+		Console.WriteLine($"++++++ method HASH: {method.GetHashCode()}");
+		var trace = method.TraceList[1];
+		Console.WriteLine($"++++++ trace HASH: {trace.GetHashCode()}");
+		var onExitInfoCount = trace.OnExitMemoryInfo!.Count;
+		Console.WriteLine($"++++++ onExitInfoCount HASH: {trace.OnExitMemoryInfo.GetHashCode()}");
 
+		if(onExitInfoCount != 2)
+			throw new Exception("dadasd");
+	}
 }
 

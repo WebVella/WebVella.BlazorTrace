@@ -105,7 +105,7 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 	{
 		if (item is null) return;
 		await WvBlazorTraceService.ToggleTraceMuteAsync(item);
-		_currentMutes = await WvBlazorTraceService.GetAllTraceMutesAsync();
+		_currentMutes = await WvBlazorTraceService.GetTraceMutes();
 		await _getData();
 		_initMenu();
 		RegenRenderLock();
@@ -117,7 +117,7 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 	private async Task _show()
 	{
 		await new JsService(JSRuntimeSrv).AddKeyEventListener(_objectRef, "OnShortcutKey", "Escape", _componentId.ToString());
-		_currentMutes = await WvBlazorTraceService.GetAllTraceMutesAsync();
+		_currentMutes = await WvBlazorTraceService.GetTraceMutes();
 		_initMenu();		
 		_modalVisible = true;
 		RegenRenderLock();

@@ -88,10 +88,10 @@ public partial class WvBlazorTraceListModal : WvBlazorTraceComponentBase, IAsync
 		return sb.ToString();
 	}
 
-	private async Task _showMemoryModal(List<WvTraceMemoryInfo>? memInfo)
+	private async Task _showMemoryModal(Guid traceId, bool isOnEnter = true)
 	{
 		if (_memoryModal is null || _row is null) return;
-		await _memoryModal.Show(_row, memInfo.ToMemoryDataFields());
+		await _memoryModal.Show(_row, traceId,isOnEnter);
 	}
 
 

@@ -15,6 +15,8 @@ public partial class WvBlazorTraceMemoryModal : WvBlazorTraceComponentBase
 
 	// PARAMETERS
 	//////////////////////////////////////////////////
+	[CascadingParameter(Name = "WvBlazorTraceBody")]
+	public WvBlazorTraceBody WvBlazorTraceBody { get; set; } = default!;
 	[Parameter] public int NestLevel { get; set; } = 1;
 
 	// LOCAL VARIABLES
@@ -24,6 +26,8 @@ public partial class WvBlazorTraceMemoryModal : WvBlazorTraceComponentBase
 	private bool _escapeListenerEnabled = false;
 	private bool _modalVisible = false;
 	private WvMethodTraceRow? _row = null;
+	private Guid? _traceId = null;
+	private bool _isOnEnter = true;
 	private List<WvSnapshotMemoryComparisonDataField> _items = new();
 	private WvBlazorTraceMuteMemoryModal? _traceMuteModal = null;
 
@@ -44,15 +48,11 @@ public partial class WvBlazorTraceMemoryModal : WvBlazorTraceComponentBase
 
 	// PUBLIC
 	//////////////////////////////////////////////////
-	public async Task Show(WvMethodTraceRow row, List<WvSnapshotMemoryComparisonDataField>? items = null)
+	public async Task Show(WvMethodTraceRow row, Guid? traceId = null, bool isOnEnter = true)
 	{
 		await new JsService(JSRuntimeSrv).AddKeyEventListener(_objectRef, "OnShortcutKey", "Escape", _componentId.ToString());
 		_escapeListenerEnabled = true;
-		_row = row;
-		if (items is not null)
-			_items = items;
-		else
-			_items = _row.MemoryComparison.Fields;
+		_initData(row, traceId, isOnEnter);
 		_modalVisible = true;
 		RegenRenderLock();
 		await InvokeAsync(StateHasChanged);
@@ -80,8 +80,47 @@ public partial class WvBlazorTraceMemoryModal : WvBlazorTraceComponentBase
 	private async Task _onMute(WvSnapshotMemoryComparisonDataField row)
 	{
 		if (row == null) return;
-			if (_traceMuteModal is null) return;
-			await _traceMuteModal.Show(row);
+		if (_traceMuteModal is null) return;
+		await _traceMuteModal.Show(row);
+	}
+
+	private async Task _muteChanged()
+	{
+		var data = WvBlazorTraceBody.GetData();
+		if (data is null || _row is null) return;
+
+		var row = data.MethodTraceRows.FirstOrDefault(x => x.Id == _row.Id);
+		if (row is null) return;
+		_initData(row, _traceId, _isOnEnter);
+		RegenRenderLock();
+		await InvokeAsync(StateHasChanged);
+	}
+
+	private void _initData(WvMethodTraceRow row, Guid? traceId, bool isOnEnter = true){ 
+		_row = row;
+		_items = new();
+		_traceId = null;
+		_isOnEnter = true;
+		if(_row is null) return;
+
+		if (traceId is not null)
+		{
+			var trace = _row.TraceList.FirstOrDefault(x => x.TraceId == traceId);
+			if (trace is not null && isOnEnter)
+			{
+				_traceId = traceId;
+				_isOnEnter = isOnEnter;
+				_items = trace.OnEnterMemoryInfo.ToMemoryDataFields();
+			}
+			else if (trace is not null && !isOnEnter)
+			{
+				_traceId = traceId;
+				_isOnEnter = isOnEnter;
+				_items = trace.OnExitMemoryInfo.ToMemoryDataFields();
+			}
+		}
+		else
+			_items = _row.MemoryComparison.Fields;	
 	}
 
 	//PRIVATE
@@ -101,5 +140,6 @@ public partial class WvBlazorTraceMemoryModal : WvBlazorTraceComponentBase
 
 		return sb.ToString();
 	}
+
 
 }

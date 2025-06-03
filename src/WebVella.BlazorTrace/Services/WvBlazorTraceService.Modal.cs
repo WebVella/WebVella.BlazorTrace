@@ -61,8 +61,8 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		{
 			CreatedOn = DateTimeOffset.Now,
 			Id = Guid.Empty,
-			ModuleDict = _moduleDict,
-			SignalDict = _signalDict,
+			ModuleDict = GetModuleDict(),
+			SignalDict = GetSignalDict(),
 			Name = "current"
 		};
 		if (request.PrimarySnapshotId.HasValue)
@@ -88,6 +88,13 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 
 		if (result.Request.IsMethodMenu)
 		{
+			Console.WriteLine($"****");
+			checkModuleDict(_moduleDictInternal);
+			Console.WriteLine($"****");
+			checkModuleDict(primarySN.ModuleDict);
+			Console.WriteLine($"****");
+			checkModuleDict(secondarySN.ModuleDict);
+
 			var traceRows = primarySN.GenerateMethodTraceRows(
 				secondarySn: secondarySN,
 				muteTraces:store.MutedTraces,
@@ -162,7 +169,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		}
 		else if (result.Request.IsTraceMuteMenu)
 		{
-			var traceRows = await GetAllTraceMutesAsync();
+			var traceRows = await GetTraceMutes();
 			foreach (var row in traceRows)
 			{
 				if (!row.IsTypeMatches(result.Request.MutedFilter.TypeFilter)) continue;
@@ -178,6 +185,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 			}
 			result.MutedTraceRows = result.MutedTraceRows.OrderBy(x => $"{x.Id}").ToList();
 		}
+
 		return result;
 	}
 }

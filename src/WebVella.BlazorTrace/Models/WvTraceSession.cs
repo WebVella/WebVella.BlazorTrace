@@ -29,7 +29,6 @@ public class WvTraceSessionComponentTaggedInstance
 	public WvTraceSessionMethod ShouldRender { get; set; } = new();
 	public WvTraceSessionMethod Dispose { get; set; } = new();
 	public List<WvTraceSessionMethod> OtherMethods { get; set; } = new();
-	public List<WvTraceSessionSignal> Signals { get; set; } = new();
 
 	public List<WvTraceSessionMethod> MethodsTotal()
 	{
@@ -53,7 +52,8 @@ public class WvTraceSessionComponentTaggedInstance
 public class WvTraceSessionMethod
 {
 	public string? Name { get; set; } = null;
-
+	public List<WvTraceSessionMethodTrace> TraceList { get; set; } = new();
+	//Generated props
 	[JsonIgnore]
 	public long? MinDurationMs { get => this.GetMinDuration(); }
 	[JsonIgnore]
@@ -84,7 +84,6 @@ public class WvTraceSessionMethod
 	public long MaxCallsCount { get => this.GetMaxCallsCount(); }
 	[JsonIgnore]
 	public long CompletedCallsCount { get => this.CompletedCallsCount(); }
-	public List<WvTraceSessionMethodTrace> TraceList { get; set; } = new();
 	[JsonIgnore]
 	public WvTraceSessionMethodTrace? LastExitedTrace
 	{
@@ -101,27 +100,30 @@ public class WvTraceSessionMethod
 
 public class WvTraceSessionMethodTrace
 {
-	public Guid? TraceId { get; set; } = null;
+	public Guid TraceId { get; set; } = default!;
 	public DateTimeOffset? EnteredOn { get; set; } = null;
 	public DateTimeOffset? ExitedOn { get; set; } = null;
-	[JsonIgnore]
-	public long? DurationMs { get => this.GetDurationMS(); }
 	public long? OnEnterMemoryBytes { get; set; } = null;
-	[JsonIgnore]
-	//to much info to be stored in the store
-	public List<WvTraceMemoryInfo>? OnEnterMemoryInfo { get; set; } = null;
 	public long? OnExitMemoryBytes { get; set; } = null;
-	[JsonIgnore]
-	//to much info to be stored in the store
-	public List<WvTraceMemoryInfo>? OnExitMemoryInfo { get; set; } = null;
 	public bool? OnEnterFirstRender { get; set; } = null;
 	public bool? OnExitFirstRender { get; set; } = null;
 	public string? OnEnterCustomData { get; set; } = null;
 	public string? OnExitCustomData { get; set; } = null;
-	public WvTraceMethodOptions OnEnterOptions { get; set; } = default!;
-	public WvTraceMethodOptions OnExitOptions { get; set; } = default!;
-	public string OnEnterLimitsHTML { get=> this.CalculateLimitsHTML(true);}
-	public string OnExitLimitsHTML { get=> this.CalculateLimitsHTML(false);}
+	public WvTraceMethodOptions OnEnterOptions { get; set; } = new();
+	public WvTraceMethodOptions OnExitOptions { get; set; } = new();
+
+	//Non Serializable - to much info to be stored in the store JSON
+	[JsonIgnore]
+	public List<WvTraceMemoryInfo>? OnEnterMemoryInfo { get; set; } = null;
+
+	[JsonIgnore]
+	public List<WvTraceMemoryInfo>? OnExitMemoryInfo { get; set; } = null;
+
+	//Generated props
+	[JsonIgnore]
+	public long? DurationMs { get => this.GetDurationMS(); }
+	public string OnEnterLimitsHTML { get => this.CalculateLimitsHTML(true); }
+	public string OnExitLimitsHTML { get => this.CalculateLimitsHTML(false); }
 }
 
 public class WvTraceSessionSignal

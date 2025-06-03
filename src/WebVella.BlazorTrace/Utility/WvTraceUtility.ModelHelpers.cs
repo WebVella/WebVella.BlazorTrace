@@ -148,7 +148,6 @@ public static partial class WvTraceUtility
 	{
 		return method.TraceList.Count(x => x.EnteredOn is not null && x.ExitedOn is not null);
 	}
-
 	public static List<WvTraceSessionLimitHit> CalculateLimitsInfo(this WvTraceSessionMethod method)
 	{
 		var result = new List<WvTraceSessionLimitHit>();
@@ -257,7 +256,6 @@ public static partial class WvTraceUtility
 
 		return result;
 	}
-
 	public static string CalculateLimitsHTML(this WvTraceSessionMethodTrace trace, bool isOnEnter)
 	{
 		var list = new List<string>();
@@ -277,7 +275,6 @@ public static partial class WvTraceUtility
 		}
 		return String.Join("", list);
 	}
-
 	public static List<WvTraceSessionLimitHit> CalculateLimitsInfo(this WvTraceSessionSignal signal)
 	{
 		var result = new List<WvTraceSessionLimitHit>();
@@ -305,7 +302,6 @@ public static partial class WvTraceUtility
 
 		return result;
 	}
-
 	public static string CalculateLimitsHTML(this WvTraceSessionSignalTrace trace)
 	{
 		var list = new List<string>();
@@ -316,12 +312,203 @@ public static partial class WvTraceUtility
 		}
 		return String.Join("", list);
 	}
-
-	public static long? GetMemoryBytes(this List<WvTraceMemoryInfo>? memList)
+	public static Dictionary<string, WvTraceSessionModule> Clone(this Dictionary<string, WvTraceSessionModule> original)
 	{
-		if (memList == null) return null;
+		if (original is null) throw new Exception("Cannot clone nullable object ");
+		var target = new Dictionary<string, WvTraceSessionModule>();
+		foreach (var moduleName in original.Keys)
+		{
+			target[moduleName] = original[moduleName].Clone();
+		}
+		return target;
+	}
+	public static WvTraceSessionModule Clone(this WvTraceSessionModule original)
+	{
+		if (original is null) throw new Exception("Cannot clone nullable object ");
+		var target = new WvTraceSessionModule();
+		foreach (var componentFullName in original.ComponentDict.Keys)
+		{
+			target.ComponentDict[componentFullName] = original.ComponentDict[componentFullName].Clone();
+		}
+		return target;
+	}
+	public static WvTraceSessionComponent Clone(this WvTraceSessionComponent original)
+	{
+		if (original is null) throw new Exception("Cannot clone nullable object ");
+		var target = new WvTraceSessionComponent
+		{
+			Name = original.Name,
+		};
+		foreach (var componentInstanceOriginal in original.TaggedInstances)
+		{
+			target.TaggedInstances.Add(componentInstanceOriginal.Clone());
+		}
+		return target;
+	}
+	public static WvTraceSessionComponentTaggedInstance Clone(this WvTraceSessionComponentTaggedInstance original)
+	{
+		if (original is null) throw new Exception("Cannot clone nullable object ");
+		var target = new WvTraceSessionComponentTaggedInstance
+		{
+			Tag = original.Tag,
+			OnInitialized = original.OnInitialized.Clone(),
+			OnParameterSet = original.OnParameterSet.Clone(),
+			OnAfterRender = original.OnAfterRender.Clone(),
+			ShouldRender = original.ShouldRender.Clone(),
+			Dispose = original.Dispose.Clone(),
+			OtherMethods = new()
+		};
+		foreach (var method in original.OtherMethods)
+		{
+			target.OtherMethods.Add(method.Clone());
+		}
+		return target;
+	}
+	public static WvTraceSessionMethod Clone(this WvTraceSessionMethod original)
+	{
+		if (original is null) throw new Exception("Cannot clone nullable object ");
+		var target = new WvTraceSessionMethod()
+		{
+			Name = original.Name,
+			TraceList = new()
+		};
+		foreach (var trace in original.TraceList)
+		{
+			target.TraceList.Add(trace.Clone());
+		}
+		return target;
+	}
+	public static WvTraceSessionMethodTrace Clone(this WvTraceSessionMethodTrace original)
+	{
+		if (original is null) throw new Exception("Cannot clone nullable object ");
+		var target = new WvTraceSessionMethodTrace()
+		{
+			TraceId = original.TraceId,
+			EnteredOn = original.EnteredOn,
+			ExitedOn = original.ExitedOn,
+			OnEnterMemoryBytes = original.OnEnterMemoryBytes,
+			OnExitMemoryBytes = original.OnExitMemoryBytes,
+			OnEnterFirstRender = original.OnEnterFirstRender,
+			OnExitFirstRender = original.OnExitFirstRender,
+			OnEnterCustomData = original.OnEnterCustomData,
+			OnExitCustomData = original.OnExitCustomData,
+			OnEnterOptions = original.OnEnterOptions.Clone(),
+			OnExitOptions = original.OnExitOptions.Clone(),
+			OnEnterMemoryInfo = original.OnEnterMemoryInfo is null ? null : new(),
+			OnExitMemoryInfo = original.OnExitMemoryInfo is null ? null : new(),
+		};
 
-		return memList.Sum(x=> x.Size);
+		foreach (var item in (original.OnEnterMemoryInfo ?? new()))
+			target.OnEnterMemoryInfo!.Add(item.Clone());
+
+		foreach (var item in (original.OnExitMemoryInfo ?? new()))
+			target.OnExitMemoryInfo!.Add(item.Clone());
+
+		return target;
+	}
+	public static WvTraceMethodOptions Clone(this WvTraceMethodOptions original)
+	{
+		if (original is null)
+			throw new Exception("Cannot clone nullable object ");
+		var target = new WvTraceMethodOptions()
+		{
+			CallLimit = original.CallLimit,
+			DurationLimitMS = original.DurationLimitMS,
+			MemoryLimitDeltaBytes = original.MemoryLimitDeltaBytes,
+			MemoryLimitTotalBytes = original.MemoryLimitTotalBytes,
+		};
+
+		return target;
+	}
+	public static WvTraceMemoryInfo Clone(this WvTraceMemoryInfo original)
+	{
+		if (original is null) throw new Exception("Cannot clone nullable object ");
+		var target = new WvTraceMemoryInfo()
+		{
+			AssemblyName = original.AssemblyName,
+			FieldName = original.FieldName,
+			Size = original.Size,
+			TypeName = original.TypeName,
+		};
+
+		return target;
+	}
+	public static Dictionary<string, WvTraceSessionSignal> Clone(this Dictionary<string, WvTraceSessionSignal> original)
+	{
+		if (original is null) throw new Exception("Cannot clone nullable object ");
+		var target = new Dictionary<string, WvTraceSessionSignal>();
+		foreach (var moduleName in original.Keys)
+		{
+			target[moduleName] = original[moduleName].Clone();
+		}
+		return target;
+	}
+	public static WvTraceSessionSignal Clone(this WvTraceSessionSignal original)
+	{
+		if (original is null) throw new Exception("Cannot clone nullable object ");
+		var target = new WvTraceSessionSignal();
+		foreach (var trace in original.TraceList)
+		{
+			target.TraceList.Add(trace.Clone());
+		}
+		return target;
+	}
+	public static WvTraceSessionSignalTrace Clone(this WvTraceSessionSignalTrace original)
+	{
+		if (original is null) throw new Exception("Cannot clone nullable object ");
+		var target = new WvTraceSessionSignalTrace()
+		{
+			SendOn = original.SendOn,
+			MethodName = original.MethodName,
+			ComponentFullName = original.ComponentFullName,
+			ComponentName = original.ComponentName,
+			CustomData = original.CustomData,
+			InstanceTag = original.InstanceTag,
+			ModuleName = original.ModuleName,
+			Options = original.Options.Clone(),
+		};
+		return target;
+	}
+	public static WvTraceSignalOptions Clone(this WvTraceSignalOptions original)
+	{
+		if (original is null) throw new Exception("Cannot clone nullable object ");
+		var target = new WvTraceSignalOptions()
+		{
+			CallLimit = original.CallLimit,
+		};
+		return target;
+	}
+
+	public static List<WvTraceMute> Clone(this List<WvTraceMute> original)
+	{
+		if (original is null) throw new Exception("Cannot clone nullable object ");
+		var target = new List<WvTraceMute>();
+		foreach (var item in original)
+		{
+			target.Add(item.Clone());
+		}
+
+		return target;
+	}
+
+	public static WvTraceMute Clone(this WvTraceMute original)
+	{
+		if (original is null) throw new Exception("Cannot clone nullable object ");
+		var target = new WvTraceMute()
+		{
+			ComponentName = original.ComponentName,
+			ComponentFullName = original.ComponentFullName,
+			CustomData = original.CustomData,
+			InstanceTag = original.InstanceTag,
+			Field = original.Field,
+			IsPinned = original.IsPinned,
+			Method = original.Method,
+			Module = original.Module,
+			Signal = original.Signal,
+			Type = original.Type,
+		};
+
+		return target;
 	}
 
 }

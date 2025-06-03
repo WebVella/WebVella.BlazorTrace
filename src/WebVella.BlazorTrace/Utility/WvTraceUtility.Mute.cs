@@ -99,7 +99,6 @@ public static partial class WvTraceUtility
 			if (item.IsMuted(muteList)) continue;
 			item.OnEnterMemoryInfo = item.OnEnterMemoryInfo.ProcessMemoryInfoList(muteList);
 			item.OnExitMemoryInfo = item.OnExitMemoryInfo.ProcessMemoryInfoList(muteList);
-
 			result.Add(item);
 		}
 		return result;
