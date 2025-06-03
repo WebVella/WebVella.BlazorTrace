@@ -99,6 +99,7 @@ public partial class WvBlazorTraceMuteMethodModal : WvBlazorTraceComponentBase
 		await WvBlazorTraceBody.MuteTraceChange(item);
 		_selectedTypes = WvBlazorTraceBody.GetTraceMutes();
 		await OnChange.InvokeAsync();
+		RegenRenderLock();
 	}
 
 	private void _initMuteOptions()

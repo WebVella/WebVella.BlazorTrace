@@ -18,6 +18,8 @@ public partial class WvBlazorTraceMuteSignalModal : WvBlazorTraceComponentBase
 	public WvBlazorTraceBody WvBlazorTraceBody { get; set; } = default!;
 	[Parameter] public int NestLevel { get; set; } = 1;
 
+	[Parameter] public EventCallback OnChange { get; set; }
+
 	// LOCAL VARIABLES
 	//////////////////////////////////////////////////
 	private Guid _componentId = Guid.NewGuid();
@@ -96,6 +98,8 @@ public partial class WvBlazorTraceMuteSignalModal : WvBlazorTraceComponentBase
 	{
 		await WvBlazorTraceBody.MuteTraceChange(item);
 		_selectedTypes = WvBlazorTraceBody.GetTraceMutes();
+		await OnChange.InvokeAsync();
+		RegenRenderLock();
 	}
 
 	private void _initMuteOptions()
