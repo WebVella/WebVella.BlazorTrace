@@ -316,4 +316,12 @@ public static partial class WvTraceUtility
 		}
 		return String.Join("", list);
 	}
+
+	public static long? GetMemoryBytes(this List<WvTraceMemoryInfo>? memList)
+	{
+		if (memList == null) return null;
+
+		return memList.Sum(x=> x.Size);
+	}
+
 }

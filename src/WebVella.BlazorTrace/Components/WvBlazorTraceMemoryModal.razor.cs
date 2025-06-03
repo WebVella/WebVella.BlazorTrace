@@ -11,6 +11,7 @@ public partial class WvBlazorTraceMemoryModal : WvBlazorTraceComponentBase
 	// INJECTS
 	//////////////////////////////////////////////////
 	[Inject] protected IJSRuntime JSRuntimeSrv { get; set; } = default!;
+	[Inject] public IWvBlazorTraceService WvBlazorTraceService { get; set; } = default!;
 
 	// PARAMETERS
 	//////////////////////////////////////////////////
@@ -24,6 +25,7 @@ public partial class WvBlazorTraceMemoryModal : WvBlazorTraceComponentBase
 	private bool _modalVisible = false;
 	private WvMethodTraceRow? _row = null;
 	private List<WvSnapshotMemoryComparisonDataField> _items = new();
+	private WvBlazorTraceMuteMemoryModal? _traceMuteModal = null;
 
 	// LIFECYCLE
 	/// //////////////////////////////////////////////
@@ -73,6 +75,13 @@ public partial class WvBlazorTraceMemoryModal : WvBlazorTraceComponentBase
 	public async Task OnShortcutKey(string code)
 	{
 		await Hide();
+	}
+
+	private async Task _onMute(WvSnapshotMemoryComparisonDataField row)
+	{
+		if (row == null) return;
+			if (_traceMuteModal is null) return;
+			await _traceMuteModal.Show(row);
 	}
 
 	//PRIVATE

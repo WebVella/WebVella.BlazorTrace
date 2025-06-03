@@ -1,0 +1,121 @@
+﻿@namespace WebVella.BlazorTrace
+@using WebVella.BlazorTrace.Utility
+
+@if (Data is not null && Data.Request is not null && Data.Request!.IsMethodMenu)
+{
+	<table>
+		<thead>
+			<tr class="wv-sticky" style="top:-10px;">
+				<th style="width:95px">
+					@if (Data?.Request is not null && Data.Request.MethodsFilter.HasFilter)
+					{
+						<button type="button" class="icon wv-accent" @onclick="@(async () => await ClearFilter.InvokeAsync(typeof(WvTraceModalRequestMethodsFilter)))"
+								style="border-width:1px;">
+							<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+								<path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+							</svg>
+						</button>
+					}
+				</th>
+				<th>
+					<InputText placeholder="module" autocomplete="new-password"
+							   @bind-Value=@Data!.Request.MethodsFilter.ModuleFilter
+							   @bind-Value:after="@(async () => await SubmitFilter.InvokeAsync())" />
+				</th>
+				<th>
+					<InputText placeholder="component" autocomplete="new-password"
+							   @bind-Value=@Data!.Request.MethodsFilter.ComponentFilter
+							   @bind-Value:after="@(async () => await SubmitFilter.InvokeAsync())" />
+				</th>
+				<th>
+					<InputText placeholder="method" autocomplete="new-password"
+							   @bind-Value=@Data!.Request.MethodsFilter.MethodFilter
+							   @bind-Value:after="@(async () => await SubmitFilter.InvokeAsync())" />
+				</th>
+				<th>
+					<InputSelect @bind-Value="@Data!.Request.MethodsFilter.CallsFilter" @bind-Value:after="@(async () => await SubmitFilter.InvokeAsync())">
+						<option value="">no call filter</option>
+						@foreach (var option in Enum.GetValues<WvTraceModalCallsFilter>())
+						{
+							<option value="@option">@option.WvBTToDescriptionString()</option>
+						}
+					</InputSelect>
+				</th>
+				<th>
+					<InputSelect TValue="WvTraceModalMemoryFilter?" @bind-Value="@Data.Request.MethodsFilter.MemoryFilter"
+								 @bind-Value:after="@(async () => await SubmitFilter.InvokeAsync())">
+						<option value="">no memory filter</option>
+						@foreach (var option in Enum.GetValues<WvTraceModalMemoryFilter>())
+						{
+							<option value="@option">@option.WvBTToDescriptionString()</option>
+						}
+					</InputSelect>
+				</th>
+				<th>
+					<InputSelect @bind-Value="@Data.Request.MethodsFilter.DurationFilter" @bind-Value:after="@(async () => await SubmitFilter.InvokeAsync())">
+						<option value="">no duration filter</option>
+						@foreach (var option in Enum.GetValues<WvTraceModalDurationFilter>())
+						{
+							<option value="@option">@option.WvBTToDescriptionString()</option>
+						}
+					</InputSelect>
+				</th>
+				<th>
+					<InputSelect @bind-Value="@Data.Request.MethodsFilter.LimitsFilter" @bind-Value:after="@(async () => await SubmitFilter.InvokeAsync())">
+						<option value="">no limit filter</option>
+						@foreach (var option in Enum.GetValues<WvTraceModalLimitsFilter>())
+						{
+							<option value="@option">@option.WvBTToDescriptionString()</option>
+						}
+					</InputSelect>
+				</th>
+			</tr>
+			@foreach (var item in Data.MethodTraceRows.Where(x => x.IsPinned))
+			{
+				<WvBlazorTraceRow @key=item.Id Item="item" Class="wv-pinned-row wv-selected-row"
+								  OnTraceListView="ShowTraceListModal"
+								  OnMemoryView="ShowMemoryModal"
+								  OnPin="PinClicked"
+								  OnLimitView="ShowLimitModal"
+								  OnMute="ShowTraceMuteModal" />
+			}
+		</thead>
+		<tbody>
+			@if (Loading)
+			{
+				<tr>
+					<td colspan="8" style="padding:30px;text-align:center;">Loading ....</td>
+				</tr>
+			}
+			else
+			{
+				<Virtualize Items="Data.MethodTraceRows.Where(x => !x.IsPinned).ToList()" Context="item" TItem="WvMethodTraceRow">
+					<WvBlazorTraceRow @key=@item.Id Item="@item"
+									  OnTraceListView="ShowTraceListModal"
+									  OnMemoryView="ShowMemoryModal"
+									  OnPin="PinClicked"
+									  OnLimitView="ShowLimitModal"
+									  OnMute="ShowTraceMuteModal" />
+				</Virtualize>
+				@if (Data.MethodTraceRows.Count == 0)
+				{
+					<tr>
+						<td colspan="8" style="padding:30px;text-align:center;">No tracers are logged yet</td>
+					</tr>
+				}
+			}
+		</tbody>
+	</table>
+}
+@code {
+	[Parameter] public WvTraceModalData? Data { get; set; } = null;
+	[Parameter] public bool Loading { get; set; } = false;
+	[Parameter] public EventCallback<Type> ClearFilter { get; set; }
+	[Parameter] public EventCallback SubmitFilter { get; set; } = default!;
+	[Parameter] public EventCallback<WvMethodTraceRow> ShowTraceListModal { get; set; }
+	[Parameter] public EventCallback<WvMethodTraceRow> ShowMemoryModal { get; set; }
+	[Parameter] public EventCallback<WvMethodTraceRow> PinClicked { get; set; }
+	[Parameter] public EventCallback<WvMethodTraceRow> ShowLimitModal { get; set; }
+	[Parameter] public EventCallback<WvMethodTraceRow> ShowTraceMuteModal { get; set; }
+
+}

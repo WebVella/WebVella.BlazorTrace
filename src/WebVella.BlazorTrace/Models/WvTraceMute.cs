@@ -92,6 +92,19 @@ public class WvTraceMute
 				break;
 		}
 	}
+	public WvTraceMute(WvTraceMuteType type, WvSnapshotMemoryComparisonDataField row)
+	{
+		Type = type;
+		switch (type)
+		{
+			case WvTraceMuteType.Field:
+				Field = row.FieldName;
+				break;
+			default:
+				break;
+		}
+	}
+
 	public bool ModuleMatches(string? search)
 	{
 
@@ -203,7 +216,7 @@ public class WvTraceMute
 
 		if (string.IsNullOrWhiteSpace(search)) return true;
 		var searchLower = search.Trim().ToLowerInvariant();
-		if(Type.WvBTToDescriptionString().ToLowerInvariant().Contains(searchLower))
+		if (Type.WvBTToDescriptionString().ToLowerInvariant().Contains(searchLower))
 			return true;
 		return false;
 	}

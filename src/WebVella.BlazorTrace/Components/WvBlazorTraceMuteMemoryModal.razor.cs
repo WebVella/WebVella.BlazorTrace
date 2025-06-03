@@ -6,7 +6,7 @@ using WebVella.BlazorTrace.Services;
 using WebVella.BlazorTrace.Utility;
 
 namespace WebVella.BlazorTrace;
-public partial class WvBlazorTraceMuteMethodModal : WvBlazorTraceComponentBase
+public partial class WvBlazorTraceMuteMemoryModal : WvBlazorTraceComponentBase
 {
 	// INJECTS
 	//////////////////////////////////////////////////
@@ -22,10 +22,10 @@ public partial class WvBlazorTraceMuteMethodModal : WvBlazorTraceComponentBase
 	// LOCAL VARIABLES
 	//////////////////////////////////////////////////
 	private Guid _componentId = Guid.NewGuid();
-	private DotNetObjectReference<WvBlazorTraceMuteMethodModal> _objectRef = default!;
+	private DotNetObjectReference<WvBlazorTraceMuteMemoryModal> _objectRef = default!;
 	private bool _escapeListenerEnabled = false;
 	private bool _modalVisible = false;
-	private WvMethodTraceRow? _row = null;
+	private WvSnapshotMemoryComparisonDataField? _row = null;
 	private List<WvTraceMute> _applicableTypes = new();
 	private List<WvTraceMute> _selectedTypes = new();
 
@@ -52,7 +52,7 @@ public partial class WvBlazorTraceMuteMethodModal : WvBlazorTraceComponentBase
 
 	// PUBLIC
 	//////////////////////////////////////////////////
-	public async Task Show(WvMethodTraceRow row)
+	public async Task Show(WvSnapshotMemoryComparisonDataField row)
 	{
 		await new JsService(JSRuntimeSrv).AddKeyEventListener(_objectRef, "OnShortcutKey", "Escape", _componentId.ToString());
 		_escapeListenerEnabled = true;
@@ -97,6 +97,7 @@ public partial class WvBlazorTraceMuteMethodModal : WvBlazorTraceComponentBase
 	{
 		await WvBlazorTraceBody.MuteTraceChange(item);
 		_selectedTypes = WvBlazorTraceBody.GetTraceMutes();
+		RegenRenderLock();
 	}
 
 	private void _initMuteOptions()
@@ -104,21 +105,11 @@ public partial class WvBlazorTraceMuteMethodModal : WvBlazorTraceComponentBase
 		_applicableTypes = new();
 		if (_row is not null)
 		{
-			_applicableTypes = new(){
-			new WvTraceMute(WvTraceMuteType.MethodInComponentInstance,_row),
-			new WvTraceMute(WvTraceMuteType.MethodInComponent,_row),
-			new WvTraceMute(WvTraceMuteType.MethodInModule,_row),
-			new WvTraceMute(WvTraceMuteType.Method,_row),
-			new WvTraceMute(WvTraceMuteType.ComponentInstance,_row),
-			new WvTraceMute(WvTraceMuteType.Component,_row),
-			new WvTraceMute(WvTraceMuteType.Module,_row),
-		};
-			if (_row!.IsPinned)
-				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.PinnedMethods, _row));
-			else
-				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.NotPinnedMethods, _row));
+			_applicableTypes = new()
+			{
+				new WvTraceMute(WvTraceMuteType.Field,_row),
+			};
 		}
-
 		_selectedTypes = WvBlazorTraceBody.GetTraceMutes();
 	}
 }

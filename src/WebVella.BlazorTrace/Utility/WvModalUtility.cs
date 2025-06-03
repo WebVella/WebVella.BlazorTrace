@@ -416,6 +416,11 @@ public static class WvModalUtility
 			var item = (WvSignalTraceRow)trace;
 			signalName = item.SignalName;
 		}
+		else if (trace is WvSnapshotMemoryComparisonDataField)
+		{
+			var item = (WvSnapshotMemoryComparisonDataField)trace;
+			field = item.FieldName;
+		}
 		string moduleHtml = !String.IsNullOrWhiteSpace(module) ? $"<span>{module}</span>" : "<span>undefined</span>";
 		string componentHtml = !String.IsNullOrWhiteSpace(component) ? $"<span>{component}</span>" : "<span>undefined</span>";
 		string instanceTagHtml = !String.IsNullOrWhiteSpace(instanceTag) ? $"<span>{instanceTag}</span>" : "<span>undefined</span>";

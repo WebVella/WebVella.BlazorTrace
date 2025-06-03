@@ -1,0 +1,114 @@
+﻿@namespace WebVella.BlazorTrace
+@using WebVella.BlazorTrace.Utility
+
+@if (Data is not null && Data.Request is not null && Data.Request!.IsTraceMuteMenu)
+{
+	<table>
+		<thead>
+			<tr class="wv-sticky" style="top:-10px;">
+				<th style="width:40px">
+					@if (Data?.Request is not null && Data.Request.MutedFilter.HasFilter)
+					{
+						<button type="button" class="icon wv-accent" @onclick="@(async () => await ClearFilter.InvokeAsync(typeof(WvTraceModalRequestMutedFilter)))"
+								style="border-width:1px;">
+							<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+								<path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+							</svg>
+						</button>
+					}
+				</th>
+				<th>
+					<InputText placeholder="type" autocomplete="new-password"
+							   @bind-Value=@Data!.Request.MutedFilter.TypeFilter
+							   @bind-Value:after="@(async () => await SubmitFilter.InvokeAsync())" />
+				</th>
+				<th>
+					<InputText placeholder="module" autocomplete="new-password"
+							   @bind-Value=@Data!.Request.MutedFilter.ModuleFilter
+							   @bind-Value:after="@(async () => await SubmitFilter.InvokeAsync())" />
+				</th>
+				<th>
+					<InputText placeholder="component" autocomplete="new-password"
+							   @bind-Value=@Data!.Request.MutedFilter.ComponentFilter
+							   @bind-Value:after="@(async () => await SubmitFilter.InvokeAsync())" />
+				</th>
+				<th>
+					<InputText placeholder="instance tag" autocomplete="new-password"
+							   @bind-Value=@Data!.Request.MutedFilter.InstanceTag
+							   @bind-Value:after="@(async () => await SubmitFilter.InvokeAsync())" />
+				</th>
+				<th>
+					<InputText placeholder="method" autocomplete="new-password"
+							   @bind-Value=@Data!.Request.MutedFilter.MethodFilter
+							   @bind-Value:after="@(async () => await SubmitFilter.InvokeAsync())" />
+				</th>
+				<th>
+					<InputText placeholder="signal" autocomplete="new-password"
+							   @bind-Value=@Data!.Request.MutedFilter.SignalFilter
+							   @bind-Value:after="@(async () => await SubmitFilter.InvokeAsync())" />
+				</th>
+				<th>
+					<InputText placeholder="field" autocomplete="new-password"
+							   @bind-Value=@Data!.Request.MutedFilter.FieldFilter
+							   @bind-Value:after="@(async () => await SubmitFilter.InvokeAsync())" />
+				</th>
+				<th>
+					<InputText placeholder="custom data" autocomplete="new-password"
+							   @bind-Value=@Data!.Request.MutedFilter.CustomDataFilter
+							   @bind-Value:after="@(async () => await SubmitFilter.InvokeAsync())" />
+				</th>
+				<th>
+					<InputText placeholder="pin" autocomplete="new-password"
+							   @bind-Value=@Data!.Request.MutedFilter.PinFilter
+							   @bind-Value:after="@(async () => await SubmitFilter.InvokeAsync())" />
+				</th>
+
+			</tr>
+		</thead>
+		<tbody>
+			<Virtualize Items="Data.MutedTraceRows" Context="item" TItem="WvTraceMute">
+				<tr @key=@item.Id>
+					<td class="wv-button">
+						<button type="button" class="icon wv-accent" title="unmute trace" @onclick=@(async ()=> await MuteTraceChange.InvokeAsync(item))>
+							<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+								<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+								<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708" />
+							</svg>
+						</button>
+					</td>
+					<td>@((MarkupString)item.Type.WvBTToDescriptionString())</td>
+					<td>@((MarkupString)(String.IsNullOrWhiteSpace(item.Module) ? "<span class='wv-mute'>undefined</span>" : item.Module))</td>
+					<td>@((MarkupString)(String.IsNullOrWhiteSpace(item.ComponentName) ? "<span class='wv-mute'>undefined</span>" : item.ComponentName))</td>
+					<td>@((MarkupString)(String.IsNullOrWhiteSpace(item.InstanceTag) ? "<span class='wv-mute'>undefined</span>" : item.InstanceTag))</td>
+					<td>@((MarkupString)(String.IsNullOrWhiteSpace(item.Method) ? "<span class='wv-mute'>undefined</span>" : item.Method))</td>
+					<td>@((MarkupString)(String.IsNullOrWhiteSpace(item.Signal) ? "<span class='wv-mute'>undefined</span>" : item.Signal))</td>
+					<td>@((MarkupString)(String.IsNullOrWhiteSpace(item.Field) ? "<span class='wv-mute'>undefined</span>" : item.Field))</td>
+					<td>@((MarkupString)(String.IsNullOrWhiteSpace(item.CustomData) ? "<span class='wv-mute'>undefined</span>" : item.CustomData))</td>
+					<td>
+						@if (item.IsPinned is not null)
+						{
+							<span>@item.IsPinned.Value.ToString()</span>
+						}
+						else
+						{
+							<span class='wv-mute'>undefined</span>
+						}
+					</td>
+				</tr>
+			</Virtualize>
+			@if (Data.MutedTraceRows.Count == 0)
+			{
+				<tr>
+					<td colspan="10" style="padding:30px;text-align:center;">No traces are muted yet</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
+@code {
+	[Parameter] public WvTraceModalData? Data { get; set; } = null;
+	[Parameter] public EventCallback<Type> ClearFilter { get; set; }
+	[Parameter] public EventCallback SubmitFilter { get; set; } = default!;
+	[Parameter] public EventCallback<WvTraceMute> MuteTraceChange { get; set; }
+
+}

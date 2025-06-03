@@ -11,13 +11,12 @@ public partial class WvBlazorTraceMuteSignalModal : WvBlazorTraceComponentBase
 	// INJECTS
 	//////////////////////////////////////////////////
 	[Inject] protected IJSRuntime JSRuntimeSrv { get; set; } = default!;
-	[Inject] public IWvBlazorTraceService WvBlazorTraceService { get; set; } = default!;
 
 	// PARAMETERS
 	//////////////////////////////////////////////////
+	[CascadingParameter(Name = "WvBlazorTraceBody")]
+	public WvBlazorTraceBody WvBlazorTraceBody { get; set; } = default!;
 	[Parameter] public int NestLevel { get; set; } = 1;
-	[Parameter] public EventCallback<WvTraceMute> OnChange { get; set; }
-	[Parameter] public List<WvTraceMute> TraceMutes { get; set; } = new();
 
 	// LOCAL VARIABLES
 	//////////////////////////////////////////////////
@@ -27,6 +26,7 @@ public partial class WvBlazorTraceMuteSignalModal : WvBlazorTraceComponentBase
 	private bool _modalVisible = false;
 	private WvSignalTraceRow? _row = null;
 	private List<WvTraceMute> _applicableTypes = new();
+	private List<WvTraceMute> _selectedTypes = new();
 
 	// LIFECYCLE
 	/// //////////////////////////////////////////////
@@ -92,7 +92,11 @@ public partial class WvBlazorTraceMuteSignalModal : WvBlazorTraceComponentBase
 		return sb.ToString();
 	}
 
-	private async Task _typeClick(WvTraceMute item) => await OnChange.InvokeAsync(item);
+	private async Task _typeClick(WvTraceMute item)
+	{
+		await WvBlazorTraceBody.MuteTraceChange(item);
+		_selectedTypes = WvBlazorTraceBody.GetTraceMutes();
+	}
 
 	private void _initMuteOptions()
 	{
@@ -107,5 +111,6 @@ public partial class WvBlazorTraceMuteSignalModal : WvBlazorTraceComponentBase
 			else
 				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.NotPinnedSignals, _row));
 		}
+		_selectedTypes = WvBlazorTraceBody.GetTraceMutes();
 	}
 }

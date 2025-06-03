@@ -24,7 +24,7 @@
 				<tbody>
 					@foreach (var item in _applicableTypes)
 					{
-						var selected = TraceMutes.Any(x => x.Id == item.Id);
+						var selected = _selectedTypes.Any(x => x.Id == item.Id);
 						<tr @key=@item class="@(selected ? "wv-selected-row" : "")">
 							<td>
 								@if (selected)

@@ -1,0 +1,41 @@
+﻿@namespace WebVella.BlazorTrace
+@using WebVella.BlazorTrace.Utility
+
+@if (Data is not null && Data.Request is not null && Data.Request!.IsSnapshotMenu)
+{
+	<table>
+		<thead>
+			<tr>
+				<th style="width:100px"></th>
+				<th style="width:140px">created on</th>
+				<th>name</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var item in Data.SnapshotList.OrderBy(x => x.CreatedOn))
+			{
+				<tr @key=item.Id>
+					<td style="padding:0 10px;">
+						<button class="wv-accent" style="margin-right:10px;" @onclick=item.OnRemove!>remove</button>
+					</td>
+					<td>@item.CreatedOn.ToString("yyyy-MM-dd HH:mm:ss")</td>
+					<td>
+						<InputText placeholder="date string if empty" autocomplete="new-password"
+								   @bind-Value=@item.Name
+								   @bind-Value:after=item.OnRename! />
+					</td>
+
+				</tr>
+			}
+			@if (Data.SnapshotList.Count == 0)
+			{
+				<tr>
+					<td colspan="3" style="padding:30px;text-align:center;">No snapshots saved yet</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
+@code {
+	[Parameter] public WvTraceModalData? Data { get; set; } = null;
+}

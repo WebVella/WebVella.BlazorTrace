@@ -97,24 +97,24 @@ public static partial class WvTraceUtility
 		foreach (var item in traceList)
 		{
 			if (item.IsMuted(muteList)) continue;
-			item.OnEnterMemoryInfo.ProcessMemoryInfoList(muteList);
-			item.OnExitMemoryInfo.ProcessMemoryInfoList(muteList);
+			item.OnEnterMemoryInfo = item.OnEnterMemoryInfo.ProcessMemoryInfoList(muteList);
+			item.OnExitMemoryInfo = item.OnExitMemoryInfo.ProcessMemoryInfoList(muteList);
 
 			result.Add(item);
 		}
 		return result;
 	}
 
-	public static void ProcessMemoryInfoList(this List<WvTraceMemoryInfo>? memoryInfoList, List<WvTraceMute> muteList)
+	public static List<WvTraceMemoryInfo>? ProcessMemoryInfoList(this List<WvTraceMemoryInfo>? memoryInfoList, List<WvTraceMute> muteList)
 	{
-		if (memoryInfoList is null) return;
+		if (memoryInfoList is null) return null;
 		var newList = new List<WvTraceMemoryInfo>();
 		foreach (var memInfo in memoryInfoList)
 		{
 			if (memInfo.IsMuted(muteList)) continue;
 			newList.Add(memInfo);
 		}
-		memoryInfoList = newList;
+		return newList;
 	}
 
 	public static bool IsMuted(this WvMethodTraceRow row, List<WvTraceMute> muteList, List<string> pins)
@@ -154,6 +154,17 @@ public static partial class WvTraceUtility
 	}
 	public static bool IsMuted(this WvTraceMemoryInfo memInfo, List<WvTraceMute> muteList)
 	{
+		foreach (var muteTrace in muteList)
+		{
+			switch (muteTrace.Type)
+			{
+				case WvTraceMuteType.Field:
+					if (muteTrace.Field.ProcessForMatch() == memInfo.FieldName.ProcessForMatch()) return true;
+					break;
+				default:
+					break;
+			}
+		}
 		return false;
 	}
 

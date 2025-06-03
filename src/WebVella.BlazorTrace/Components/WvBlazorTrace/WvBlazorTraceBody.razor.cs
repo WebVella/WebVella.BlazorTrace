@@ -71,7 +71,7 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 		if (_infiniteLoopCancellationTokenSource is not null)
 			_infiniteLoopCancellationTokenSource.Cancel();
 	}
-	protected override async Task OnInitializedAsync()
+	protected override void OnInitialized()
 	{
 		base.OnInitialized();
 		_configuration = WvBlazorTraceConfigurationService.GetConfiguraion();
@@ -80,13 +80,11 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 		if (!String.IsNullOrWhiteSpace(ButtonColor))
 			_buttonStyles = $"background-color:{ButtonColor};";
 		_buttonClasses = $" wv-trace-button {Position.WvBTToDescriptionString()} ";
-		_currentMutes = await WvBlazorTraceService.GetAllTraceMutesAsync();
-		_initMenu();
 		EnableRenderLock();
 	}
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
-		base.OnAfterRender(firstRender);
+		await base.OnAfterRenderAsync(firstRender);
 		if (firstRender)
 		{
 			if (_configuration.EnableF1Shortcut)
@@ -97,11 +95,30 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 		}
 	}
 
+	// PUBLIC METHODS
+	////////////////////////////////////////////////
+	
+	public WvTraceModalData? GetData() => _data;
+	public List<WvTraceMute> GetTraceMutes() => _currentMutes;
+
+	public async Task MuteTraceChange(WvTraceMute item)
+	{
+		if (item is null) return;
+		await WvBlazorTraceService.ToggleTraceMuteAsync(item);
+		_currentMutes = await WvBlazorTraceService.GetAllTraceMutesAsync();
+		await _getData();
+		_initMenu();
+		RegenRenderLock();
+		await InvokeAsync(StateHasChanged);
+	}
+
 	// UI HANDLERS
 	////////////////////////////////////////////////
 	private async Task _show()
 	{
 		await new JsService(JSRuntimeSrv).AddKeyEventListener(_objectRef, "OnShortcutKey", "Escape", _componentId.ToString());
+		_currentMutes = await WvBlazorTraceService.GetAllTraceMutesAsync();
+		_initMenu();		
 		_modalVisible = true;
 		RegenRenderLock();
 		await InvokeAsync(StateHasChanged);
@@ -120,13 +137,11 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 		_loadingData = false;
 		RegenRenderLock();
 	}
-
 	private void _enableAutoReload()
 	{
 		_data!.Request.IsAutoRefresh = true;
 		RegenRenderLock();
 	}
-
 	private void _disableAutoReload()
 	{
 		_data!.Request.IsAutoRefresh = false;
@@ -148,7 +163,6 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 			await InvokeAsync(StateHasChanged);
 		}
 	}
-
 	private async Task _submitFilter()
 	{
 		RegenRenderLock();
@@ -169,12 +183,200 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 		RegenRenderLock();
 		await _submitFilter();
 	}
-
 	private async Task _menuClick(WvTraceModalMenuItem item)
 	{
 		if (_data?.Request is null) return;
 		_data.Request.Menu = item.Id;
 		await _getData();
+	}
+	private async Task _showTraceListModal(object row)
+	{
+		if (row == null) return;
+		if (row is WvMethodTraceRow)
+		{
+			if (_traceListModal is null) return;
+			await _traceListModal.Show((WvMethodTraceRow)row);
+		}
+		else if (row is WvSignalTraceRow)
+		{
+			if (_signalTraceListModal is null) return;
+			await _signalTraceListModal.Show((WvSignalTraceRow)row);
+		}
+	}
+	private async Task _showMemoryModal(WvMethodTraceRow row)
+	{
+		if (_memoryModal is null) return;
+		await _memoryModal.Show(row);
+	}
+	private async Task _showLimitModal(object row)
+	{
+		if (row == null) return;
+		if (row is WvMethodTraceRow)
+		{
+			if (_limitModal is null) return;
+			await _limitModal.Show((WvMethodTraceRow)row);
+		}
+		else if (row is WvSignalTraceRow)
+		{
+			if (_signalLimitModal is null) return;
+			await _signalLimitModal.Show((WvSignalTraceRow)row);
+		}
+	}
+	private async Task _showTraceMuteModal(object row)
+	{
+		if (row == null) return;
+		if (row is WvMethodTraceRow)
+		{
+			if (_traceMuteModal is null) return;
+			await _traceMuteModal.Show((WvMethodTraceRow)row);
+		}
+		else if (row is WvSignalTraceRow)
+		{
+			if (_signalMuteModal is null) return;
+			await _signalMuteModal.Show((WvSignalTraceRow)row);
+		}
+	}
+	private async Task _pinClicked(object rowObject)
+	{
+		if (rowObject is WvMethodTraceRow)
+		{
+			var row = (WvMethodTraceRow)rowObject;
+			if (row.IsPinned)
+			{
+				await WvBlazorTraceService.RemovePinAsync(row.Id);
+				row.IsPinned = false;
+			}
+			else
+			{
+				await WvBlazorTraceService.AddPinAsync(row.Id);
+				row.IsPinned = true;
+			}
+		}
+		else if (rowObject is WvSignalTraceRow)
+		{
+			var row = (WvSignalTraceRow)rowObject;
+			if (row.IsPinned)
+			{
+				await WvBlazorTraceService.RemovePinAsync(row.Id);
+				row.IsPinned = false;
+			}
+			else
+			{
+				await WvBlazorTraceService.AddPinAsync(row.Id);
+				row.IsPinned = true;
+			}
+		}
+
+		RegenRenderLock();
+		await InvokeAsync(StateHasChanged);
+	}
+	private async Task _saveSnapshot()
+	{
+		if (_savingState != WvSnapshotSavingState.NotSaving) return;
+		_savingState = WvSnapshotSavingState.Saving;
+		RegenRenderLock();
+		await InvokeAsync(StateHasChanged);
+		await Task.Delay(1);
+		try
+		{
+			var snapshot = await WvBlazorTraceService.CreateSnapshotAsync();
+			_data!.SnapshotList.Add(new WvSnapshotListItem
+			{
+				Id = snapshot.Id,
+				Name = snapshot.Name,
+				CreatedOn = snapshot.CreatedOn,
+
+			});
+			_data!.SnapshotList = _data!.SnapshotList.OrderBy(x => x.Name).ToList();
+			_initSnapshotActions();
+			if (_data.Request.PrimarySnapshotId is null)
+			{
+				_data.Request.PrimarySnapshotId = snapshot.Id;
+				await _highlightPrimarySnapshot();
+				await _getData(true);
+			}
+
+			_savingState = WvSnapshotSavingState.Saved;
+			RegenRenderLock();
+			await InvokeAsync(StateHasChanged);
+			await Task.Delay(1);
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine(ex.ToString());
+		}
+		finally
+		{
+			_savingState = WvSnapshotSavingState.NotSaving;
+			RegenRenderLock();
+			await InvokeAsync(StateHasChanged);
+		}
+	}
+	private async Task _clearCurrent()
+	{
+		try
+		{
+			WvBlazorTraceService.ClearCurrentSession();
+			await _getData();
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine(ex.ToString());
+		}
+		finally
+		{
+			RegenRenderLock();
+			await InvokeAsync(StateHasChanged);
+		}
+	}
+	private async Task _removeSnapshot(WvSnapshotListItem sn)
+	{
+		if (!await JSRuntimeSrv.InvokeAsync<bool>("confirm", "Are you sure that you need this snapshot removed?"))
+			return;
+		try
+		{
+			await WvBlazorTraceService.RemoveSnapshotAsync(sn.Id);
+			//check update list
+			//if the removed is selected in primary or secondary in request
+			//set to null
+			_data!.SnapshotList = _data!.SnapshotList.Where(x => x.Id != sn.Id).ToList();
+			if (_data.Request.PrimarySnapshotId == sn.Id)
+				_data.Request.PrimarySnapshotId = null;
+			if (_data.Request.SecondarySnapshotId == sn.Id)
+				_data.Request.SecondarySnapshotId = null;
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine(ex.ToString());
+		}
+		finally
+		{
+			RegenRenderLock();
+			await InvokeAsync(StateHasChanged);
+		}
+	}
+	private async Task _renameSnapshot(WvSnapshotListItem sn)
+	{
+
+		try
+		{
+			var snapshot = await WvBlazorTraceService.RenameSnapshotAsync(sn.Id, sn.Name);
+			//Check an update list with the new name
+			var snIndex = _data!.SnapshotList.FindIndex(x => x.Id != sn.Id);
+			if (snIndex > -1)
+			{
+				_data!.SnapshotList[snIndex].Name = snapshot.Name;
+			}
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine(ex.ToString());
+		}
+		finally
+		{
+			RegenRenderLock();
+			await InvokeAsync(StateHasChanged);
+		}
 	}
 
 	// LOGIC
@@ -299,149 +501,6 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 			}
 		}, _infiniteLoopCancellationTokenSource.Token);
 	}
-	private async Task _showTraceListModal(object row)
-	{
-		if (row == null) return;
-		if (row is WvMethodTraceRow)
-		{
-			if (_traceListModal is null) return;
-			await _traceListModal.Show((WvMethodTraceRow)row);
-		}
-		else if (row is WvSignalTraceRow)
-		{
-			if (_signalTraceListModal is null) return;
-			await _signalTraceListModal.Show((WvSignalTraceRow)row);
-		}
-	}
-	private async Task _showMemoryModal(WvMethodTraceRow row)
-	{
-		if (_memoryModal is null) return;
-		await _memoryModal.Show(row);
-	}
-	private async Task _showLimitModal(object row)
-	{
-		if (row == null) return;
-		if (row is WvMethodTraceRow)
-		{
-			if (_limitModal is null) return;
-			await _limitModal.Show((WvMethodTraceRow)row);
-		}
-		else if (row is WvSignalTraceRow)
-		{
-			if (_signalLimitModal is null) return;
-			await _signalLimitModal.Show((WvSignalTraceRow)row);
-		}
-	}
-
-	private async Task _showTraceMuteModal(object row)
-	{
-		if (row == null) return;
-		if (row is WvMethodTraceRow)
-		{
-			if (_traceMuteModal is null) return;
-			await _traceMuteModal.Show((WvMethodTraceRow)row);
-		}
-		else if (row is WvSignalTraceRow)
-		{
-			if (_signalMuteModal is null) return;
-			await _signalMuteModal.Show((WvSignalTraceRow)row);
-		}
-	}
-
-	private async Task _pinClicked(object rowObject)
-	{
-		if (rowObject is WvMethodTraceRow)
-		{
-			var row = (WvMethodTraceRow)rowObject;
-			if (row.IsPinned)
-			{
-				await WvBlazorTraceService.RemovePinAsync(row.Id);
-				row.IsPinned = false;
-			}
-			else
-			{
-				await WvBlazorTraceService.AddPinAsync(row.Id);
-				row.IsPinned = true;
-			}
-		}
-		else if (rowObject is WvSignalTraceRow)
-		{
-			var row = (WvSignalTraceRow)rowObject;
-			if (row.IsPinned)
-			{
-				await WvBlazorTraceService.RemovePinAsync(row.Id);
-				row.IsPinned = false;
-			}
-			else
-			{
-				await WvBlazorTraceService.AddPinAsync(row.Id);
-				row.IsPinned = true;
-			}
-		}
-
-		RegenRenderLock();
-		await InvokeAsync(StateHasChanged);
-	}
-	private async Task _saveSnapshot()
-	{
-		if (_savingState != WvSnapshotSavingState.NotSaving) return;
-		_savingState = WvSnapshotSavingState.Saving;
-		RegenRenderLock();
-		await InvokeAsync(StateHasChanged);
-		await Task.Delay(1);
-		try
-		{
-			var snapshot = await WvBlazorTraceService.CreateSnapshotAsync();
-			_data!.SnapshotList.Add(new WvSnapshotListItem
-			{
-				Id = snapshot.Id,
-				Name = snapshot.Name,
-				CreatedOn = snapshot.CreatedOn,
-
-			});
-			_data!.SnapshotList = _data!.SnapshotList.OrderBy(x => x.Name).ToList();
-			_initSnapshotActions();
-			if (_data.Request.PrimarySnapshotId is null)
-			{
-				_data.Request.PrimarySnapshotId = snapshot.Id;
-				await _highlightPrimarySnapshot();
-				await _getData(true);
-			}
-
-			_savingState = WvSnapshotSavingState.Saved;
-			RegenRenderLock();
-			await InvokeAsync(StateHasChanged);
-			await Task.Delay(1);
-		}
-		catch (Exception ex)
-		{
-			Console.WriteLine(ex.ToString());
-		}
-		finally
-		{
-			_savingState = WvSnapshotSavingState.NotSaving;
-			RegenRenderLock();
-			await InvokeAsync(StateHasChanged);
-		}
-	}
-
-	private async Task _clearCurrent()
-	{
-		try
-		{
-			WvBlazorTraceService.ClearCurrentSession();
-			await _getData();
-		}
-		catch (Exception ex)
-		{
-			Console.WriteLine(ex.ToString());
-		}
-		finally
-		{
-			RegenRenderLock();
-			await InvokeAsync(StateHasChanged);
-		}
-	}
 	private async Task _highlightPrimarySnapshot()
 	{
 		_primarySnHighlightClass = "wv-highlight";
@@ -453,7 +512,6 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 		await InvokeAsync(StateHasChanged);
 
 	}
-
 	private void _initSnapshotActions()
 	{
 		if (_data is null || _data.SnapshotList is null) return;
@@ -462,67 +520,5 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 			item.OnRemove = async () => await _removeSnapshot(item);
 			item.OnRename = async () => await _renameSnapshot(item);
 		}
-	}
-
-	private async Task _removeSnapshot(WvSnapshotListItem sn)
-	{
-		if (!await JSRuntimeSrv.InvokeAsync<bool>("confirm", "Are you sure that you need this snapshot removed?"))
-			return;
-		try
-		{
-			await WvBlazorTraceService.RemoveSnapshotAsync(sn.Id);
-			//check update list
-			//if the removed is selected in primary or secondary in request
-			//set to null
-			_data!.SnapshotList = _data!.SnapshotList.Where(x => x.Id != sn.Id).ToList();
-			if (_data.Request.PrimarySnapshotId == sn.Id)
-				_data.Request.PrimarySnapshotId = null;
-			if (_data.Request.SecondarySnapshotId == sn.Id)
-				_data.Request.SecondarySnapshotId = null;
-		}
-		catch (Exception ex)
-		{
-			Console.WriteLine(ex.ToString());
-		}
-		finally
-		{
-			RegenRenderLock();
-			await InvokeAsync(StateHasChanged);
-		}
-	}
-
-	private async Task _renameSnapshot(WvSnapshotListItem sn)
-	{
-
-		try
-		{
-			var snapshot = await WvBlazorTraceService.RenameSnapshotAsync(sn.Id, sn.Name);
-			//Check an update list with the new name
-			var snIndex = _data!.SnapshotList.FindIndex(x => x.Id != sn.Id);
-			if (snIndex > -1)
-			{
-				_data!.SnapshotList[snIndex].Name = snapshot.Name;
-			}
-		}
-		catch (Exception ex)
-		{
-			Console.WriteLine(ex.ToString());
-		}
-		finally
-		{
-			RegenRenderLock();
-			await InvokeAsync(StateHasChanged);
-		}
-	}
-
-	private async Task _muteTraceChange(WvTraceMute item)
-	{
-		if (item is null) return;
-		await WvBlazorTraceService.ToggleTraceMuteAsync(item);
-		_currentMutes = await WvBlazorTraceService.GetAllTraceMutesAsync();
-		await _getData();
-		_initMenu();
-		RegenRenderLock();
-		//await InvokeAsync(StateHasChanged);
 	}
 }
