@@ -78,8 +78,8 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 														Size = MemoryBytes + ExtraMemoryBytes
 														}
 													},
-					OnEnterOptions = Options,
-					OnExitOptions = Options
+					OnEnterOptions = MethodOptions,
+					OnExitOptions = MethodOptions
 				});
 			var mutedTraces = new List<WvTraceMute>();
 			var pins = new List<string>();

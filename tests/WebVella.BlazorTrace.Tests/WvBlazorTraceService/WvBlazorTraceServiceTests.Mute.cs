@@ -274,8 +274,8 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 														Size = MemoryBytes + ExtraMemoryBytes
 														}
 													},
-				OnEnterOptions = Options,
-				OnExitOptions = Options
+				OnEnterOptions = MethodOptions,
+				OnExitOptions = MethodOptions
 			});
 			var mutedTraces = new List<WvTraceMute>();
 			var pins = new List<string>();
@@ -343,8 +343,8 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 														Size = MemoryBytes + ExtraMemoryBytes
 														}
 													},
-				OnEnterOptions = Options,
-				OnExitOptions = Options
+				OnEnterOptions = MethodOptions,
+				OnExitOptions = MethodOptions
 			});
 			var pins = new List<string>();
 			var result = new List<WvMethodTraceRow>();
@@ -414,8 +414,8 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 														Size = MemoryBytes + ExtraMemoryBytes
 														}
 													},
-				OnEnterOptions = Options,
-				OnExitOptions = Options
+				OnEnterOptions = MethodOptions,
+				OnExitOptions = MethodOptions
 			});
 			var mutedTraces = new List<WvTraceMute>();
 			var pins = new List<string>();
@@ -486,8 +486,8 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 														Size = MemoryBytes + ExtraMemoryBytes
 														}
 													},
-				OnEnterOptions = Options,
-				OnExitOptions = Options
+				OnEnterOptions = MethodOptions,
+				OnExitOptions = MethodOptions
 			});
 			var mutedTraces = new List<WvTraceMute>();
 			var pins = new List<string>();
@@ -559,8 +559,8 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 														Size = MemoryBytes + ExtraMemoryBytes
 														}
 													},
-				OnEnterOptions = Options,
-				OnExitOptions = Options
+				OnEnterOptions = MethodOptions,
+				OnExitOptions = MethodOptions
 			});
 			var mutedTraces = new List<WvTraceMute>();
 			var pins = new List<string>();
@@ -631,8 +631,8 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 														Size = MemoryBytes + ExtraMemoryBytes
 														}
 													},
-				OnEnterOptions = Options,
-				OnExitOptions = Options
+				OnEnterOptions = MethodOptions,
+				OnExitOptions = MethodOptions
 			});
 			var mutedTraces = new List<WvTraceMute>();
 			var pins = new List<string>();
@@ -1043,6 +1043,136 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 			Assert.Null(ex);
 			Assert.Single(result);
 			Assert.Empty(result[0].LimitHits);
+		}
+	}
+	#endregion
+	#region << Signal >>
+	[Fact]
+	public void TraceRowGenerationMuteTraceSignal()
+	{
+		lock (_locker)
+		{
+			//given
+			var primarySN = GetSnapshot();
+			var mutedTraces = new List<WvTraceMute>();
+			var pins = new List<string>();
+			var result = new List<WvSignalTraceRow>();
+
+			//Without mute
+			Action action = () => result = primarySN.GenerateSignalTraceRows(primarySN, mutedTraces, pins);
+			var ex = Record.Exception(action);
+			Assert.Null(ex);
+			Assert.NotEmpty(result);
+
+			//With mute
+			mutedTraces.Add(new WvTraceMute
+			{
+				Type = WvTraceMuteType.Signal,
+				Signal = SignalName
+			});
+
+			action = () => result = primarySN.GenerateSignalTraceRows(primarySN, mutedTraces, pins);
+			ex = Record.Exception(action);
+			Assert.Null(ex);
+			Assert.Empty(result);
+		}
+	}
+
+	[Fact]
+	public void TraceRowGenerationMuteTraceSignalInModule()
+	{
+		lock (_locker)
+		{
+			//given
+			var primarySN = GetSnapshot();
+			var mutedTraces = new List<WvTraceMute>();
+			var pins = new List<string>();
+			var result = new List<WvSignalTraceRow>();
+
+			//Without mute
+			Action action = () => result = primarySN.GenerateSignalTraceRows(primarySN, mutedTraces, pins);
+			var ex = Record.Exception(action);
+			Assert.Null(ex);
+			Assert.NotEmpty(result);
+
+			//With mute
+			mutedTraces.Add(new WvTraceMute
+			{
+				Type = WvTraceMuteType.SignalInModule,
+				Module = ModuleName,
+				Signal = SignalName
+			});
+
+			action = () => result = primarySN.GenerateSignalTraceRows(primarySN, mutedTraces, pins);
+			ex = Record.Exception(action);
+			Assert.Null(ex);
+			Assert.Empty(result);
+		}
+	}
+
+	[Fact]
+	public void TraceRowGenerationMuteTraceSignalInComponent()
+	{
+		lock (_locker)
+		{
+			//given
+			var primarySN = GetSnapshot();
+			var mutedTraces = new List<WvTraceMute>();
+			var pins = new List<string>();
+			var result = new List<WvSignalTraceRow>();
+
+			//Without mute
+			Action action = () => result = primarySN.GenerateSignalTraceRows(primarySN, mutedTraces, pins);
+			var ex = Record.Exception(action);
+			Assert.Null(ex);
+			Assert.NotEmpty(result);
+
+			//With mute
+			mutedTraces.Add(new WvTraceMute
+			{
+				Type = WvTraceMuteType.SignalInComponent,
+				ComponentFullName = ComponentFullName,
+				ComponentName = ComponentName,
+				Signal = SignalName
+			});
+			action = () => result = primarySN.GenerateSignalTraceRows(primarySN, mutedTraces, pins);
+			ex = Record.Exception(action);
+			Assert.Null(ex);
+			Assert.Empty(result);
+		}
+	}
+
+	[Fact]
+	public void TraceRowGenerationMuteTraceSignalInComponentInstance()
+	{
+		lock (_locker)
+		{
+			//given
+			var primarySN = GetSnapshot();
+			var mutedTraces = new List<WvTraceMute>();
+			var pins = new List<string>();
+			var result = new List<WvSignalTraceRow>();
+
+			//Without mute
+			Action action = () => result = primarySN.GenerateSignalTraceRows(primarySN, mutedTraces, pins);
+			var ex = Record.Exception(action);
+			Assert.Null(ex);
+			Assert.NotEmpty(result);
+
+			//With mute
+			mutedTraces.Add(new WvTraceMute
+			{
+				Type = WvTraceMuteType.SignalInComponentInstance,
+				ComponentFullName = ComponentFullName,
+				ComponentName = ComponentName,
+				InstanceTag = InstanceTag,
+				Signal = SignalName
+			});
+
+			action = () => result = primarySN.GenerateSignalTraceRows(primarySN, mutedTraces, pins);
+			ex = Record.Exception(action);
+			Assert.Null(ex);
+			Assert.Empty(result);
 		}
 	}
 	#endregion

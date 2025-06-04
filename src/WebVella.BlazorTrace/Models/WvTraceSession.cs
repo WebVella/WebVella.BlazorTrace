@@ -144,9 +144,6 @@ public class WvTraceSessionSignalTrace
 	public string? MethodName { get; set; } = null;
 	public string? CustomData { get; set; } = null;
 	public WvTraceSignalOptions Options { get; set; } = default!;
-
-	[JsonIgnore]
-	public string LimitHtml { get => this.CalculateLimitsHTML(); }
 }
 
 

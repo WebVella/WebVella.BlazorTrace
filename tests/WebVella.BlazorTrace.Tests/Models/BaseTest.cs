@@ -19,17 +19,20 @@ public class BaseTest
 	public Mock<WvBlazorTraceService> WvBlazorTraceServiceMock;
 	public TestComponent Component;
 
-	public WvTraceMethodOptions Options { get; set; } = new();
+	public WvTraceMethodOptions MethodOptions { get; set; } = new();
+	public WvTraceSignalOptions SignalOptions { get; set; } = new();
 	public bool FirstRender { get; set; } = true;
 	public string AssemblyName { get; set; } = "Microsoft.System";
 	public string ModuleName { get; set; } = "WebVella.BlazorTrace.Tests";
 	public string ComponentName { get; set; } = "TestComponent";
 	public string ComponentFullName { get => ModuleName + "." + ComponentName; }
 	public string MethodName { get; set; } = "OnInitialized";
+	public string SignalName { get; set; } = "test-signal";
 	public Guid TraceId { get; set; } = Guid.NewGuid();
 	public string InstanceTag { get; set; } = Guid.NewGuid().ToString();
 	public string OnEnterCustomData { get; set; } = Guid.NewGuid().ToString();
 	public string OnExitCustomData { get; set; } = Guid.NewGuid().ToString();
+	public string SignalCustomData { get; set; } = Guid.NewGuid().ToString();
 	public string FieldName { get; set; } = "_test";
 	public long MemoryBytes { get; set; } = 48;
 	public long ExtraMemoryBytes { get; set; } = 2048;
@@ -171,7 +174,12 @@ public class BaseTest
 
 	public WvSnapshot GetSnapshot()
 	{
-		Options = new WvTraceMethodOptions{ 
+		MethodOptions = new WvTraceMethodOptions
+		{
+			CallLimit = 0
+		};
+		SignalOptions = new WvTraceSignalOptions
+		{
 			CallLimit = 0
 		};
 
@@ -215,14 +223,30 @@ public class BaseTest
 														Size = MemoryBytes
 														}
 													},
-													OnEnterOptions = Options,
-													OnExitOptions = Options
+													OnEnterOptions = MethodOptions,
+													OnExitOptions = MethodOptions
 												}
 											}
 										}
 									}
 								}
 							}}
+						}
+					}}
+				},
+			SignalDict = new Dictionary<string, WvTraceSessionSignal>{
+					{SignalName, new WvTraceSessionSignal{
+						TraceList = new List<WvTraceSessionSignalTrace>{
+							new WvTraceSessionSignalTrace{
+								SendOn = TimeStamp,
+								ModuleName = ModuleName,
+								ComponentName = ComponentName,
+								ComponentFullName = ComponentFullName,
+								InstanceTag = InstanceTag,
+								MethodName = MethodName,
+								CustomData = SignalCustomData,
+								Options = SignalOptions
+							}
 						}
 					}}
 				}

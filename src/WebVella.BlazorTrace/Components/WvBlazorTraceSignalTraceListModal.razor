@@ -16,6 +16,7 @@
 			<table>
 				<thead>
 					<tr>
+						<th rowspan="2" style="width:40px"></th>
 						<th>send on</th>
 						<th>module</th>
 						<th>component</th>
@@ -28,12 +29,28 @@
 					<Virtualize Items="_row.TraceList.OrderBy(x => x.SendOn).ToList()" Context="item"
 								TItem="WvTraceSessionSignalTrace">
 						<tr @key="@Guid.NewGuid()">
+							<td class="wv-button">
+								<button type="button" class="icon wv-mute" title="mute trace" @onclick=@(()=>_onMute(item))>
+									<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+										<path d="M5.164 14H15c-.299-.199-.557-.553-.78-1-.9-1.8-1.22-5.12-1.22-6q0-.396-.06-.776l-.938.938c.02.708.157 2.154.457 3.58.161.767.377 1.566.663 2.258H6.164zm5.581-9.91a4 4 0 0 0-1.948-1.01L8 2.917l-.797.161A4 4 0 0 0 4 7c0 .628-.134 2.197-.459 3.742q-.075.358-.166.718l-1.653 1.653q.03-.055.059-.113C2.679 11.2 3 7.88 3 7c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0c.942.19 1.788.645 2.457 1.284zM10 15a2 2 0 1 1-4 0zm-9.375.625a.53.53 0 0 0 .75.75l14.75-14.75a.53.53 0 0 0-.75-.75z" />
+									</svg>
+								</button>
+							</td>
 							<td>@item.SendOn.ToString("yyyy-MMM-dd HH:mm:ss")</td>
-							<td>@item.ModuleName</td>
-							<td>@item.ComponentName</td>
-							<td>@item.MethodName</td>
+							<td title="module / assembly short name">@item.ModuleName</td>
+							<td title="@item.ComponentFullName">
+								<span>@item.ComponentName</span>
+								@if (!String.IsNullOrWhiteSpace(item.InstanceTag))
+								{
+									<span class="wv-trace-modal__divider"></span>
+									<span class="wv-tag" title="tag">@item.InstanceTag</span>
+								}
+							</td>
+							<td title="method name">@item.MethodName</td>
 							<td class="wv-tag">@item.CustomData</td>
-							<td>@((MarkupString)item.LimitHtml)</td>
+							<td>
+								<button class="wv-mute" @onclick=@(()=> _showLimitInfoModal(item,true))>limit info</button>
+							</td>
 						</tr>
 					</Virtualize>
 					@if (_row.TraceList.Count == 0)
@@ -49,6 +66,8 @@
 			<button title="Close [Esc]" type="button" @onclick=@(()=> Hide(false))>Close [Esc]</button>
 		</div>
 	</div>
+	<WvBlazorTraceLimitInfoSignalModal @ref=_limitInfoModal NestLevel="@(NestLevel+1)" />
+	<WvBlazorTraceMuteSignalTraceModal @ref=_traceMuteModal NestLevel="@(NestLevel+1)" OnChange="_muteChanged" />
 }
 
 

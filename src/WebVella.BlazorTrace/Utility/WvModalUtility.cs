@@ -53,8 +53,8 @@ public static class WvModalUtility
 
 						if (row.IsMuted(muteTraces, pins)) continue;
 						row.LimitHits = row.LimitHits.GetUnmuted(
-							row:row,
-							muteList:muteTraces
+							row: row,
+							muteList: muteTraces
 						);
 
 						result.Add(row);
@@ -67,13 +67,13 @@ public static class WvModalUtility
 	}
 
 	public static List<WvSignalTraceRow> GenerateSignalTraceRows(this WvSnapshot primarySn,
-		WvSnapshot secondarySn)
+		WvSnapshot secondarySn, List<WvTraceMute> muteTraces, List<string> pins)
 	{
 		//Generate data on secondarySN (which should be the newest in the default case
 		var unionDataDict = new Dictionary<string, WvSignalUnionData>();
 		var signalComparisonDict = new Dictionary<string, WvSnapshotSignalComparison>();
-		unionDataDict.AddSnapshotToSignalComparisonDictionary(signalComparisonDict, primarySn, true);
-		unionDataDict.AddSnapshotToSignalComparisonDictionary(signalComparisonDict, secondarySn, false);
+		unionDataDict.AddSnapshotToSignalComparisonDictionary(signalComparisonDict, primarySn, muteTraces, true);
+		unionDataDict.AddSnapshotToSignalComparisonDictionary(signalComparisonDict, secondarySn, muteTraces, false);
 		unionDataDict.ProcessSignalComparisonDictionary(signalComparisonDict);
 		var result = new List<WvSignalTraceRow>();
 
@@ -177,6 +177,7 @@ public static class WvModalUtility
 
 	public static void AddSnapshotToSignalComparisonDictionary(this Dictionary<string, WvSignalUnionData> unionDict, Dictionary<string, WvSnapshotSignalComparison> signalComp,
 			WvSnapshot? snapshot,
+			List<WvTraceMute> muteList,
 			bool isPrimary = true)
 	{
 		if (unionDict is null) unionDict = new();
@@ -184,7 +185,12 @@ public static class WvModalUtility
 		if (snapshot is null) return;
 		foreach (var signalName in snapshot.SignalDict.Keys)
 		{
+			if (signalName.IsSignalMuted(muteList: muteList)) continue;
 			var signal = snapshot.SignalDict[signalName];
+			var unmutedTraceList = signal.TraceList.GetUnmuted(muteList);
+			if (unmutedTraceList.Count == 0) continue;
+			signal.TraceList = unmutedTraceList;
+
 			unionDict.SetSignalUnionData(signalName, signal, isPrimary);
 			if (!signalComp.ContainsKey(signalName))
 				signalComp[signalName] = new();

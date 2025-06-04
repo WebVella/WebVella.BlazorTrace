@@ -173,7 +173,7 @@ public class WvTraceMute
 			default:
 				break;
 		}
-	}	
+	}
 	public WvTraceMute(WvTraceMuteType type, WvMethodTraceRow row, WvTraceSessionLimitHit dataField)
 	{
 		Type = type;
@@ -200,7 +200,33 @@ public class WvTraceMute
 			default:
 				break;
 		}
-	}	
+	}
+	public WvTraceMute(WvTraceMuteType type, WvSignalTraceRow row, WvTraceSessionSignalTrace trace)
+	{
+		Type = type;
+		switch (type)
+		{
+			case WvTraceMuteType.SignalInModule:
+				Module = trace.ModuleName;
+				Signal = row.SignalName;
+				break;
+			case WvTraceMuteType.SignalInComponent:
+				ComponentName = trace.ComponentName;
+				ComponentFullName = trace.ComponentFullName;
+				Signal = row.SignalName;
+				break;
+			case WvTraceMuteType.SignalInComponentInstance:
+				ComponentName = trace.ComponentName;
+				ComponentFullName = trace.ComponentFullName;
+				InstanceTag = trace.InstanceTag;
+				Signal = row.SignalName;
+				break;
+			default:
+				break;
+		}
+	}
+
+
 	public bool ModuleMatches(string? search)
 	{
 

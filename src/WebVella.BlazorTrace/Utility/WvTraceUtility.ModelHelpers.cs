@@ -302,16 +302,7 @@ public static partial class WvTraceUtility
 
 		return result;
 	}
-	public static string CalculateLimitsHTML(this WvTraceSessionSignalTrace trace)
-	{
-		var list = new List<string>();
 
-		if (trace.Options is not null)
-		{
-			list.Add($"<div>{trace.Options.CallLimit} <span class='wv-mute'>calls</span></div>");
-		}
-		return String.Join("", list);
-	}
 	public static Dictionary<string, WvTraceSessionModule> Clone(this Dictionary<string, WvTraceSessionModule> original)
 	{
 		if (original is null) throw new Exception("Cannot clone nullable object ");

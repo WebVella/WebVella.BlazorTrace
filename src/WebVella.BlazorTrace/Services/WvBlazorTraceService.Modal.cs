@@ -133,7 +133,9 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		else if (result.Request.IsSignalMenu)
 		{
 			var signalTraceRows = primarySN.GenerateSignalTraceRows(
-				secondarySn: secondarySN
+				secondarySn: secondarySN,
+				muteTraces:store.MutedTraces,
+				pins:store.Pins
 			);
 			foreach (var row in signalTraceRows)
 			{

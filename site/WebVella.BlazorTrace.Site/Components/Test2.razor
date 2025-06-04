@@ -30,6 +30,13 @@
 		for (int i = 0; i < 5; i++)
 		{
 			_list.Add(Guid.NewGuid());
+			if (_enableTrace)
+				WvBlazorTraceService.OnSignal(this, signalName: "test-signal", instanceTag: InstanceTag,
+				customData:$"index={i}",
+				options: new WvTraceSignalOptions
+				{
+					CallLimit = 5 - i
+				});
 		}
 
 		if (_enableTrace)
