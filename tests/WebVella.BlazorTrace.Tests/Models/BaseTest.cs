@@ -21,14 +21,17 @@ public class BaseTest
 
 	public WvTraceMethodOptions Options { get; set; } = new();
 	public bool FirstRender { get; set; } = true;
+	public string AssemblyName { get; set; } = "Microsoft.System";
 	public string ModuleName { get; set; } = "WebVella.BlazorTrace.Tests";
 	public string ComponentName { get; set; } = "TestComponent";
-	public string ComponentFullName { get => ModuleName + ComponentName; }
+	public string ComponentFullName { get => ModuleName + "." + ComponentName; }
 	public string MethodName { get; set; } = "OnInitialized";
 	public Guid TraceId { get; set; } = Guid.NewGuid();
 	public string InstanceTag { get; set; } = Guid.NewGuid().ToString();
-	public string CustomData { get; set; } = Guid.NewGuid().ToString();
+	public string OnEnterCustomData { get; set; } = Guid.NewGuid().ToString();
+	public string OnExitCustomData { get; set; } = Guid.NewGuid().ToString();
 	public string FieldName { get; set; } = "_test";
+	public long MemoryBytes { get; set; } = 48;
 	public long ExtraMemoryBytes { get; set; } = 2048;
 	public int DelayMS { get; set; } = 200;
 	public DateTimeOffset TimeStamp { get; set; } = DateTimeOffset.Now;
@@ -168,6 +171,10 @@ public class BaseTest
 
 	public WvSnapshot GetSnapshot()
 	{
+		Options = new WvTraceMethodOptions{ 
+			CallLimit = 0
+		};
+
 		var snapshot = new WvSnapshot()
 		{
 			Id = Guid.NewGuid(),
@@ -186,26 +193,26 @@ public class BaseTest
 											TraceList = new List<WvTraceSessionMethodTrace>{
 												new WvTraceSessionMethodTrace{
 													TraceId = TraceId,
-													OnEnterCustomData = CustomData,
-													OnExitCustomData = CustomData,
+													OnEnterCustomData = OnEnterCustomData,
+													OnExitCustomData = OnExitCustomData,
 													EnteredOn = TimeStamp,
 													ExitedOn = TimeStamp2,
 													OnEnterFirstRender = FirstRender,
 													OnExitFirstRender = FirstRender,
-													OnEnterMemoryBytes = 0,
+													OnEnterMemoryBytes = MemoryBytes,
 													OnEnterMemoryInfo = new List<WvTraceMemoryInfo>{
 														new WvTraceMemoryInfo{
-														AssemblyName = ModuleName,
+														AssemblyName = AssemblyName,
 														FieldName = FieldName,
-														Size = 0
+														Size = MemoryBytes
 														}
 													},
-													OnExitMemoryBytes = 0,
+													OnExitMemoryBytes = MemoryBytes,
 													OnExitMemoryInfo = new List<WvTraceMemoryInfo>{
 														new WvTraceMemoryInfo{
-														AssemblyName = ModuleName,
+														AssemblyName = AssemblyName,
 														FieldName = FieldName,
-														Size = 0
+														Size = MemoryBytes
 														}
 													},
 													OnEnterOptions = Options,

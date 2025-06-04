@@ -18,16 +18,16 @@
 
 @code {
 	[Parameter] public string? InstanceTag { get; set; }
-	private bool _enableTrace = false;
+	private bool _enableTrace = true;
 	private int _counter = 0;
 
 	protected override void OnInitialized()
 	{
-		//if (_enableTrace)
+		if (_enableTrace)
 			WvBlazorTraceService.OnEnter(component: this, instanceTag: InstanceTag, customData: $"counter");
 
 		base.OnInitialized();
-		//if (_enableTrace)
+		if (_enableTrace)
 			WvBlazorTraceService.OnExit(component: this, instanceTag: InstanceTag, customData: $"counter");
 	}
 

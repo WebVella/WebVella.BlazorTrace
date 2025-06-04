@@ -6,12 +6,11 @@ using WebVella.BlazorTrace.Services;
 using WebVella.BlazorTrace.Utility;
 
 namespace WebVella.BlazorTrace;
-public partial class WvBlazorTraceMemoryModal : WvBlazorTraceComponentBase
+public partial class WvBlazorTraceMuteTraceModal : WvBlazorTraceComponentBase
 {
 	// INJECTS
 	//////////////////////////////////////////////////
 	[Inject] protected IJSRuntime JSRuntimeSrv { get; set; } = default!;
-	[Inject] public IWvBlazorTraceService WvBlazorTraceService { get; set; } = default!;
 
 	// PARAMETERS
 	//////////////////////////////////////////////////
@@ -23,14 +22,13 @@ public partial class WvBlazorTraceMemoryModal : WvBlazorTraceComponentBase
 	// LOCAL VARIABLES
 	//////////////////////////////////////////////////
 	private Guid _componentId = Guid.NewGuid();
-	private DotNetObjectReference<WvBlazorTraceMemoryModal> _objectRef = default!;
+	private DotNetObjectReference<WvBlazorTraceMuteTraceModal> _objectRef = default!;
 	private bool _escapeListenerEnabled = false;
 	private bool _modalVisible = false;
 	private WvMethodTraceRow? _row = null;
-	private Guid? _traceId = null;
-	private bool _isOnEnter = true;
-	private List<WvSnapshotMemoryComparisonDataField> _items = new();
-	private WvBlazorTraceMuteMemoryModal? _memoryMuteModal = null;
+	private WvTraceSessionMethodTrace? _methodTrace = null;
+	private List<WvTraceMute> _applicableTypes = new();
+	private List<WvTraceMute> _selectedTypes = new();
 
 	// LIFECYCLE
 	/// //////////////////////////////////////////////
@@ -47,13 +45,21 @@ public partial class WvBlazorTraceMemoryModal : WvBlazorTraceComponentBase
 		EnableRenderLock();
 	}
 
+	protected override void OnParametersSet()
+	{
+		base.OnParametersSet();
+		RegenRenderLock();
+	}
+
 	// PUBLIC
 	//////////////////////////////////////////////////
-	public async Task Show(WvMethodTraceRow row, Guid? traceId = null, bool isOnEnter = true)
+	public async Task Show(WvMethodTraceRow row, WvTraceSessionMethodTrace dataField)
 	{
 		await new JsService(JSRuntimeSrv).AddKeyEventListener(_objectRef, "OnShortcutKey", "Escape", _componentId.ToString());
 		_escapeListenerEnabled = true;
-		_initData(row, traceId, isOnEnter);
+		_row = row;
+		_methodTrace = dataField;
+		_initMuteOptions();
 		_modalVisible = true;
 		RegenRenderLock();
 		await InvokeAsync(StateHasChanged);
@@ -63,7 +69,7 @@ public partial class WvBlazorTraceMemoryModal : WvBlazorTraceComponentBase
 		await new JsService(JSRuntimeSrv).RemoveKeyEventListener("Escape", _componentId.ToString());
 		_escapeListenerEnabled = false;
 		_row = null;
-		_items = new();
+		_methodTrace = null;
 		_modalVisible = false;
 		RegenRenderLock();
 		if (invokeStateChanged)
@@ -78,68 +84,46 @@ public partial class WvBlazorTraceMemoryModal : WvBlazorTraceComponentBase
 		await Hide();
 	}
 
-
 	//PRIVATE
 	/////////////////////////////////////////////////
 	private string _getTitle()
 	{
-		if (_row is null) return String.Empty;
+		if (_methodTrace is null) return String.Empty;
 
 		var sb = new StringBuilder();
-		sb.Append($"<span>{_row.Component}</span>");
-		if (!String.IsNullOrWhiteSpace(_row.InstanceTag))
-		{
-			sb.Append($" <span class='wv-tag' style='margin-left:5px'>{_row.InstanceTag}</span>");
-		}
-		sb.Append("<span class='wv-trace-modal__divider'></span>");
-		sb.Append($"<span>{_row.Method}</span>");
+		sb.Append($"<span>Mute method trace</span>");
 
 		return sb.ToString();
 	}
 
-	private async Task _onMute(WvSnapshotMemoryComparisonDataField dataField)
+	private async Task _typeClick(WvTraceMute item)
 	{
-		if (dataField is null || _row is null) return;
-		if (_memoryMuteModal is null) return;
-		await _memoryMuteModal.Show(_row,dataField);
-	}
-
-	private async Task _muteChanged()
-	{
-		var data = WvBlazorTraceBody.GetData();
-		if (data is null || _row is null) return;
-
-		var row = data.MethodTraceRows.FirstOrDefault(x => x.Id == _row.Id);
-		_initData(row, _traceId, _isOnEnter);
+		await WvBlazorTraceBody.MuteTraceChange(item);
+		_selectedTypes = WvBlazorTraceBody.GetTraceMutes();
 		await OnChange.InvokeAsync();
 		RegenRenderLock();
-		await InvokeAsync(StateHasChanged);
 	}
 
-	private void _initData(WvMethodTraceRow? row, Guid? traceId, bool isOnEnter = true){ 
-		_items = new();
-		_traceId = null;
-		_isOnEnter = true;
-		if(row is null) return;
-
-		_row = row;
-		if (traceId is not null)
+	private void _initMuteOptions()
+	{
+		_applicableTypes = new();
+		if (_methodTrace is not null && _row is not null)
 		{
-			var trace = _row.TraceList.FirstOrDefault(x => x.TraceId == traceId);
-			if (trace is not null && isOnEnter)
-			{
-				_traceId = traceId;
-				_isOnEnter = isOnEnter;
-				_items = trace.OnEnterMemoryInfo.ToMemoryDataFields();
+			_applicableTypes = new();
+			if(!String.IsNullOrWhiteSpace(_methodTrace.OnEnterCustomData)){ 
+				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.OnEnterCustomData,_row, _methodTrace.OnEnterCustomData));
+				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.OnEnterCustomDataInModule,_row, _methodTrace.OnEnterCustomData));
+				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.OnEnterCustomDataInComponent,_row, _methodTrace.OnEnterCustomData));
+				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.OnEnterCustomDataInComponentInstance,_row, _methodTrace.OnEnterCustomData));
 			}
-			else if (trace is not null && !isOnEnter)
-			{
-				_traceId = traceId;
-				_isOnEnter = isOnEnter;
-				_items = trace.OnExitMemoryInfo.ToMemoryDataFields();
+			if(!String.IsNullOrWhiteSpace(_methodTrace.OnExitCustomData)){ 
+				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.OnExitCustomData,_row, _methodTrace.OnExitCustomData));
+				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.OnExitCustomDataInModule,_row, _methodTrace.OnExitCustomData));
+				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.OnExitCustomDataInComponent,_row, _methodTrace.OnExitCustomData));
+				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.OnExitCustomDataInComponentInstance,_row, _methodTrace.OnExitCustomData));
 			}
+
 		}
-		else
-			_items = _row.MemoryComparison.Fields;	
+		_selectedTypes = WvBlazorTraceBody.GetTraceMutes();
 	}
 }

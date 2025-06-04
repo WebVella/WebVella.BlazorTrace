@@ -17,7 +17,7 @@
 						</button>
 					}
 				</th>
-				<th>
+				<th style="width: 300px;">
 					<InputText placeholder="type" autocomplete="new-password"
 							   @bind-Value=@Data!.Request.MutedFilter.TypeFilter
 							   @bind-Value:after="@(async () => await SubmitFilter.InvokeAsync())" />
@@ -83,7 +83,7 @@
 					<td>@((MarkupString)(String.IsNullOrWhiteSpace(item.Method) ? "<span class='wv-mute'>undefined</span>" : item.Method))</td>
 					<td>@((MarkupString)(String.IsNullOrWhiteSpace(item.Signal) ? "<span class='wv-mute'>undefined</span>" : item.Signal))</td>
 					<td>@((MarkupString)(String.IsNullOrWhiteSpace(item.Field) ? "<span class='wv-mute'>undefined</span>" : item.Field))</td>
-					<td>@((MarkupString)(String.IsNullOrWhiteSpace(item.CustomData) ? "<span class='wv-mute'>undefined</span>" : item.CustomData))</td>
+					<td>@((MarkupString)(String.IsNullOrWhiteSpace(item.OnEnterCustomData) ? "<span class='wv-mute'>undefined</span>" : item.OnEnterCustomData))</td>
 					<td>
 						@if (item.IsPinned is not null)
 						{

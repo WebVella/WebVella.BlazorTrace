@@ -25,7 +25,8 @@ public partial class WvBlazorTraceMuteMemoryModal : WvBlazorTraceComponentBase
 	private DotNetObjectReference<WvBlazorTraceMuteMemoryModal> _objectRef = default!;
 	private bool _escapeListenerEnabled = false;
 	private bool _modalVisible = false;
-	private WvSnapshotMemoryComparisonDataField? _row = null;
+	private WvMethodTraceRow? _row = null;
+	private WvSnapshotMemoryComparisonDataField? _dataField = null;
 	private List<WvTraceMute> _applicableTypes = new();
 	private List<WvTraceMute> _selectedTypes = new();
 
@@ -52,11 +53,12 @@ public partial class WvBlazorTraceMuteMemoryModal : WvBlazorTraceComponentBase
 
 	// PUBLIC
 	//////////////////////////////////////////////////
-	public async Task Show(WvSnapshotMemoryComparisonDataField row)
+	public async Task Show(WvMethodTraceRow row, WvSnapshotMemoryComparisonDataField dataField)
 	{
 		await new JsService(JSRuntimeSrv).AddKeyEventListener(_objectRef, "OnShortcutKey", "Escape", _componentId.ToString());
 		_escapeListenerEnabled = true;
 		_row = row;
+		_dataField = dataField;
 		_initMuteOptions();
 		_modalVisible = true;
 		RegenRenderLock();
@@ -67,6 +69,7 @@ public partial class WvBlazorTraceMuteMemoryModal : WvBlazorTraceComponentBase
 		await new JsService(JSRuntimeSrv).RemoveKeyEventListener("Escape", _componentId.ToString());
 		_escapeListenerEnabled = false;
 		_row = null;
+		_dataField = null;
 		_modalVisible = false;
 		RegenRenderLock();
 		if (invokeStateChanged)
@@ -85,7 +88,7 @@ public partial class WvBlazorTraceMuteMemoryModal : WvBlazorTraceComponentBase
 	/////////////////////////////////////////////////
 	private string _getTitle()
 	{
-		if (_row is null) return String.Empty;
+		if (_dataField is null) return String.Empty;
 
 		var sb = new StringBuilder();
 		sb.Append($"<span>Mute method trace</span>");
@@ -104,11 +107,16 @@ public partial class WvBlazorTraceMuteMemoryModal : WvBlazorTraceComponentBase
 	private void _initMuteOptions()
 	{
 		_applicableTypes = new();
-		if (_row is not null)
+		if (_dataField is not null && _row is not null)
 		{
 			_applicableTypes = new()
 			{
-				new WvTraceMute(WvTraceMuteType.Field,_row),
+				new WvTraceMute(WvTraceMuteType.Assembly,_row, _dataField),
+				new WvTraceMute(WvTraceMuteType.Field,_row, _dataField),
+				new WvTraceMute(WvTraceMuteType.FieldInAssembly,_row, _dataField),
+				new WvTraceMute(WvTraceMuteType.FieldInModule,_row, _dataField),
+				new WvTraceMute(WvTraceMuteType.FieldInComponent,_row, _dataField),
+				new WvTraceMute(WvTraceMuteType.FieldInComponentInstance,_row, _dataField),
 			};
 		}
 		_selectedTypes = WvBlazorTraceBody.GetTraceMutes();

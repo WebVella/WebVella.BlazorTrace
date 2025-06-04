@@ -10,6 +10,8 @@ public partial class WvBlazorTraceLimitModal : WvBlazorTraceComponentBase
 {
 	// INJECTS
 	//////////////////////////////////////////////////
+	[CascadingParameter(Name = "WvBlazorTraceBody")]
+	public WvBlazorTraceBody WvBlazorTraceBody { get; set; } = default!;	
 	[Inject] protected IJSRuntime JSRuntimeSrv { get; set; } = default!;
 
 	// PARAMETERS
@@ -23,6 +25,7 @@ public partial class WvBlazorTraceLimitModal : WvBlazorTraceComponentBase
 	private bool _escapeListenerEnabled = false;
 	private bool _modalVisible = false;
 	private WvMethodTraceRow? _row = null;
+	private WvBlazorTraceMuteLimitModal? _limitMuteModal = null;
 
 	// LIFECYCLE
 	/// //////////////////////////////////////////////
@@ -85,6 +88,28 @@ public partial class WvBlazorTraceLimitModal : WvBlazorTraceComponentBase
 		sb.Append($"<span>{_row.Method}</span>");
 
 		return sb.ToString();
+	}
+
+	private async Task _onMute(WvTraceSessionLimitHit dataField)
+	{
+		if (dataField is null || _row is null) return;
+		if (_limitMuteModal is null) return;
+		await _limitMuteModal.Show(_row, dataField);
+	}
+
+	private async Task _muteChanged()
+	{
+		var data = WvBlazorTraceBody.GetData();
+		if (data is null || _row is null) return;
+
+		var row = data.MethodTraceRows.FirstOrDefault(x => x.Id == _row.Id);
+		if (row is null){ 
+			_row.LimitHits = new();
+		}
+		else
+			_row = row;
+		RegenRenderLock();
+		await InvokeAsync(StateHasChanged);
 	}
 
 }

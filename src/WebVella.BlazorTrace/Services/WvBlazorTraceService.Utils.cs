@@ -138,8 +138,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 			if (traceInfo.IsOnInitialized)
 			{
 				componentTaggedInstance.OnInitialized.Name = traceInfo.MethodName;
-				var firstNotExitedTrace = componentTaggedInstance.OnInitialized.TraceList
-					.FirstOrDefault(x => x.ExitedOn is null && x.TraceId == traceInfo.TraceId);
+				var firstNotExitedTrace = componentTaggedInstance.OnInitialized.TraceList.GetMatchingOnEnterTrace(traceInfo.TraceId);
 				if (firstNotExitedTrace is null)
 				{
 					trace = new WvTraceSessionMethodTrace();
@@ -151,8 +150,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 			else if (traceInfo.IsOnParameterSet)
 			{
 				componentTaggedInstance.OnParameterSet.Name = traceInfo.MethodName;
-				var firstNotExitedTrace = componentTaggedInstance.OnParameterSet.TraceList
-					.FirstOrDefault(x => x.ExitedOn is null && x.TraceId == traceInfo.TraceId);
+				var firstNotExitedTrace = componentTaggedInstance.OnParameterSet.TraceList.GetMatchingOnEnterTrace(traceInfo.TraceId);
 				if (firstNotExitedTrace is null)
 				{
 					trace = new WvTraceSessionMethodTrace();
@@ -164,8 +162,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 			else if (traceInfo.IsOnAfterRender)
 			{
 				componentTaggedInstance.OnAfterRender.Name = traceInfo.MethodName;
-				var firstNotExitedTrace = componentTaggedInstance.OnAfterRender.TraceList
-					.FirstOrDefault(x => x.ExitedOn is null && x.TraceId == traceInfo.TraceId);
+				var firstNotExitedTrace = componentTaggedInstance.OnAfterRender.TraceList.GetMatchingOnEnterTrace(traceInfo.TraceId);
 				if (firstNotExitedTrace is null)
 				{
 					trace = new WvTraceSessionMethodTrace();
@@ -177,8 +174,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 			else if (traceInfo.IsShouldRender)
 			{
 				componentTaggedInstance.ShouldRender.Name = traceInfo.MethodName;
-				var firstNotExitedTrace = componentTaggedInstance.ShouldRender.TraceList
-					.FirstOrDefault(x => x.ExitedOn is null && x.TraceId == traceInfo.TraceId);
+				var firstNotExitedTrace = componentTaggedInstance.ShouldRender.TraceList.GetMatchingOnEnterTrace(traceInfo.TraceId);
 				if (firstNotExitedTrace is null)
 				{
 					trace = new WvTraceSessionMethodTrace();
@@ -190,8 +186,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 			else if (traceInfo.IsDispose)
 			{
 				componentTaggedInstance.Dispose.Name = traceInfo.MethodName;
-				var firstNotExitedTrace = componentTaggedInstance.Dispose.TraceList
-					.FirstOrDefault(x => x.ExitedOn is null && x.TraceId == traceInfo.TraceId);
+				var firstNotExitedTrace = componentTaggedInstance.Dispose.TraceList.GetMatchingOnEnterTrace(traceInfo.TraceId);
 				if (firstNotExitedTrace is null)
 				{
 					trace = new WvTraceSessionMethodTrace();
@@ -208,8 +203,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 					otherMethod = new() { Name = traceInfo.MethodName };
 					componentTaggedInstance.OtherMethods.Add(otherMethod);
 				}
-				var firstNotExitedTrace = otherMethod.TraceList
-					.FirstOrDefault(x => x.ExitedOn is null && x.TraceId == traceInfo.TraceId);
+				var firstNotExitedTrace = otherMethod.TraceList.GetMatchingOnEnterTrace(traceInfo.TraceId);
 				if (firstNotExitedTrace is null)
 				{
 					trace = new WvTraceSessionMethodTrace();

@@ -62,7 +62,7 @@ public static partial class WvTraceUtility
 		return false;
 	}
 
-	public static bool IsMethodMuted(this string? methodName, string moduleName, string componentFullName, string? instanceTag, List<WvTraceMute> muteList)
+	public static bool IsMethodMuted(this string? methodName, string? moduleName, string? componentFullName, string? instanceTag, List<WvTraceMute> muteList)
 	{
 		foreach (var muteTrace in muteList)
 		{
@@ -72,16 +72,16 @@ public static partial class WvTraceUtility
 					if (muteTrace.Method.ProcessForMatch() == methodName.ProcessForMatch()) return true;
 					break;
 				case WvTraceMuteType.MethodInModule:
-					if(muteTrace.Module.ProcessForMatch() != moduleName.ProcessForMatch()) break;
+					if (muteTrace.Module.ProcessForMatch() != moduleName.ProcessForMatch()) break;
 					if (muteTrace.Method.ProcessForMatch() == methodName.ProcessForMatch()) return true;
 					break;
 				case WvTraceMuteType.MethodInComponent:
-					if(muteTrace.ComponentFullName.ProcessForMatch() != componentFullName.ProcessForMatch()) break;
+					if (muteTrace.ComponentFullName.ProcessForMatch() != componentFullName.ProcessForMatch()) break;
 					if (muteTrace.Method.ProcessForMatch() == methodName.ProcessForMatch()) return true;
 					break;
 				case WvTraceMuteType.MethodInComponentInstance:
-					if(muteTrace.ComponentFullName.ProcessForMatch() != componentFullName.ProcessForMatch()) break;
-					if(muteTrace.InstanceTag.ProcessForMatch() != instanceTag.ProcessForMatch()) break;
+					if (muteTrace.ComponentFullName.ProcessForMatch() != componentFullName.ProcessForMatch()) break;
+					if (muteTrace.InstanceTag.ProcessForMatch() != instanceTag.ProcessForMatch()) break;
 					if (muteTrace.Method.ProcessForMatch() == methodName.ProcessForMatch()) return true;
 					break;
 				default:
@@ -91,69 +91,98 @@ public static partial class WvTraceUtility
 		return false;
 	}
 
-	public static List<WvTraceSessionMethodTrace> GetUnmuted(this List<WvTraceSessionMethodTrace> traceList, List<WvTraceMute> muteList)
+	public static List<WvTraceSessionMethodTrace> GetUnmuted(this List<WvTraceSessionMethodTrace> traceList, string moduleName, string componentFullName, string? instanceTag, List<WvTraceMute> muteList)
 	{
 		var result = new List<WvTraceSessionMethodTrace>();
 		foreach (var item in traceList)
 		{
-			if (item.IsMuted(muteList)) continue;
-			item.OnEnterMemoryInfo = item.OnEnterMemoryInfo.ProcessMemoryInfoList(muteList);
-			item.OnEnterMemoryBytes = item.OnEnterMemoryInfo?.Sum(x=> x.Size);
-			item.OnExitMemoryInfo = item.OnExitMemoryInfo.ProcessMemoryInfoList(muteList);
-			item.OnExitMemoryBytes = item.OnExitMemoryInfo?.Sum(x=> x.Size);
+			if (item.IsMuted(
+			moduleName: moduleName,
+			componentFullName: componentFullName,
+			instanceTag: instanceTag,
+			muteList: muteList)) continue;
+			item.OnEnterMemoryInfo = item.OnEnterMemoryInfo.ProcessMemoryInfoList(
+				moduleName: moduleName,
+				componentFullName: componentFullName,
+				instanceTag: instanceTag,
+				muteList: muteList
+			);
+			item.OnEnterMemoryBytes = item.OnEnterMemoryInfo?.Sum(x => x.Size);
+			item.OnExitMemoryInfo = item.OnExitMemoryInfo.ProcessMemoryInfoList(
+				moduleName: moduleName,
+				componentFullName: componentFullName,
+				instanceTag: instanceTag,
+				muteList: muteList
+			);
+			item.OnExitMemoryBytes = item.OnExitMemoryInfo?.Sum(x => x.Size);
 			result.Add(item);
 		}
 		return result;
 	}
+	public static bool IsMuted(this WvTraceSessionMethodTrace trace, string? moduleName, string? componentFullName, string? instanceTag, List<WvTraceMute> muteList)
+	{
+		foreach (var muteTrace in muteList)
+		{
+			switch (muteTrace.Type)
+			{
+				case WvTraceMuteType.OnEnterCustomData:
+					if (muteTrace.OnEnterCustomData.ProcessForMatch() == trace.OnEnterCustomData.ProcessForMatch()) return true;
+					break;
+				case WvTraceMuteType.OnEnterCustomDataInModule:
+					if (muteTrace.Module.ProcessForMatch() != moduleName.ProcessForMatch()) break;
+					if (muteTrace.OnEnterCustomData.ProcessForMatch() == trace.OnEnterCustomData.ProcessForMatch()) return true;
+					break;
+				case WvTraceMuteType.OnEnterCustomDataInComponent:
+					if (muteTrace.ComponentFullName.ProcessForMatch() != componentFullName.ProcessForMatch()) break;
+					if (muteTrace.OnEnterCustomData.ProcessForMatch() == trace.OnEnterCustomData.ProcessForMatch()) return true;
+					break;
+				case WvTraceMuteType.OnEnterCustomDataInComponentInstance:
+					if (muteTrace.ComponentFullName.ProcessForMatch() != componentFullName.ProcessForMatch()) break;
+					if (muteTrace.InstanceTag.ProcessForMatch() != instanceTag.ProcessForMatch()) break;
+					if (muteTrace.OnEnterCustomData.ProcessForMatch() == trace.OnEnterCustomData.ProcessForMatch()) return true;
+					break;
+				case WvTraceMuteType.OnExitCustomData:
+					if (muteTrace.OnExitCustomData.ProcessForMatch() == trace.OnExitCustomData.ProcessForMatch()) return true;
+					break;
+				case WvTraceMuteType.OnExitCustomDataInModule:
+					if (muteTrace.Module.ProcessForMatch() != moduleName.ProcessForMatch()) break;
+					if (muteTrace.OnExitCustomData.ProcessForMatch() == trace.OnExitCustomData.ProcessForMatch()) return true;
+					break;
+				case WvTraceMuteType.OnExitCustomDataInComponent:
+					if (muteTrace.ComponentFullName.ProcessForMatch() != componentFullName.ProcessForMatch()) break;
+					if (muteTrace.OnExitCustomData.ProcessForMatch() == trace.OnExitCustomData.ProcessForMatch()) return true;
+					break;
+				case WvTraceMuteType.OnExitCustomDataInComponentInstance:
+					if (muteTrace.ComponentFullName.ProcessForMatch() != componentFullName.ProcessForMatch()) break;
+					if (muteTrace.InstanceTag.ProcessForMatch() != instanceTag.ProcessForMatch()) break;
+					if (muteTrace.OnExitCustomData.ProcessForMatch() == trace.OnExitCustomData.ProcessForMatch()) return true;
+					break;
+				default:
+					break;
+			}
+		}
 
-	public static List<WvTraceMemoryInfo>? ProcessMemoryInfoList(this List<WvTraceMemoryInfo>? memoryInfoList, List<WvTraceMute> muteList)
+		return false;
+	}
+
+	public static List<WvTraceMemoryInfo>? ProcessMemoryInfoList(this List<WvTraceMemoryInfo>? memoryInfoList, string moduleName, string componentFullName, string? instanceTag, List<WvTraceMute> muteList)
 	{
 		if (memoryInfoList is null) return null;
 		var newList = new List<WvTraceMemoryInfo>();
 		foreach (var memInfo in memoryInfoList)
 		{
-			if (memInfo.IsMuted(muteList)) continue;
+			if (memInfo.IsMuted(
+				moduleName: moduleName,
+				componentFullName: componentFullName,
+				instanceTag: instanceTag,
+				muteList: muteList
+			)) continue;
 			newList.Add(memInfo);
 		}
 		return newList;
 	}
 
-	public static bool IsMuted(this WvMethodTraceRow row, List<WvTraceMute> muteList, List<string> pins)
-	{
-		foreach (var muteTrace in muteList)
-		{
-			switch (muteTrace.Type)
-			{
-				case WvTraceMuteType.PinnedMethods:
-					if(pins.Contains(row.Id)) return true;
-					break;
-				case WvTraceMuteType.NotPinnedMethods:
-					if(!pins.Contains(row.Id)) return true;
-					break;
-				default:
-					break;
-			}
-		}
-
-		return false;
-	}
-	public static bool IsMuted(this WvTraceSessionMethodTrace trace, List<WvTraceMute> muteList)
-	{
-		foreach (var muteTrace in muteList)
-		{
-			switch (muteTrace.Type)
-			{
-				case WvTraceMuteType.Module:
-
-					break;
-				default:
-					break;
-			}
-		}
-
-		return false;
-	}
-	public static bool IsMuted(this WvTraceMemoryInfo memInfo, List<WvTraceMute> muteList)
+	public static bool IsMuted(this WvTraceMemoryInfo memInfo, string? moduleName, string? componentFullName, string? instanceTag, List<WvTraceMute> muteList)
 	{
 		foreach (var muteTrace in muteList)
 		{
@@ -162,15 +191,100 @@ public static partial class WvTraceUtility
 				case WvTraceMuteType.Field:
 					if (muteTrace.Field.ProcessForMatch() == memInfo.FieldName.ProcessForMatch()) return true;
 					break;
+				case WvTraceMuteType.FieldInModule:
+					if (muteTrace.Module.ProcessForMatch() != moduleName.ProcessForMatch()) break;
+					if (muteTrace.Field.ProcessForMatch() == memInfo.FieldName.ProcessForMatch()) return true;
+					break;
+				case WvTraceMuteType.FieldInComponent:
+					if (muteTrace.ComponentFullName.ProcessForMatch() != componentFullName.ProcessForMatch()) break;
+					if (muteTrace.Field.ProcessForMatch() == memInfo.FieldName.ProcessForMatch()) return true;
+					break;
+				case WvTraceMuteType.FieldInComponentInstance:
+					if (muteTrace.ComponentFullName.ProcessForMatch() != componentFullName.ProcessForMatch()) break;
+					if (muteTrace.InstanceTag.ProcessForMatch() != instanceTag.ProcessForMatch()) break;
+					if (muteTrace.Field.ProcessForMatch() == memInfo.FieldName.ProcessForMatch()) return true;
+					break;
+				case WvTraceMuteType.FieldInAssembly:
+					if (muteTrace.Assembly.ProcessForMatch() != memInfo.AssemblyName.ProcessForMatch()) break;
+					if (muteTrace.Field.ProcessForMatch() == memInfo.FieldName.ProcessForMatch()) return true;
+					break;
+				case WvTraceMuteType.Assembly:
+					if (muteTrace.Assembly.ProcessForMatch() == memInfo.AssemblyName.ProcessForMatch()) return true;
+					break;
 				default:
 					break;
 			}
 		}
 		return false;
 	}
+	public static bool IsMuted(this WvMethodTraceRow row, List<WvTraceMute> muteList, List<string> pins)
+	{
+		foreach (var muteTrace in muteList)
+		{
+			switch (muteTrace.Type)
+			{
+				case WvTraceMuteType.PinnedMethods:
+					if (pins.Contains(row.Id)) return true;
+					break;
+				case WvTraceMuteType.NotPinnedMethods:
+					if (!pins.Contains(row.Id)) return true;
+					break;
+				default:
+					break;
+			}
+		}
 
-	public static string ProcessForMatch(this string? stringValue){ 
-		if(String.IsNullOrWhiteSpace(stringValue)) return String.Empty;
+		return false;
+	}
+	public static string ProcessForMatch(this string? stringValue)
+	{
+		if (String.IsNullOrWhiteSpace(stringValue)) return String.Empty;
 		return stringValue;
+	}
+
+	public static List<WvTraceSessionLimitHit> GetUnmuted(this List<WvTraceSessionLimitHit> limitHits,
+		WvMethodTraceRow row, List<WvTraceMute> muteList)
+	{
+		var result = new List<WvTraceSessionLimitHit>();
+		foreach (var item in limitHits)
+		{
+			if (item.IsMuted(
+			moduleName: row.Module,
+			componentFullName: row.ComponentFullName,
+			instanceTag: row.InstanceTag,
+			muteList: muteList)) continue;
+			result.Add(item);
+		}
+		return result;
+	}
+
+	public static bool IsMuted(this WvTraceSessionLimitHit limitHit,
+		string? moduleName, string? componentFullName, string? instanceTag, List<WvTraceMute> muteList)
+	{
+		foreach (var muteTrace in muteList)
+		{
+			switch (muteTrace.Type)
+			{
+				case WvTraceMuteType.Limit:
+					if (muteTrace.LimitType == limitHit.Type) return true;
+					break;
+				case WvTraceMuteType.LimitInModule:
+					if (muteTrace.Module.ProcessForMatch() != moduleName.ProcessForMatch()) break;
+					if (muteTrace.LimitType == limitHit.Type) return true;
+					break;
+				case WvTraceMuteType.LimitInComponent:
+					if (muteTrace.ComponentFullName.ProcessForMatch() != componentFullName.ProcessForMatch()) break;
+					if (muteTrace.LimitType == limitHit.Type) return true;
+					break;
+				case WvTraceMuteType.LimitInComponentInstance:
+					if (muteTrace.ComponentFullName.ProcessForMatch() != componentFullName.ProcessForMatch()) break;
+					if (muteTrace.InstanceTag.ProcessForMatch() != instanceTag.ProcessForMatch()) break;
+					if (muteTrace.LimitType == limitHit.Type) return true;
+					break;
+				default:
+					break;
+			}
+		}
+		return false;
 	}
 }

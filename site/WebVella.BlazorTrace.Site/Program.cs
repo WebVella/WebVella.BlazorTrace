@@ -15,6 +15,7 @@ public class Program
 		{
 #if DEBUG
 			EnableTracing = true,
+			AutoShowModal = true,
 #else
 			EnableTracing = false,
 #endif

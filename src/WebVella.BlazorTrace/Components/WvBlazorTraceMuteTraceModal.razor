@@ -1,7 +1,7 @@
 ﻿@namespace WebVella.BlazorTrace
 @using WebVella.BlazorTrace.Utility
 @inherits WvBlazorTraceComponentBase
-@if (_modalVisible && _row is not null)
+@if (_modalVisible && _row is not null &&  _methodTrace is not null)
 {
 	var style = $"z-index:{(20000 + (2 * NestLevel))}";
 	<WvBlazorTraceModalOverlay NestLevel="@NestLevel" OnHide="@(()=> Hide(false))" />
@@ -34,16 +34,24 @@
 								else
 								{
 									<button class="wv-mute" style="width:100%" @onclick=@(()=>_typeClick(item))>not selected</button>
-								
+
 								}
 							</td>
 							<td>@((MarkupString)item.Type.WvBTToDescriptionString())</td>
 							<td>@((MarkupString)item.Type.GenerateMuteDescriptionHtml(
-								module:_row.Module,
-								component:_row.Component,
-								instanceTag:_row.InstanceTag,
-								method:_row.Method
-							))</td>
+															module: _row.Module,
+															component: _row.Component,
+															instanceTag: _row.InstanceTag,
+															onEnterCustomData: _methodTrace.OnEnterCustomData,
+															onExitCustomData: _methodTrace.OnExitCustomData
+														))
+													</td>
+						</tr>
+					}
+					@if (_applicableTypes.Count == 0)
+					{
+						<tr>
+							<td colspan="3">No Custom Data found OnEnter or OnExit in this trace. You need one in order to limit by it.</td>
 						</tr>
 					}
 				</tbody>

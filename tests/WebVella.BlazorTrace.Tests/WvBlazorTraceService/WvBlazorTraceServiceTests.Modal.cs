@@ -45,7 +45,6 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 		lock (_locker)
 		{
 			//given
-			long extraMemoryBytes = 2048;
 			var primarySN = GetSnapshot();
 			var secondarySN = GetSnapshot();
 			secondarySN.Id = Guid.NewGuid();
@@ -57,26 +56,26 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 			secondaryMethod.TraceList.Add(new WvTraceSessionMethodTrace
 				{
 					TraceId = Guid.NewGuid(),
-					OnEnterCustomData = CustomData,
-					OnExitCustomData = CustomData,
+					OnEnterCustomData = OnEnterCustomData,
+					OnExitCustomData = OnEnterCustomData,
 					EnteredOn = TimeStamp.AddSeconds(30),
 					ExitedOn = TimeStamp2.AddSeconds(30).AddMilliseconds(DelayMS),
 					OnEnterFirstRender = FirstRender,
 					OnExitFirstRender = FirstRender,
-					OnEnterMemoryBytes = 0,
+					OnEnterMemoryBytes = MemoryBytes,
 					OnEnterMemoryInfo = new List<WvTraceMemoryInfo>{
 														new WvTraceMemoryInfo{
 														AssemblyName = ModuleName,
 														FieldName = FieldName,
-														Size = 0
+														Size = MemoryBytes
 														}
 													},
-					OnExitMemoryBytes = extraMemoryBytes,
+					OnExitMemoryBytes = MemoryBytes + ExtraMemoryBytes,
 					OnExitMemoryInfo = new List<WvTraceMemoryInfo>{
 														new WvTraceMemoryInfo{
 														AssemblyName = ModuleName,
 														FieldName = FieldName,
-														Size = extraMemoryBytes
+														Size = MemoryBytes + ExtraMemoryBytes
 														}
 													},
 					OnEnterOptions = Options,
@@ -99,14 +98,14 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 				methodName: MethodName
 			);
 			Assert.Equal(2, trRow.TraceList.Count);
-			Assert.Equal(extraMemoryBytes, trRow.LastMemoryBytes);
+			Assert.Equal(MemoryBytes + ExtraMemoryBytes, trRow.LastMemoryBytes);
 			Assert.Equal(DelayMS * 2, trRow.LastDurationMS);
 			Assert.NotNull(trRow.MethodComparison);
 			Assert.Equal(1, trRow.MethodComparison.TraceListChange);
 			Assert.Equal(DelayMS, trRow.MethodComparison.LastDurationChangeMS);
 
 			Assert.NotNull(trRow.MemoryComparison);
-			Assert.Equal(extraMemoryBytes, trRow.MemoryComparison.LastMemoryChangeBytes);
+			Assert.Equal(ExtraMemoryBytes, trRow.MemoryComparison.LastMemoryChangeBytes);
 		}
 	}
 }

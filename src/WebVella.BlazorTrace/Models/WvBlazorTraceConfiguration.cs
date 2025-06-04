@@ -10,6 +10,11 @@ public class WvBlazorTraceConfiguration
 	public bool EnableTracing { get; set; } = true;
 
 	/// <summary>
+	/// For easier tool development
+	/// </summary>
+	public bool AutoShowModal { get; set; } = false;
+
+	/// <summary>
 	/// By default F1 will open the trace modal
 	/// </summary>
 	public bool EnableF1Shortcut { get; set; } = true;

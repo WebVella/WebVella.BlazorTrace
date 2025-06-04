@@ -498,7 +498,7 @@ public static partial class WvTraceUtility
 		{
 			ComponentName = original.ComponentName,
 			ComponentFullName = original.ComponentFullName,
-			CustomData = original.CustomData,
+			OnEnterCustomData = original.OnEnterCustomData,
 			InstanceTag = original.InstanceTag,
 			Field = original.Field,
 			IsPinned = original.IsPinned,

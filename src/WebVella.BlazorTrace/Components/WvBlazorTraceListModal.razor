@@ -4,91 +4,100 @@
 @if (_row is not null && _modalVisible)
 {
 	var style = $"z-index:{(20000 + (2 * NestLevel))}";
-	<WvBlazorTraceModalOverlay NestLevel="@NestLevel" OnHide="@(()=> Hide(false))" />
-	<div class="wv-trace-modal medium" style="@style">
-		<div class="wv-trace-modal__header">
-			<div class="wv-trace-modal__header__left" style="flex:1 1 auto;">@((MarkupString)_getTitle())</div>
-			<div class="wv-trace-modal__header__right">
-				<button title="Close (Esc)" type="button" class="circle icon" @onclick=@(()=> Hide(false))>X</button>
+		<WvBlazorTraceModalOverlay NestLevel="@NestLevel" OnHide="@(()=> Hide(false))" />
+		<div class="wv-trace-modal medium" style="@style">
+			<div class="wv-trace-modal__header">
+				<div class="wv-trace-modal__header__left" style="flex:1 1 auto;">@((MarkupString)_getTitle())</div>
+				<div class="wv-trace-modal__header__right">
+					<button title="Close (Esc)" type="button" class="circle icon" @onclick=@(()=> Hide(false))>X</button>
+				</div>
 			</div>
-		</div>
-		<div class="wv-trace-modal__body">
-			<table>
-				<thead>
-					<tr>
-						<th rowspan="2">duration</th>
-						<th colspan="5">enter</th>
-						<th colspan="5">exit</th>
-					</tr>
-					<tr>
-						<th>timestamp</th>
-						<th>memory</th>
-						<th>custom data</th>
-						<th>first render</th>
-						<th style="width:90px">limits</th>
-						<th>timestamp</th>
-						<th>memory</th>
-						<th>custom data</th>
-						<th>first render</th>
-						<th style="width:90px">limits</th>
-					</tr>
-				</thead>
-				<tbody>
-					<Virtualize Items="_row.TraceList.OrderByDescending(x => x.DurationMs).ToList()" Context="item"
-								TItem="WvTraceSessionMethodTrace">
-						<tr @key="@Guid.NewGuid()">
-							<td class="wv-number">@item.DurationMs.WvBTToDurationMSString()</td>
-							<td class="wv-number">@item.EnteredOn?.WvBTToTimeString()</td>
-							<td class="wv-number wv-clickable" @onclick=@(() => _showMemoryModal(item.TraceId,true))>
-								<div class="icon">
-									<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-box-arrow-up-right" viewBox="0 0 16 16">
-										<path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5" />
-										<path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z" />
-									</svg>
-								</div>
-								<div>
-									@item.OnEnterMemoryBytes.WvBTToKilobytesString()
-								</div>
-							</td>
-							<td class="wv-tag">@item.OnEnterCustomData</td>
-							<td>@item.OnEnterFirstRender.WvBTGetFirstRenderString()</td>
-							<td>
-								<button class="wv-mute" @onclick=@(()=> _showLimitInfoModal(item,true))>limit info</button>
-							</td>
-							<td class="wv-number">@item.ExitedOn?.WvBTToTimeString()</td>
-							<td class="wv-number wv-clickable" @onclick=@(() => _showMemoryModal(item.TraceId,false))>
-								<div class="icon">
-									<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-box-arrow-up-right" viewBox="0 0 16 16">
-										<path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5" />
-										<path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z" />
-									</svg>
-								</div>
-								<div>
-									@item.OnExitMemoryBytes.WvBTToKilobytesString()
-								</div>
-							</td>
-							<td class="wv-tag">@item.OnExitCustomData</td>
-							<td>@item.OnExitFirstRender.WvBTGetFirstRenderString()</td>
-							<td>
-								<button class="wv-mute" @onclick=@(()=> _showLimitInfoModal(item,false))>limit info</button>
-							</td>
+			<div class="wv-trace-modal__body">
+				<table>
+					<thead>
+						<tr>
+							<th rowspan="2" style="width:40px"></th>
+							<th rowspan="2">duration</th>
+							<th colspan="5">enter</th>
+							<th colspan="5">exit</th>
 						</tr>
-					</Virtualize>
+						<tr>
+							<th>timestamp</th>
+							<th>memory</th>
+							<th>custom data</th>
+							<th>first render</th>
+							<th style="width:90px">limits</th>
+							<th>timestamp</th>
+							<th>memory</th>
+							<th>custom data</th>
+							<th>first render</th>
+							<th style="width:90px">limits</th>
+						</tr>
+					</thead>
+					<tbody>
+						<Virtualize Items="_row.TraceList.OrderByDescending(x => x.DurationMs).ToList()" Context="item"
+									TItem="WvTraceSessionMethodTrace">
+							<tr @key="@Guid.NewGuid()">
+								<td class="wv-button">
+									<button type="button" class="icon wv-mute" title="mute trace" @onclick=@(()=>_onMute(item))>
+										<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+											<path d="M5.164 14H15c-.299-.199-.557-.553-.78-1-.9-1.8-1.22-5.12-1.22-6q0-.396-.06-.776l-.938.938c.02.708.157 2.154.457 3.58.161.767.377 1.566.663 2.258H6.164zm5.581-9.91a4 4 0 0 0-1.948-1.01L8 2.917l-.797.161A4 4 0 0 0 4 7c0 .628-.134 2.197-.459 3.742q-.075.358-.166.718l-1.653 1.653q.03-.055.059-.113C2.679 11.2 3 7.88 3 7c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0c.942.19 1.788.645 2.457 1.284zM10 15a2 2 0 1 1-4 0zm-9.375.625a.53.53 0 0 0 .75.75l14.75-14.75a.53.53 0 0 0-.75-.75z" />
+										</svg>
+									</button>
+								</td>
+								<td class="wv-number">@item.DurationMs.WvBTToDurationMSString()</td>
+								<td class="wv-number">@item.EnteredOn?.WvBTToTimeString()</td>
+								<td class="wv-number wv-clickable" @onclick=@(() => _showMemoryModal(item.TraceId,true))>
+									<div class="icon">
+										<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-box-arrow-up-right" viewBox="0 0 16 16">
+											<path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5" />
+											<path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z" />
+										</svg>
+									</div>
+									<div>
+									@item.OnEnterMemoryBytes.WvBTToKilobytesString()
+									</div>
+								</td>
+								<td class="wv-tag">@item.OnEnterCustomData</td>
+								<td>@item.OnEnterFirstRender.WvBTGetFirstRenderString()</td>
+								<td>
+									<button class="wv-mute" @onclick=@(()=> _showLimitInfoModal(item,true))>limit info</button>
+								</td>
+								<td class="wv-number">@item.ExitedOn?.WvBTToTimeString()</td>
+								<td class="wv-number wv-clickable" @onclick=@(() => _showMemoryModal(item.TraceId,false))>
+									<div class="icon">
+										<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-box-arrow-up-right" viewBox="0 0 16 16">
+											<path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5" />
+											<path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z" />
+										</svg>
+									</div>
+									<div>
+									@item.OnExitMemoryBytes.WvBTToKilobytesString()
+									</div>
+								</td>
+								<td class="wv-tag">@item.OnExitCustomData</td>
+								<td>@item.OnExitFirstRender.WvBTGetFirstRenderString()</td>
+								<td>
+									<button class="wv-mute" @onclick=@(()=> _showLimitInfoModal(item,false))>limit info</button>
+								</td>
+							</tr>
+						</Virtualize>
 					@if (_row.TraceList.Count == 0)
 					{
-						<tr>
-							<td colspan="11" style="padding:30px;text-align:center;">No tracers are logged yet for this method</td>
-						</tr>
+								<tr>
+									<td colspan="11" style="padding:30px;text-align:center;">No tracers are logged yet for this method</td>
+								</tr>
 					}
-				</tbody>
-			</table>
+					</tbody>
+				</table>
+			</div>
+			<div class="wv-trace-modal__footer">
+				<button title="Close [Esc]" type="button" @onclick=@(()=> Hide(false))>Close [Esc]</button>
+			</div>
 		</div>
-		<div class="wv-trace-modal__footer">
-			<button title="Close [Esc]" type="button" @onclick=@(()=> Hide(false))>Close [Esc]</button>
-		</div>
-	</div>
-	<WvBlazorTraceMemoryModal @ref=_memoryModal NestLevel="@(NestLevel+1)" OnChange="_muteChanged" />
-	<WvBlazorTraceLimitInfoModal @ref=_limitInfoModal NestLevel="@(NestLevel+1)" />
+		<WvBlazorTraceMemoryModal @ref=_memoryModal NestLevel="@(NestLevel+1)" OnChange="_muteChanged" />
+		<WvBlazorTraceMuteTraceModal @ref=_traceMuteModal NestLevel="@(NestLevel+1)" OnChange="_muteChanged" />
+		<WvBlazorTraceLimitInfoModal @ref=_limitInfoModal NestLevel="@(NestLevel+1)" />
 }
 
 

@@ -38,7 +38,7 @@
 								}
 							</td>
 							<td>@((MarkupString)item.Type.WvBTToDescriptionString())</td>
-							<td>@((MarkupString)item.Type.GenerateMuteDescriptionHtml(_row))</td>
+							<td>@((MarkupString)item.Type.GenerateMuteDescriptionHtml(signalName:_row.SignalName))</td>
 						</tr>
 					}
 				</tbody>

@@ -16,7 +16,7 @@
 @code {
 	[Parameter] public int ParentCounter { get; set; } = 0;
 	[Parameter] public string? InstanceTag { get; set; }
-	private bool _enableTrace = false;
+	private bool _enableTrace = true;
 	private int _counter = 0;
 	private List<Guid> _list = new();
 	private static string _staticTest = Guid.NewGuid().ToString();

@@ -55,7 +55,7 @@
 			<button title="Close [Esc]" type="button" @onclick=@(()=> Hide(false))>Close [Esc]</button>
 		</div>
 	</div>
-	<WvBlazorTraceMuteMemoryModal @ref=_traceMuteModal NestLevel="@(NestLevel + 1)" OnChange="_muteChanged" />
+	<WvBlazorTraceMuteMemoryModal @ref=_memoryMuteModal NestLevel="@(NestLevel + 1)" OnChange="_muteChanged" />
 }
 
 

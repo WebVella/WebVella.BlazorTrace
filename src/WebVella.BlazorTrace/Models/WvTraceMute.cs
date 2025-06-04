@@ -21,8 +21,11 @@ public class WvTraceMute
 	public string? Method { get; set; }
 	public string? Signal { get; set; }
 	public string? Field { get; set; }
-	public string? CustomData { get; set; }
+	public string? Assembly { get; set; }
+	public string? OnEnterCustomData { get; set; }
+	public string? OnExitCustomData { get; set; }
 	public bool? IsPinned { get; set; }
+	public WvTraceSessionLimitType? LimitType { get; set; }
 	public WvTraceMute()
 	{
 	}
@@ -92,19 +95,112 @@ public class WvTraceMute
 				break;
 		}
 	}
-	public WvTraceMute(WvTraceMuteType type, WvSnapshotMemoryComparisonDataField row)
+	public WvTraceMute(WvTraceMuteType type, WvMethodTraceRow row, WvSnapshotMemoryComparisonDataField dataField)
 	{
 		Type = type;
 		switch (type)
 		{
 			case WvTraceMuteType.Field:
-				Field = row.FieldName;
+				Field = dataField.FieldName;
+				break;
+			case WvTraceMuteType.FieldInModule:
+				Module = row.Module;
+				Field = dataField.FieldName;
+				break;
+			case WvTraceMuteType.FieldInComponent:
+				ComponentName = row.Component;
+				ComponentFullName = row.ComponentFullName;
+				Field = dataField.FieldName;
+				break;
+			case WvTraceMuteType.FieldInComponentInstance:
+				ComponentName = row.Component;
+				ComponentFullName = row.ComponentFullName;
+				InstanceTag = row.InstanceTag;
+				Field = dataField.FieldName;
+				break;
+			case WvTraceMuteType.FieldInAssembly:
+				Assembly = dataField.AssemblyName;
+				Field = dataField.FieldName;
+				break;
+			case WvTraceMuteType.Assembly:
+				Assembly = dataField.AssemblyName;
 				break;
 			default:
 				break;
 		}
 	}
-
+	public WvTraceMute(WvTraceMuteType type, WvMethodTraceRow row, string customData)
+	{
+		Type = type;
+		switch (type)
+		{
+			case WvTraceMuteType.OnEnterCustomData:
+				OnEnterCustomData = customData;
+				break;
+			case WvTraceMuteType.OnEnterCustomDataInModule:
+				Module = row.Module;
+				OnEnterCustomData = customData;
+				break;
+			case WvTraceMuteType.OnEnterCustomDataInComponent:
+				ComponentName = row.Component;
+				ComponentFullName = row.ComponentFullName;
+				OnEnterCustomData = customData;
+				break;
+			case WvTraceMuteType.OnEnterCustomDataInComponentInstance:
+				ComponentName = row.Component;
+				ComponentFullName = row.ComponentFullName;
+				InstanceTag = row.InstanceTag;
+				OnEnterCustomData = customData;
+				break;
+			case WvTraceMuteType.OnExitCustomData:
+				OnExitCustomData = customData;
+				break;
+			case WvTraceMuteType.OnExitCustomDataInModule:
+				Module = row.Module;
+				OnExitCustomData = customData;
+				break;
+			case WvTraceMuteType.OnExitCustomDataInComponent:
+				ComponentName = row.Component;
+				ComponentFullName = row.ComponentFullName;
+				OnExitCustomData = customData;
+				break;
+			case WvTraceMuteType.OnExitCustomDataInComponentInstance:
+				ComponentName = row.Component;
+				ComponentFullName = row.ComponentFullName;
+				InstanceTag = row.InstanceTag;
+				OnExitCustomData = customData;
+				break;
+			default:
+				break;
+		}
+	}	
+	public WvTraceMute(WvTraceMuteType type, WvMethodTraceRow row, WvTraceSessionLimitHit dataField)
+	{
+		Type = type;
+		switch (type)
+		{
+			case WvTraceMuteType.Limit:
+				LimitType = dataField.Type;
+				break;
+			case WvTraceMuteType.LimitInModule:
+				Module = row.Module;
+				LimitType = dataField.Type;
+				break;
+			case WvTraceMuteType.LimitInComponent:
+				ComponentName = row.Component;
+				ComponentFullName = row.ComponentFullName;
+				LimitType = dataField.Type;
+				break;
+			case WvTraceMuteType.LimitInComponentInstance:
+				ComponentName = row.Component;
+				ComponentFullName = row.ComponentFullName;
+				InstanceTag = row.InstanceTag;
+				LimitType = dataField.Type;
+				break;
+			default:
+				break;
+		}
+	}	
 	public bool ModuleMatches(string? search)
 	{
 
@@ -182,10 +278,10 @@ public class WvTraceMute
 
 		if (string.IsNullOrWhiteSpace(search)) return true;
 		var searchLower = search.Trim().ToLowerInvariant();
-		if ("undefined".Contains(searchLower) && String.IsNullOrWhiteSpace(CustomData))
+		if ("undefined".Contains(searchLower) && String.IsNullOrWhiteSpace(OnEnterCustomData))
 			return true;
 
-		if ((CustomData ?? String.Empty).ToLowerInvariant().Contains(searchLower))
+		if ((OnEnterCustomData ?? String.Empty).ToLowerInvariant().Contains(searchLower))
 			return true;
 
 		return false;

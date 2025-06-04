@@ -92,12 +92,14 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 				await new JsService(JSRuntimeSrv).AddKeyEventListener(_objectRef, "OnShortcutKey", "F1");
 				_f1ListenerEnabled = true;
 			}
+			if(_configuration.AutoShowModal)
+				await _show();
 		}
 	}
 
 	// PUBLIC METHODS
 	////////////////////////////////////////////////
-	
+
 	public WvTraceModalData? GetData() => _data;
 	public List<WvTraceMute> GetTraceMutes() => _currentMutes;
 
@@ -118,7 +120,7 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 	{
 		await new JsService(JSRuntimeSrv).AddKeyEventListener(_objectRef, "OnShortcutKey", "Escape", _componentId.ToString());
 		_currentMutes = await WvBlazorTraceService.GetTraceMutes();
-		_initMenu();		
+		_initMenu();
 		_modalVisible = true;
 		RegenRenderLock();
 		await InvokeAsync(StateHasChanged);
@@ -171,13 +173,16 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 	private async Task _clearFilter(Type filterType)
 	{
 		if (_data is null) return;
-		if(filterType == typeof(WvTraceModalRequestMethodsFilter)){ 
+		if (filterType == typeof(WvTraceModalRequestMethodsFilter))
+		{
 			_data.Request.MethodsFilter = new();
 		}
-		else if(filterType == typeof(WvTraceModalRequestSignalsFilter)){ 
+		else if (filterType == typeof(WvTraceModalRequestSignalsFilter))
+		{
 			_data.Request.SignalsFilter = new();
 		}
-		else if(filterType == typeof(WvTraceModalRequestMutedFilter)){ 
+		else if (filterType == typeof(WvTraceModalRequestMutedFilter))
+		{
 			_data.Request.MutedFilter = new();
 		}
 		RegenRenderLock();

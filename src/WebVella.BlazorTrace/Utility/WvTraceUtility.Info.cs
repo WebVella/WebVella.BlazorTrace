@@ -25,4 +25,13 @@ public static partial class WvTraceUtility
 			ModuleName = componentType?.Module.Name?.Replace(".dll", "")
 		};
 	}
+
+	public static WvTraceSessionMethodTrace? GetMatchingOnEnterTrace(this List<WvTraceSessionMethodTrace> traceList, Guid? traceId){ 
+		var orderedTraceList = traceList.OrderBy(x=> x.EnteredOn);
+		if(traceId is not null) 
+			return traceList.FirstOrDefault(x =>x.EnteredOn is not null && x.ExitedOn is null && x.TraceId == traceId.Value);
+		
+		//any not exited will do
+		return traceList.FirstOrDefault(x =>x.EnteredOn is not null && x.ExitedOn is null);
+	}
 }
