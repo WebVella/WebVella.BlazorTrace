@@ -11,6 +11,7 @@ namespace WebVella.BlazorTrace.Models;
 public class WvTraceQueueAction
 {
 	public WvTraceQueueItemMethod MethodCalled { get; set; } = WvTraceQueueItemMethod.OnEnter;
+	[JsonIgnore]
 	public object Caller { get; set; } = default!;
 	public Guid? TraceId { get; set; } = null;
 	public WvTraceMethodOptions MethodOptions { get; set; } = default!;

@@ -29,21 +29,24 @@ public class MemorySizeCalculator
 		memoryDetails: memoryDetails,
 		configuration: configuration,
 		currentDepth: maxDepth,
-		maxDepth:maxDepth);
+		maxDepth: maxDepth);
 	}
 
 	private static long CalculateSize(
 		object measuredObject,
-		object component,
+		object? component,
 		string valueLabel,
 		List<WvTraceMemoryInfo> memoryDetails,
 		WvBlazorTraceConfiguration configuration,
 		int currentDepth,
 		int maxDepth,
-		HashSet<object>? visited = null)
+		HashSet<object>? visited = null,
+		HashSet<string>? measured = null)
 	{
 		// Initialize the set on first call
 		visited ??= new HashSet<object>();
+		measured ??= new HashSet<string>();
+
 		if (measuredObject == null || currentDepth < 0)
 			return 0;
 
@@ -63,11 +66,19 @@ public class MemorySizeCalculator
 		// Skip already processed reference types to prevent infinite loops
 		if (!type.IsValueType && visited.Contains(measuredObject))
 			return 0;
-
 		// Add ref-type objects to the visited set to avoid cycles
 		if (!type.IsValueType)
 			visited.Add(measuredObject);
 
+		var measuredHash = $"{component?.GetType().FullName}{type.FullName}{valueLabel}";
+		if(measured.Contains(measuredHash))
+			return 0;
+
+		measured.Add(measuredHash);
+
+
+		WvTraceUtility.ConsoleLog($"Comp: {component?.GetType().FullName}");
+		WvTraceUtility.ConsoleLog($"CalculateSize: {type.FullName} {valueLabel}");
 		long size = 0;
 
 		// Process arrays recursively
@@ -88,7 +99,8 @@ public class MemorySizeCalculator
 							configuration: configuration,
 							currentDepth: currentDepth - 1,
 							maxDepth: maxDepth,
-							visited: visited);
+							visited: visited,
+							measured:measured);
 				else
 					// Approximate non-primitive elements as a pointer/ref
 					size += 8;
@@ -109,6 +121,11 @@ public class MemorySizeCalculator
 				{
 					object? fieldValue = field.GetValue(measuredObject);
 					if (fieldValue == null) continue;
+					if (configuration.MemoryExcludeFieldNameList.Any(x => field.Name.Contains(x))
+						&& !configuration.MemoryIncludeFieldNameList.Any(x => field.Name.Contains(x)))
+					{
+						continue;
+					}
 
 					if (currentDepth > 0)
 						size += CalculateSize(
@@ -119,7 +136,8 @@ public class MemorySizeCalculator
 								configuration: configuration,
 								currentDepth: currentDepth - 1,
 								maxDepth: maxDepth,
-								visited: visited);
+								visited: visited,
+								measured:measured);
 					else
 						// Approximate non-primitive struct elements as a pointer/ref
 						size += 8;
@@ -134,7 +152,11 @@ public class MemorySizeCalculator
 			{
 				object? fieldValue = field.GetValue(measuredObject);
 				if (fieldValue == null) continue;
-
+				if (configuration.MemoryExcludeFieldNameList.Any(x => field.Name.Contains(x))
+					&& !configuration.MemoryIncludeFieldNameList.Any(x => field.Name.Contains(x)))
+				{
+					continue;
+				}
 				if (currentDepth > 0)
 					size += CalculateSize(
 							measuredObject: fieldValue,
@@ -144,7 +166,7 @@ public class MemorySizeCalculator
 							configuration: configuration,
 							currentDepth: currentDepth - 1,
 							maxDepth: maxDepth,
-							visited: visited);
+							visited: visited, measured: measured);
 				else
 					// Approximate non-primitive elements as a pointer/ref
 					size += 8;
@@ -157,7 +179,7 @@ public class MemorySizeCalculator
 
 		//Exclude the component itself from the log
 		//maxDepth is the component, maxDepth-1 are the props of it
-		if (size > 0 && currentDepth == maxDepth-1)
+		if (size > 0 && currentDepth == maxDepth - 1)
 		{
 			var memInfoId = WvTraceUtility.WvBTGetMemoryInfoId(type.Assembly.FullName!, valueLabel);
 			var memIndex = memoryDetails.FindIndex(x => x.Id == memInfoId);
@@ -184,7 +206,8 @@ public class MemorySizeCalculator
 	{
 		return type.IsPrimitive ||
 			   type == typeof(string) ||
-			   type == typeof(decimal);
+			   type == typeof(decimal)
+			   ||type == typeof(Guid);
 	}
 
 	private static long WvBTGetPrimitiveSize(object value)
@@ -198,6 +221,7 @@ public class MemorySizeCalculator
 		else if (t == typeof(int) || t == typeof(uint) || t == typeof(float)) return 4;
 		else if (t == typeof(long) || t == typeof(ulong) || t == typeof(double)) return 8;
 		else if (t == typeof(decimal)) return 16; // 128 bits
+		else if (t == typeof(Guid)) return 16; // 128 bits
 		else if (t == typeof(string))
 			return ((string)value).Length * 2 + 16; // Approximation for string memory including header
 
