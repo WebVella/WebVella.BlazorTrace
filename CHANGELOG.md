@@ -1,3 +1,5 @@
+# v1.0.5
+FIX: adding missing JsonIgnores (delete localstorage if problems occur)
 # v1.0.4
 Create "Mute" trace functionality to mute tracers based on module, component, component instance, method or custom data
 Virtualize the result rows for scalable interface
