@@ -2,8 +2,6 @@
 using Microsoft.JSInterop;
 using System.Text;
 using WebVella.BlazorTrace.Models;
-using WebVella.BlazorTrace.Services;
-using WebVella.BlazorTrace.Utility;
 
 namespace WebVella.BlazorTrace;
 public partial class WvBlazorTraceLimitModal : WvBlazorTraceComponentBase
@@ -11,7 +9,7 @@ public partial class WvBlazorTraceLimitModal : WvBlazorTraceComponentBase
 	// INJECTS
 	//////////////////////////////////////////////////
 	[CascadingParameter(Name = "WvBlazorTraceBody")]
-	public WvBlazorTraceBody WvBlazorTraceBody { get; set; } = default!;	
+	public WvBlazorTraceBody WvBlazorTraceBody { get; set; } = default!;
 	[Inject] protected IJSRuntime JSRuntimeSrv { get; set; } = default!;
 
 	// PARAMETERS
@@ -103,7 +101,8 @@ public partial class WvBlazorTraceLimitModal : WvBlazorTraceComponentBase
 		if (data is null || _row is null) return;
 
 		var row = data.MethodTraceRows.FirstOrDefault(x => x.Id == _row.Id);
-		if (row is null){ 
+		if (row is null)
+		{
 			_row.LimitHits = new();
 		}
 		else

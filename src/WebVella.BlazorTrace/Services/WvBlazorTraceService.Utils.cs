@@ -249,42 +249,5 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 			});
 		}
 	}
-
-	private async Task _setUnprotectedLocalStorageAsync(string key, string value)
-	{
-		await _jSRuntime.InvokeVoidAsync("localStorage.setItem", key, value);
-	}
-
-	private async Task _removeUnprotectedLocalStorageAsync(string key)
-	{
-		await _jSRuntime.InvokeVoidAsync("localStorage.removeItem", key);
-	}
-
-	private async Task<string> _getUnprotectedLocalStorageAsync(string key)
-	{
-		try{ 
-		return await _jSRuntime.InvokeAsync<string>("localStorage.getItem", key);
-		}catch(Exception ex){ 
-			throw;
-		}
-	}
-
-	private void checkModuleDict(Dictionary<string, WvTraceSessionModule> moduleDict){ 
-		var module = moduleDict[moduleDict.Keys.First()];
-		Console.WriteLine($"++++++ module HASH: {module.GetHashCode()}");
-		var component = module.ComponentDict[module.ComponentDict.Keys.First()];
-		Console.WriteLine($"++++++ component HASH: {component.GetHashCode()}");
-		var instance = component.TaggedInstances.First();
-		Console.WriteLine($"++++++ instance HASH: {instance.GetHashCode()}");
-		var method = instance.OnInitialized;
-		Console.WriteLine($"++++++ method HASH: {method.GetHashCode()}");
-		var trace = method.TraceList[1];
-		Console.WriteLine($"++++++ trace HASH: {trace.GetHashCode()}");
-		var onExitInfoCount = trace.OnExitMemoryInfo!.Count;
-		Console.WriteLine($"++++++ onExitInfoCount HASH: {trace.OnExitMemoryInfo.GetHashCode()}");
-
-		if(onExitInfoCount != 2)
-			throw new Exception("dadasd");
-	}
 }
 

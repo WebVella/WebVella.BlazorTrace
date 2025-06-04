@@ -2,8 +2,6 @@
 using Microsoft.JSInterop;
 using System.Text;
 using WebVella.BlazorTrace.Models;
-using WebVella.BlazorTrace.Services;
-using WebVella.BlazorTrace.Utility;
 
 namespace WebVella.BlazorTrace;
 public partial class WvBlazorTraceMuteTraceModal : WvBlazorTraceComponentBase
@@ -110,17 +108,19 @@ public partial class WvBlazorTraceMuteTraceModal : WvBlazorTraceComponentBase
 		if (_methodTrace is not null && _row is not null)
 		{
 			_applicableTypes = new();
-			if(!String.IsNullOrWhiteSpace(_methodTrace.OnEnterCustomData)){ 
-				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.OnEnterCustomData,_row, _methodTrace.OnEnterCustomData));
-				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.OnEnterCustomDataInModule,_row, _methodTrace.OnEnterCustomData));
-				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.OnEnterCustomDataInComponent,_row, _methodTrace.OnEnterCustomData));
-				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.OnEnterCustomDataInComponentInstance,_row, _methodTrace.OnEnterCustomData));
+			if (!String.IsNullOrWhiteSpace(_methodTrace.OnEnterCustomData))
+			{
+				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.OnEnterCustomData, _row, _methodTrace.OnEnterCustomData));
+				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.OnEnterCustomDataInModule, _row, _methodTrace.OnEnterCustomData));
+				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.OnEnterCustomDataInComponent, _row, _methodTrace.OnEnterCustomData));
+				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.OnEnterCustomDataInComponentInstance, _row, _methodTrace.OnEnterCustomData));
 			}
-			if(!String.IsNullOrWhiteSpace(_methodTrace.OnExitCustomData)){ 
-				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.OnExitCustomData,_row, _methodTrace.OnExitCustomData));
-				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.OnExitCustomDataInModule,_row, _methodTrace.OnExitCustomData));
-				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.OnExitCustomDataInComponent,_row, _methodTrace.OnExitCustomData));
-				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.OnExitCustomDataInComponentInstance,_row, _methodTrace.OnExitCustomData));
+			if (!String.IsNullOrWhiteSpace(_methodTrace.OnExitCustomData))
+			{
+				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.OnExitCustomData, _row, _methodTrace.OnExitCustomData));
+				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.OnExitCustomDataInModule, _row, _methodTrace.OnExitCustomData));
+				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.OnExitCustomDataInComponent, _row, _methodTrace.OnExitCustomData));
+				_applicableTypes.Add(new WvTraceMute(WvTraceMuteType.OnExitCustomDataInComponentInstance, _row, _methodTrace.OnExitCustomData));
 			}
 
 		}

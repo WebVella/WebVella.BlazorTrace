@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
-using System.Threading.Tasks;
 using WebVella.BlazorTrace.Models;
-using WebVella.BlazorTrace.Services;
-using WebVella.BlazorTrace.Utility;
 
 namespace WebVella.BlazorTrace;
 public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDisposable
@@ -92,7 +89,7 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 				await new JsService(JSRuntimeSrv).AddKeyEventListener(_objectRef, "OnShortcutKey", "F1");
 				_f1ListenerEnabled = true;
 			}
-			if(_configuration.AutoShowModal)
+			if (_configuration.AutoShowModal)
 				await _show();
 		}
 	}
@@ -365,12 +362,12 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 
 		try
 		{
-			var snapshot = await WvBlazorTraceService.RenameSnapshotAsync(sn.Id, sn.Name);
+			await WvBlazorTraceService.RenameSnapshotAsync(sn.Id, sn.Name);
 			//Check an update list with the new name
 			var snIndex = _data!.SnapshotList.FindIndex(x => x.Id != sn.Id);
 			if (snIndex > -1)
 			{
-				_data!.SnapshotList[snIndex].Name = snapshot.Name;
+				_data!.SnapshotList[snIndex].Name = sn.Name;
 			}
 		}
 		catch (Exception ex)

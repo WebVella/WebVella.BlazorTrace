@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WebVella.BlazorTrace.Models;
 
-namespace WebVella.BlazorTrace.Services;
+namespace WebVella.BlazorTrace;
 public class JsService
 {
 	protected IJSRuntime JSRuntime { get; }
@@ -21,7 +21,7 @@ public class JsService
 			if (keyCode == "Escape")
 				return await JSRuntime.InvokeAsync<bool>(
 					 "WebVellaBlazorTrace.addEscapeKeyEventListener",
-					 objectRef,listenerId, methodName);
+					 objectRef, listenerId, methodName);
 			else if (keyCode == "F1")
 				return await JSRuntime.InvokeAsync<bool>(
 					 "WebVellaBlazorTrace.addF1KeyEventListener",
@@ -39,7 +39,7 @@ public class JsService
 		{
 			if (keyCode == "Escape")
 				return await JSRuntime.InvokeAsync<bool>(
-				 "WebVellaBlazorTrace.removeEscapeKeyEventListener",listenerId);
+				 "WebVellaBlazorTrace.removeEscapeKeyEventListener", listenerId);
 			else if (keyCode == "F1")
 				return await JSRuntime.InvokeAsync<bool>(
 				 "WebVellaBlazorTrace.removeF1KeyEventListener");
@@ -48,5 +48,20 @@ public class JsService
 		{
 		}
 		return false;
+	}
+
+	public async Task SetUnprotectedLocalStorageAsync(string key, string value)
+	{
+		await JSRuntime.InvokeVoidAsync("localStorage.setItem", key, value);
+	}
+
+	public async Task RemoveUnprotectedLocalStorageAsync(string key)
+	{
+		await JSRuntime.InvokeVoidAsync("localStorage.removeItem", key);
+	}
+
+	public async Task<string> GetUnprotectedLocalStorageAsync(string key)
+	{
+		return await JSRuntime.InvokeAsync<string>("localStorage.getItem", key);
 	}
 }

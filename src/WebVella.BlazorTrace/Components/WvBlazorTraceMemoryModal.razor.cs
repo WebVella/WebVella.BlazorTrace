@@ -2,7 +2,6 @@
 using Microsoft.JSInterop;
 using System.Text;
 using WebVella.BlazorTrace.Models;
-using WebVella.BlazorTrace.Services;
 using WebVella.BlazorTrace.Utility;
 
 namespace WebVella.BlazorTrace;
@@ -101,7 +100,7 @@ public partial class WvBlazorTraceMemoryModal : WvBlazorTraceComponentBase
 	{
 		if (dataField is null || _row is null) return;
 		if (_memoryMuteModal is null) return;
-		await _memoryMuteModal.Show(_row,dataField);
+		await _memoryMuteModal.Show(_row, dataField);
 	}
 
 	private async Task _muteChanged()
@@ -116,11 +115,12 @@ public partial class WvBlazorTraceMemoryModal : WvBlazorTraceComponentBase
 		await InvokeAsync(StateHasChanged);
 	}
 
-	private void _initData(WvMethodTraceRow? row, Guid? traceId, bool isOnEnter = true){ 
+	private void _initData(WvMethodTraceRow? row, Guid? traceId, bool isOnEnter = true)
+	{
 		_items = new();
 		_traceId = null;
 		_isOnEnter = true;
-		if(row is null) return;
+		if (row is null) return;
 
 		_row = row;
 		if (traceId is not null)
@@ -140,6 +140,6 @@ public partial class WvBlazorTraceMemoryModal : WvBlazorTraceComponentBase
 			}
 		}
 		else
-			_items = _row.MemoryComparison.Fields;	
+			_items = _row.MemoryComparison.Fields;
 	}
 }

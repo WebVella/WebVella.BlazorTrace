@@ -19,7 +19,7 @@ namespace WebVella.BlazorTrace;
 public partial interface IWvBlazorTraceService
 {
 	Task<WvSnapshot> CreateSnapshotAsync(string? name = null);
-	Task<WvSnapshot> RenameSnapshotAsync(Guid id, string? name = null);
+	Task RenameSnapshotAsync(Guid id, string? name = null);
 	Task<WvLocalStore> GetLocalStoreAsync();
 	Task<WvSnapshot?> GetSnapshotAsync(Guid id);
 	Task RemoveSnapshotAsync(Guid id);
@@ -35,7 +35,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 	{
 		var store = await GetLocalStoreAsync();
 		store.LastModalRequest = request;
-		await _setUnprotectedLocalStorageAsync(_snapshotStoreKey, JsonSerializer.Serialize(store));
+		await new JsService(_jSRuntime).SetUnprotectedLocalStorageAsync(_snapshotStoreKey, JsonSerializer.Serialize(store));
 	}
 	public async Task<WvSnapshot> CreateSnapshotAsync(string? name)
 	{
@@ -48,44 +48,60 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 			ModuleDict = GetModuleDict(),
 			SignalDict = GetSignalDict(),
 		};
-		store.Snapshots.Add(snapshot);
+		WvSnapshotStore snapshotStore = new WvSnapshotStore
+		{
+			Id = snapshot.Id,
+			CreatedOn = snapshot.CreatedOn,
+			Name = snapshot.Name,
+			CompressedModuleDict = JsonSerializer.Serialize(snapshot.ModuleDict).CompressString(),
+			CompressedSignalDict = JsonSerializer.Serialize(snapshot.SignalDict).CompressString(),
+		};
+		store.Snapshots.Add(snapshotStore);
 		var json = JsonSerializer.Serialize(store);
-		await _setUnprotectedLocalStorageAsync(_snapshotStoreKey, JsonSerializer.Serialize(store));
+		await new JsService(_jSRuntime).SetUnprotectedLocalStorageAsync(_snapshotStoreKey, json);
 		return snapshot;
 	}
-	public async Task<WvSnapshot> RenameSnapshotAsync(Guid id, string? name = null)
+	public async Task RenameSnapshotAsync(Guid id, string? name = null)
 	{
 		var store = await GetLocalStoreAsync();
 		var snapshot = store.Snapshots.FirstOrDefault(x => x.Id == id);
 		if (snapshot is null)
 			throw new Exception("Snapshot not found");
 
-		if (name == "current") return snapshot;
+		if (name == "current") return;
 		snapshot.Name = !String.IsNullOrWhiteSpace(name) ? name : snapshot.CreatedOn.ToString("yyyy-MM-dd-HH-mm-ss");
-		await _setUnprotectedLocalStorageAsync(_snapshotStoreKey, JsonSerializer.Serialize(store));
-		return snapshot;
+		await new JsService(_jSRuntime).SetUnprotectedLocalStorageAsync(_snapshotStoreKey, JsonSerializer.Serialize(store));
 	}
 	public async Task<WvLocalStore> GetLocalStoreAsync()
 	{
-		try
-		{
-			var storeJson = await _getUnprotectedLocalStorageAsync(_snapshotStoreKey);
-			if (String.IsNullOrWhiteSpace(storeJson))
-				return new WvLocalStore();
-			var store = JsonSerializer.Deserialize<WvLocalStore>(storeJson);
-			if (store is null)
-				return new WvLocalStore();
-			return store;
-		}
-		catch (Exception ex)
-		{
-			throw;
-		}
+		var storeJson = await new JsService(_jSRuntime).GetUnprotectedLocalStorageAsync(_snapshotStoreKey);
+		if (String.IsNullOrWhiteSpace(storeJson))
+			return new WvLocalStore();
+		var store = JsonSerializer.Deserialize<WvLocalStore>(storeJson);
+		if (store is null)
+			return new WvLocalStore();
+		return store;
 	}
 	public async Task<WvSnapshot?> GetSnapshotAsync(Guid id)
 	{
 		var store = await GetLocalStoreAsync();
-		return store.Snapshots.FirstOrDefault(x => x.Id == id);
+		var storeSn = store.Snapshots.FirstOrDefault(x => x.Id == id);
+		if (storeSn is null) return null;
+		var sn = new WvSnapshot
+		{
+			Id = storeSn.Id,
+			CreatedOn = storeSn.CreatedOn,
+			Name = storeSn.Name,
+			ModuleDict = new(),
+			SignalDict = new()
+		};
+		if(!String.IsNullOrWhiteSpace(storeSn.CompressedModuleDict)) 
+			sn.ModuleDict = JsonSerializer.Deserialize<Dictionary<string, WvTraceSessionModule>>(storeSn.CompressedModuleDict.DecompressString()) ?? new();
+		if(!String.IsNullOrWhiteSpace(storeSn.CompressedSignalDict)) 
+			sn.SignalDict = JsonSerializer.Deserialize<Dictionary<string, WvTraceSessionSignal>>(storeSn.CompressedSignalDict.DecompressString()) ?? new();		
+
+		return sn;
+
 	}
 	public async Task RemoveSnapshotAsync(Guid id)
 	{
@@ -96,7 +112,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		if (store.LastModalRequest is not null && store.LastModalRequest.SecondarySnapshotId == id)
 			store.LastModalRequest.SecondarySnapshotId = null;
 
-		await _setUnprotectedLocalStorageAsync(_snapshotStoreKey, JsonSerializer.Serialize(store));
+		await new JsService(_jSRuntime).SetUnprotectedLocalStorageAsync(_snapshotStoreKey, JsonSerializer.Serialize(store));
 	}
 
 	public async Task AddPinAsync(string id)
@@ -105,7 +121,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		if (!store.Pins.Any(x => x == id))
 		{
 			store.Pins.Add(id);
-			await _setUnprotectedLocalStorageAsync(_snapshotStoreKey, JsonSerializer.Serialize(store));
+			await new JsService(_jSRuntime).SetUnprotectedLocalStorageAsync(_snapshotStoreKey, JsonSerializer.Serialize(store));
 		}
 	}
 
@@ -113,14 +129,14 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 	{
 		var store = await GetLocalStoreAsync();
 		store.Pins = store.Pins.Where(x => x != id).ToList();
-		await _setUnprotectedLocalStorageAsync(_snapshotStoreKey, JsonSerializer.Serialize(store));
+		await new JsService(_jSRuntime).SetUnprotectedLocalStorageAsync(_snapshotStoreKey, JsonSerializer.Serialize(store));
 	}
 
 	public async Task SaveLastestRequestAsync(WvTraceModalRequest? request)
 	{
 		var store = await GetLocalStoreAsync();
 		store.LastModalRequest = request;
-		await _setUnprotectedLocalStorageAsync(_snapshotStoreKey, JsonSerializer.Serialize(store));
+		await new JsService(_jSRuntime).SetUnprotectedLocalStorageAsync(_snapshotStoreKey, JsonSerializer.Serialize(store));
 	}
 
 	public async Task ToggleTraceMuteAsync(WvTraceMute traceMute)
@@ -139,7 +155,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		if (!store.MutedTraces.Any(x => x.Id == traceMute.Id))
 		{
 			store.MutedTraces.Add(traceMute);
-			await _setUnprotectedLocalStorageAsync(_snapshotStoreKey, JsonSerializer.Serialize(store));
+			await new JsService(_jSRuntime).SetUnprotectedLocalStorageAsync(_snapshotStoreKey, JsonSerializer.Serialize(store));
 		}
 		_traceMutesInternal = store.MutedTraces;
 	}
@@ -147,7 +163,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 	{
 		var store = await GetLocalStoreAsync();
 		store.MutedTraces = store.MutedTraces.Where(x => x.Id != traceMute.Id).ToList();
-		await _setUnprotectedLocalStorageAsync(_snapshotStoreKey, JsonSerializer.Serialize(store));
+		await new JsService(_jSRuntime).SetUnprotectedLocalStorageAsync(_snapshotStoreKey, JsonSerializer.Serialize(store));
 		_traceMutesInternal = store.MutedTraces;
 	}
 

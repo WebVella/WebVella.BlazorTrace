@@ -2,8 +2,6 @@
 using Microsoft.JSInterop;
 using System.Text;
 using WebVella.BlazorTrace.Models;
-using WebVella.BlazorTrace.Services;
-using WebVella.BlazorTrace.Utility;
 
 namespace WebVella.BlazorTrace;
 public partial class WvBlazorTraceSignalTraceListModal : WvBlazorTraceComponentBase, IAsyncDisposable
@@ -14,9 +12,9 @@ public partial class WvBlazorTraceSignalTraceListModal : WvBlazorTraceComponentB
 
 	// PARAMETERS
 	//////////////////////////////////////////////////
-	
+
 	[CascadingParameter(Name = "WvBlazorTraceBody")]
-	public WvBlazorTraceBody WvBlazorTraceBody { get; set; } = default!;	
+	public WvBlazorTraceBody WvBlazorTraceBody { get; set; } = default!;
 	[Parameter] public int NestLevel { get; set; } = 1;
 
 	// LOCAL VARIABLES

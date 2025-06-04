@@ -67,7 +67,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		};
 		if (request.PrimarySnapshotId.HasValue)
 		{
-			var snapshot = store.Snapshots.FirstOrDefault(x => x.Id == request.PrimarySnapshotId);
+			var snapshot = await GetSnapshotAsync(request.PrimarySnapshotId.Value);
 			if (snapshot is null) throw new Exception($"Primary snapshot not found");
 			primarySN = snapshot;
 		}
@@ -77,7 +77,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		}
 		if (request.SecondarySnapshotId.HasValue)
 		{
-			var snapshot = store.Snapshots.FirstOrDefault(x => x.Id == request.SecondarySnapshotId);
+			var snapshot = await GetSnapshotAsync(request.SecondarySnapshotId.Value);
 			if (snapshot is null) throw new Exception($"Secondary snapshot not found");
 			secondarySN = snapshot;
 		}

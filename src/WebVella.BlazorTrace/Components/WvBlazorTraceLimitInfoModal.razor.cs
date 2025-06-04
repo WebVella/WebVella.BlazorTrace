@@ -2,7 +2,6 @@
 using Microsoft.JSInterop;
 using System.Text;
 using WebVella.BlazorTrace.Models;
-using WebVella.BlazorTrace.Services;
 using WebVella.BlazorTrace.Utility;
 
 namespace WebVella.BlazorTrace;

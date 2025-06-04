@@ -2,8 +2,6 @@
 using Microsoft.JSInterop;
 using System.Text;
 using WebVella.BlazorTrace.Models;
-using WebVella.BlazorTrace.Services;
-using WebVella.BlazorTrace.Utility;
 
 namespace WebVella.BlazorTrace;
 public partial class WvBlazorTraceMuteSignalTraceModal : WvBlazorTraceComponentBase
@@ -109,10 +107,10 @@ public partial class WvBlazorTraceMuteSignalTraceModal : WvBlazorTraceComponentB
 		_applicableTypes = new();
 		if (_signalTrace is not null && _row is not null)
 		{
-			_applicableTypes = new(){ 
-				new WvTraceMute(WvTraceMuteType.SignalInModule,_row,_signalTrace),			
-				new WvTraceMute(WvTraceMuteType.SignalInComponent,_row,_signalTrace),			
-				new WvTraceMute(WvTraceMuteType.SignalInComponentInstance,_row,_signalTrace),			
+			_applicableTypes = new(){
+				new WvTraceMute(WvTraceMuteType.SignalInModule,_row,_signalTrace),
+				new WvTraceMute(WvTraceMuteType.SignalInComponent,_row,_signalTrace),
+				new WvTraceMute(WvTraceMuteType.SignalInComponentInstance,_row,_signalTrace),
 			};
 
 		}
