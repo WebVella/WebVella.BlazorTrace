@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using WebVella.BlazorTrace.Utility;
 
 namespace WebVella.BlazorTrace.Models;
 public class WvTraceMute
 {
+	[JsonIgnore]
 	public string Id { get => WvModalUtility.GenerateTraceMuteHash(this); }
 	public WvTraceMuteType Type { get; set; } = WvTraceMuteType.Module;
 	public string? Module { get; set; }
@@ -225,8 +227,6 @@ public class WvTraceMute
 				break;
 		}
 	}
-
-
 	public bool ModuleMatches(string? search)
 	{
 

@@ -262,7 +262,11 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 
 	private async Task<string> _getUnprotectedLocalStorageAsync(string key)
 	{
+		try{ 
 		return await _jSRuntime.InvokeAsync<string>("localStorage.getItem", key);
+		}catch(Exception ex){ 
+			throw;
+		}
 	}
 
 	private void checkModuleDict(Dictionary<string, WvTraceSessionModule> moduleDict){ 

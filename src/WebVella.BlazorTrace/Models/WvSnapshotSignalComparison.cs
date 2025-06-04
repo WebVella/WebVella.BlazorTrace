@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using WebVella.BlazorTrace.Utility;
 
@@ -16,6 +17,7 @@ public class WvSnapshotSignalComparison
 public class WvSnapshotSignalComparisonData
 {
 	public int TraceListChange { get; set; }
+	[JsonIgnore]
 	public string TraceListChangeHtml
 	{
 		get

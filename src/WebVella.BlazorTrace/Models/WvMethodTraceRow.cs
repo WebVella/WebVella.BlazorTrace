@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using WebVella.BlazorTrace.Utility;
 
 namespace WebVella.BlazorTrace.Models;
 public class WvMethodTraceRow
 {
+	[JsonIgnore]
 	public string Id { get => WvModalUtility.GenerateMethodHash(Module, ComponentFullName, InstanceTag, Method); }
 	public string? Module { get; set; }
 	public string? Component { get; set; }
@@ -19,6 +21,7 @@ public class WvMethodTraceRow
 	public long? LastMemoryBytes { get; set; }
 	public long? LastDurationMS { get; set; }
 	public List<WvTraceSessionLimitHit> LimitHits { get; set; } = new();
+	[JsonIgnore]
 	public string LimitsHint
 	{
 		get
@@ -34,6 +37,7 @@ public class WvMethodTraceRow
 			return String.Join("; ", hints);
 		}
 	}
+	[JsonIgnore]
 	public string LimitsHtml
 	{
 		get
@@ -64,9 +68,13 @@ public class WvMethodTraceRow
 	}
 	public WvSnapshotMethodComparisonData MethodComparison { get; set; } = new();
 	public WvSnapshotMemoryComparisonData MemoryComparison { get; set; } = new();
+	[JsonIgnore]
 	public List<WvTraceSessionLimitHit> MemoryTotalLimitHits { get => LimitHits.Where(x => x.Type == WvTraceSessionLimitType.MemoryTotal).ToList(); }
+	[JsonIgnore]
 	public List<WvTraceSessionLimitHit> MemoryDeltaLimitHits { get => LimitHits.Where(x => x.Type == WvTraceSessionLimitType.MemoryDelta).ToList(); }
+	[JsonIgnore]
 	public List<WvTraceSessionLimitHit> MethodCallsLimitHits { get => LimitHits.Where(x => x.Type == WvTraceSessionLimitType.CallCount).ToList(); }
+	[JsonIgnore]
 	public List<WvTraceSessionLimitHit> DurationLimitHits { get => LimitHits.Where(x => x.Type == WvTraceSessionLimitType.Duration).ToList(); }
 
 	public bool ModuleMatches(string? search)

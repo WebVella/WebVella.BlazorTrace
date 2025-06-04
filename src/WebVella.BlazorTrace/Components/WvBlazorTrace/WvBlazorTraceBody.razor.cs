@@ -54,7 +54,7 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 	private List<WvTraceModalMenuItem> _methodMenu = new();
 	private List<WvTraceModalMenuItem> _signalMenu = new();
 	private List<WvTraceModalMenuItem> _asideMenu = new();
-	private string _helpLink = "https://github.com/WebVella/WebVella.BlazorTrace/wiki/Methods-Modal";
+	private string _helpLink = "https://github.com/WebVella/WebVella.BlazorTrace/wiki/Help:-Main";
 
 	private WvSnapshotSavingState _savingState = WvSnapshotSavingState.NotSaving;
 

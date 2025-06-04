@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using WebVella.BlazorTrace.Utility;
 
@@ -16,6 +17,7 @@ public class WvSnapshotMemoryComparison
 public class WvSnapshotMemoryComparisonData
 {
 	public long LastMemoryChangeBytes { get; set; }
+	[JsonIgnore]
 	public string LastMemoryChangeKBHtml
 	{
 		get
@@ -34,13 +36,16 @@ public class WvSnapshotMemoryComparisonData
 
 public class WvSnapshotMemoryComparisonDataField
 {
+	[JsonIgnore]
 	public string Id { get => WvTraceUtility.WvBTGetMemoryInfoId(AssemblyName, FieldName); }
 	public string FieldName { get; set; } = String.Empty;
 	public string TypeName { get; set; } = String.Empty;
 	public string AssemblyName { get; set; } = String.Empty;
 	public long? PrimarySnapshotBytes { get; set; }
 	public long? SecondarySnapshotBytes { get; set; }
+	[JsonIgnore]
 	public long ChangeBytes => (SecondarySnapshotBytes ?? 0) - (PrimarySnapshotBytes ?? 0);
+	[JsonIgnore]
 	public string ChangeKBHtml
 	{
 		get

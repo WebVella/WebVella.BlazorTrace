@@ -122,7 +122,9 @@ public class WvTraceSessionMethodTrace
 	//Generated props
 	[JsonIgnore]
 	public long? DurationMs { get => this.GetDurationMS(); }
+	[JsonIgnore]
 	public string OnEnterLimitsHTML { get => this.CalculateLimitsHTML(true); }
+	[JsonIgnore]
 	public string OnExitLimitsHTML { get => this.CalculateLimitsHTML(false); }
 }
 

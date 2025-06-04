@@ -67,13 +67,20 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 	}
 	public async Task<WvLocalStore> GetLocalStoreAsync()
 	{
-		var storeJson = await _getUnprotectedLocalStorageAsync(_snapshotStoreKey);
-		if (String.IsNullOrWhiteSpace(storeJson))
-			return new WvLocalStore();
-		var store = JsonSerializer.Deserialize<WvLocalStore>(storeJson);
-		if (store is null)
-			return new WvLocalStore();
-		return store;
+		try
+		{
+			var storeJson = await _getUnprotectedLocalStorageAsync(_snapshotStoreKey);
+			if (String.IsNullOrWhiteSpace(storeJson))
+				return new WvLocalStore();
+			var store = JsonSerializer.Deserialize<WvLocalStore>(storeJson);
+			if (store is null)
+				return new WvLocalStore();
+			return store;
+		}
+		catch (Exception ex)
+		{
+			throw;
+		}
 	}
 	public async Task<WvSnapshot?> GetSnapshotAsync(Guid id)
 	{

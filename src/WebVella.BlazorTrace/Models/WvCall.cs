@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace WebVella.BlazorTrace.Models;
@@ -9,6 +10,7 @@ public class WvCall
 {
 	public DateTimeOffset? EnteredOn { get; set; }
 	public DateTimeOffset? ExitedOn { get; set; }
+	[JsonIgnore]
 	public long DurationMs
 	{
 		get

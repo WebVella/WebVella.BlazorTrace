@@ -2,17 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using WebVella.BlazorTrace.Utility;
 
 namespace WebVella.BlazorTrace.Models;
 public class WvSignalTraceRow
 {
+	[JsonIgnore]
 	public string Id { get => WvModalUtility.GenerateSignalHash(SignalName); }
 	public string? SignalName { get; set; }
 	public bool IsPinned { get; set; } = false;
 	public List<WvTraceSessionSignalTrace> TraceList { get; set; } = new();
 	public List<WvTraceSessionLimitHit> LimitHits { get; set; } = new();
+	[JsonIgnore]
 	public string LimitsHint
 	{
 		get
@@ -25,6 +28,7 @@ public class WvSignalTraceRow
 			return String.Join("; ", hints);
 		}
 	}
+	[JsonIgnore]
 	public string LimitsHtml
 	{
 		get
