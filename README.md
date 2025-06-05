@@ -133,5 +133,13 @@ There are several arguments that you can call them with, but here is an example 
 
 ![BlazorTrace modal](https://github.com/WebVella/WebVella.BlazorTrace/blob/main/images/limits-modal.png)
 
+### Snapshots
+
+![BlazorTrace modal](https://github.com/WebVella/WebVella.BlazorTrace/blob/main/images/trace-modal-snapshots.png)
+
+### Muted traces
+
+![BlazorTrace modal](https://github.com/WebVella/WebVella.BlazorTrace/blob/main/images/trace-modal-muted.png)
+
 ## License
 BlazorTrace is distributed under the MIT license.

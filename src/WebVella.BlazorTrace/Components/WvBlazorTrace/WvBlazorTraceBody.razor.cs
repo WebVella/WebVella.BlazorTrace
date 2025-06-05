@@ -364,7 +364,7 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 		{
 			await WvBlazorTraceService.RenameSnapshotAsync(sn.Id, sn.Name);
 			//Check an update list with the new name
-			var snIndex = _data!.SnapshotList.FindIndex(x => x.Id != sn.Id);
+			var snIndex = _data!.SnapshotList.FindIndex(x => x.Id == sn.Id);
 			if (snIndex > -1)
 			{
 				_data!.SnapshotList[snIndex].Name = sn.Name;

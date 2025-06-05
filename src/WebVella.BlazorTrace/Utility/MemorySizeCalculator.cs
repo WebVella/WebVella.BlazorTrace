@@ -75,12 +75,7 @@ public class MemorySizeCalculator
 			return 0;
 
 		measured.Add(measuredHash);
-
-
-		WvTraceUtility.ConsoleLog($"Comp: {component?.GetType().FullName}");
-		WvTraceUtility.ConsoleLog($"CalculateSize: {type.FullName} {valueLabel}");
 		long size = 0;
-
 		// Process arrays recursively
 		if (type.IsArray)
 		{
