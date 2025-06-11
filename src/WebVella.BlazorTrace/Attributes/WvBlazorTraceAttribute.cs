@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using WebVella.BlazorTrace;
 
 [module: WvBlazorTrace]
-[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Module)]
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Module, Inherited = true)]
 public class WvBlazorTraceAttribute : Attribute, IMethodDecorator
 {
 	private ComponentBase _targetInstance = default!;
