@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.36105.23
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebVella.BlazorTrace", "WebVella.BlazorTrace.csproj", "{17B69929-6020-4C11-9300-16186BBE2B71}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebVella.BlazorTrace", ".\WebVella.BlazorTrace\WebVella.BlazorTrace.csproj", "{17B69929-6020-4C11-9300-16186BBE2B71}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebVella.BlazorTrace.Site", "..\..\site\WebVella.BlazorTrace.Site\WebVella.BlazorTrace.Site.csproj", "{46488E6F-6DDB-4582-9CF1-E30C7F37A71D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebVella.BlazorTrace.Site", "..\site\WebVella.BlazorTrace.Site\WebVella.BlazorTrace.Site.csproj", "{46488E6F-6DDB-4582-9CF1-E30C7F37A71D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebVella.BlazorTrace.Tests", "..\..\tests\WebVella.BlazorTrace.Tests\WebVella.BlazorTrace.Tests.csproj", "{AD3ED490-7A62-46E3-82E7-D5BB833281E2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebVella.BlazorTrace.Tests", "..\tests\WebVella.BlazorTrace.Tests\WebVella.BlazorTrace.Tests.csproj", "{AD3ED490-7A62-46E3-82E7-D5BB833281E2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

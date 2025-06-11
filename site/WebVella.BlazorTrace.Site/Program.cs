@@ -1,6 +1,13 @@
 ﻿using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
+//how to add fody support
+//1. add module with name ot attribute
+//2. add in project file nuget ref -> <PackageReference Include="MethodDecorator.Fody" Version="1.1.1" />
+//3. add file FodyWeavers.xml
+
+[module: WvBlazorTrace]
+
 namespace WebVella.BlazorTrace.Site;
 public class Program
 {

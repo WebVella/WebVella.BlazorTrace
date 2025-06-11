@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
 using System;
 using System.Collections.Concurrent;
@@ -26,6 +27,7 @@ public partial interface IWvBlazorTraceService
 }
 public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 {
+	private static IServiceProvider _serviceProvider;
 	private IJSRuntime _jSRuntime;
 	private const string _snapshotStoreKey = "wvbtstore";
 	private Dictionary<string, WvTraceSessionModule> _moduleDictInternal = new();
@@ -36,6 +38,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 	private int _infiniteLoopDelaySeconds = 1;
 	private Task? _infiniteLoop;
 	private CancellationTokenSource? _infiniteLoopCancellationTokenSource;
+	
 
 	/// <summary>
 	/// Needs to be implemented to destroy the infinite loop
@@ -49,17 +52,21 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 
 	public WvBlazorTraceService(IJSRuntime jSRuntime,
 		IWvBlazorTraceConfigurationService configurationService,
+		IServiceProvider serviceProvider,
 		bool triggerQueueProcessing = true)
 	{
+		_serviceProvider = serviceProvider;
 		this._jSRuntime = jSRuntime;
 		this._configuration = configurationService.GetConfiguraion();
 		if (triggerQueueProcessing)
 			_processQueue();
 	}
+
 	public Dictionary<string, WvTraceSessionModule> GetModuleDict()
 	{
 		return _moduleDictInternal.Clone();
 	}
+
 	public Dictionary<string, WvTraceSessionSignal> GetSignalDict()
 	{
 		return _signalDictInternal.Clone();
@@ -78,6 +85,15 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 	{
 		_moduleDictInternal = new();
 		_signalDictInternal = new();
+	}
+
+	internal static IWvBlazorTraceService? GetScopedService()
+	{
+		if (_serviceProvider is null)
+			return null;
+
+		var service = _serviceProvider.GetRequiredService<IWvBlazorTraceService>();
+		return service;
 	}
 }
 
