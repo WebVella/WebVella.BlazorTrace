@@ -26,6 +26,19 @@ public partial class WvBlazorTraceConfigurationService : IWvBlazorTraceConfigura
 	public WvBlazorTraceConfigurationService(WvBlazorTraceConfiguration? config)
 	{
 		this._configuration = config is not null ? config : new();
+		if (_configuration.ExcludeDefaultMethods)
+		{
+			if (_configuration.TraceExcludeMethodList is null)
+				_configuration.TraceExcludeMethodList = new();
+
+			_configuration.TraceExcludeMethodList.AddRange(
+				new[]{
+					"<>",
+					"get_",
+					"set_"
+				}
+			);
+		}
 		if (_configuration.ExcludeDefaultAssemblies)
 		{
 			if (_configuration.MemoryExcludeAssemblyList is null)

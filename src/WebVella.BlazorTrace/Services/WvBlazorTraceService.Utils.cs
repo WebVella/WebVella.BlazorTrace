@@ -34,6 +34,13 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 
 			if (String.IsNullOrWhiteSpace(traceInfo.MethodName))
 				throw new ArgumentNullException(nameof(traceInfo), "MethodName is required");
+
+			if (_configuration.TraceExcludeMethodList.Any(x => traceInfo.MethodName!.StartsWith(x))
+				&& !_configuration.TraceIncludeMethodList.Any(x => traceInfo.MethodName!.StartsWith(x)))
+			{
+				return;
+			}
+
 			if (!_moduleDictInternal.ContainsKey(traceInfo.ModuleName))
 				_moduleDictInternal[traceInfo.ModuleName] = new();
 
@@ -117,6 +124,11 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 			if (String.IsNullOrWhiteSpace(traceInfo.MethodName))
 				throw new ArgumentNullException(nameof(traceInfo), "MethodName is required");
 
+			if (_configuration.TraceExcludeMethodList.Any(x => traceInfo.MethodName!.StartsWith(x))
+				&& !_configuration.TraceIncludeMethodList.Any(x => traceInfo.MethodName!.StartsWith(x)))
+			{
+				return;
+			}
 
 			if (!_moduleDictInternal.ContainsKey(traceInfo.ModuleName))
 				_moduleDictInternal[traceInfo.ModuleName] = new();

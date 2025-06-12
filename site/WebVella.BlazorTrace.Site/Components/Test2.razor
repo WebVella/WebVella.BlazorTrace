@@ -1,6 +1,8 @@
 ﻿@using System.Diagnostics
+@using WebVella.BlazorTrace
 @using WebVella.BlazorTrace.Models
-@inject IWvBlazorTraceService WvBlazorTraceService
+@attribute [WvBlazorTrace]
+@* @inject IWvBlazorTraceService WvBlazorTraceService *@
 <div style="padding:10px;border:1px solid #7e22ce; background:#d8b4fe;">
 	<div style="padding-top:15px">
 		Test 1 Parent: @ParentCounter
@@ -16,80 +18,33 @@
 @code {
 	[Parameter] public int ParentCounter { get; set; } = 0;
 	[Parameter] public string? InstanceTag { get; set; }
-	private bool _enableTrace = true;
 	private int _counter = 0;
 	private List<Guid> _list = new();
 	private static string _staticTest = Guid.NewGuid().ToString();
 
 	protected override void OnInitialized()
 	{
-		if (_enableTrace)
-			WvBlazorTraceService.OnEnter(this, instanceTag: InstanceTag);
-
 		base.OnInitialized();
 		for (int i = 0; i < 5; i++)
 		{
 			_list.Add(Guid.NewGuid());
-			if (_enableTrace)
-				WvBlazorTraceService.OnSignal(this, signalName: "test-signal", instanceTag: InstanceTag,
-				customData:$"index={i}",
-				options: new WvTraceSignalOptions
-				{
-					CallLimit = 5 - i
-				});
+			//WvBlazorTraceService.OnSignal(this, signalName: "test-signal", instanceTag: InstanceTag,
+			// customData: $"index={i}",
+			// options: new WvTraceSignalOptions
+			// {
+			// 	CallLimit = 5 - i
+			// });
 		}
-
-		if (_enableTrace)
-			WvBlazorTraceService.OnExit(this, instanceTag: InstanceTag, options: new WvTraceMethodOptions
-				{
-					MemoryLimitTotalBytes = 1,
-					MemoryLimitDeltaBytes = 1,
-					CallLimit = 1,
-					DurationLimitMS = 1
-				});
 	}
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
-		if (_enableTrace)
-			WvBlazorTraceService.OnEnter(this, firstRender: firstRender, instanceTag: InstanceTag);
-
 		base.OnAfterRender(firstRender);
 		await Task.Delay(50);
-
-		if (_enableTrace)
-			WvBlazorTraceService.OnExit(this, firstRender: firstRender, instanceTag: InstanceTag);
-	}
-
-	protected override void OnParametersSet()
-	{
-		if (_enableTrace)
-			WvBlazorTraceService.OnEnter(this, instanceTag: InstanceTag);
-
-		base.OnParametersSet();
-
-		if (_enableTrace)
-			WvBlazorTraceService.OnExit(this, instanceTag: InstanceTag);
-	}
-
-	protected override bool ShouldRender()
-	{
-		if (_enableTrace)
-			WvBlazorTraceService.OnEnter(this, instanceTag: InstanceTag);
-
-		if (_enableTrace)
-			WvBlazorTraceService.OnExit(this, instanceTag: InstanceTag);
-		return base.ShouldRender();
 	}
 
 	private void _countTest2()
 	{
-		if (_enableTrace)
-			WvBlazorTraceService.OnEnter(component: this, instanceTag: InstanceTag);
-
 		_counter++;
-
-		if (_enableTrace)
-			WvBlazorTraceService.OnExit(component: this, instanceTag: InstanceTag);
 	}
 }

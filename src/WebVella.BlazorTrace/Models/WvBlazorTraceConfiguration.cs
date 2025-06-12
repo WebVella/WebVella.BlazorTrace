@@ -20,6 +20,23 @@ public class WvBlazorTraceConfiguration
 	public bool EnableF1Shortcut { get; set; } = true;
 
 	/// <summary>
+	/// Method name start strings that you want to always include in memory trace. 
+	/// </summary>
+	public List<string> TraceIncludeMethodList { get; set; } = new();
+
+	/// <summary>
+	/// Method name start strings that you want to exclude from memory trace. 
+	/// Some framework method are excluded by default. Set the <ExcludeDefaultMethods> to false if you need them
+	/// </summary>
+	public List<string> TraceExcludeMethodList { get; set; } = new();
+
+	/// <summary>
+	/// By default some framework methods are excluded for convenience.
+	/// </summary>
+	public bool ExcludeDefaultMethods { get; set; } = true;
+
+
+	/// <summary>
 	/// Assemblies name start strings that you want to always include in memory trace. 
 	/// </summary>
 	public List<string> MemoryIncludeAssemblyList { get; set; } = new();

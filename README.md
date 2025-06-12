@@ -29,18 +29,18 @@ You can find our documentation in the [Wiki section of this repository](https://
 ## Get Started
 To start using BlazorTrace you need to do the following simple steps:
 
-1. Install the latest version of the [WebVella.BlazorTrace Nuget package](https://www.nuget.org/packages/WebVella.BlazorTrace)
-2. Add the following line in your ```Program.cs``` file. You can get more info about options to fine tune it in the wiki.
+1. Add the latest version of the [WebVella.BlazorTrace Nuget package](https://www.nuget.org/packages/WebVella.BlazorTrace) to your component holding project
+2. Add the latest version of the [MethodDecorator.Fody Nuget package](https://www.nuget.org/packages/MethodDecorator.Fody) to your component holding project
+3. Add the following line in your ```Program.cs``` file. You can get more info about options to fine tune it in the wiki.
 
 ``` csharp
-builder.Services.AddBlazorTrace(new WvBlazorTraceConfiguration()
-	{
-#if DEBUG
-	EnableTracing = true,
-#else
-	EnableTracing = false,
-#endif
-	});
+[module: WvBlazorTrace] //<-- This is important to be before the namespace declaration
+namespace Your.Name.Space;
+
+//code...
+
+builder.Services.AddBlazorTrace();
+
 #if DEBUG
 //Snapshots require bigger hub message size
 builder.Services.Configure<HubOptions>(options =>
@@ -53,9 +53,21 @@ builder.Services.AddSignalR(o =>
  o.EnableDetailedErrors = true;
 });
 #endif
+
+//code...
+
 ```
 
-3. Add the BlazorTrace component at the end of your ```App.razor``` or ```Routes.razor``` component
+4. Add ```FodyWeavers.xml``` file at the root of your component poject with the following content
+
+``` xml
+<?xml version="1.0" encoding="utf-8"?>
+<Weavers xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="FodyWeavers.xsd">
+	<MethodDecorator AsyncMethods="true" />
+</Weavers>
+```
+
+5. Add the BlazorTrace component at the end of your ```App.razor``` or ```Routes.razor``` component
 
 ``` razor
 <Router AppAssembly="@typeof(App).Assembly">
@@ -65,45 +77,54 @@ builder.Services.AddSignalR(o =>
 </Router>
 <WvBlazorTrace/> @* <-- INSERT HERE *@
 ```
-4. Inject the service in your components
-You can inject this in the component directly, or in _Imports.razor to make it available in all components.(Thanks LlamaNL :))
-``` csharp
-[Inject] protected IWvBlazorTraceService WvBlazorTraceService { get; set; }
-```
-5. Add tracers in your methods (start from LifeCycle methods). They will feed runtime data to the library and reveal the broader picture or where to look into details for issues.
-There are several arguments that you can call them with, but here is an example with the only required one (component):
+
+6. (BASIC) Add tracers in your components or methods. Decorate a method or a component class with the attribute ```[WvBlazorTrace]```
 
 ``` csharp
+// if razor component without code behind
+@attribute [WvBlazorTrace]
+```
+
+``` csharp
+// if razor.cs code behind you can decorate the entire class
+[WvBlazorTrace]
+public partial class Test1 : ComponentBase
+{
+	//code...
+}
+```
+
+``` csharp
+// if razor.cs code behind you can decorate only several methods you need traced
+public partial class Test1 : ComponentBase
+{
+
+	[WvBlazorTrace]
+	private void _countTest1(){}
+
+}
+```
+
+6. (ADVANCED) Add tracers with options that can be dynamically set. For all options, visit our wiki.
+
+``` csharp
+	[Inject] public IWvBlazorTraceService WvBlazorTraceService { get; set; } = default!;
+	[Parameter] public string? InstanceTag { get; set; }
+
 	protected override void OnInitialized()
 	{
-		WvBlazorTraceService.OnEnter(component: this);
+		WvBlazorTraceService.OnEnter(component: this, instanceTag: InstanceTag);
 		base.OnInitialized();
 		//Do something
-		WvBlazorTraceService.OnExit(component: this);
-	}
-```
-if there are many returns in the method you can also do it with try/finally block
-
-``` csharp
-	protected override void OnInitialized()
-	{
-		try
-		{
-			WvBlazorTraceService.OnEnter(component: this);
-			base.OnInitialized();
-			//Do something
-		}
-		finally
-		{
-			WvBlazorTraceService.OnExit(component: this);
-		}
+		WvBlazorTraceService.OnExit(component: this, instanceTag: InstanceTag);
 	}
 ```
 
-6. Add signals in your methods. They are a way to track events in your components or look in details about what and how is going on.
+7. Add signals in your methods. They are a way to track events in your components or look in details about what and how is going on.
 There are several arguments that you can call them with, but here is an example with the only required one (component):
 
 ``` csharp
+	[Inject] public IWvBlazorTraceService WvBlazorTraceService { get; set; } = default!;
 	private void _countTest()
 	{
 		_counter++;
@@ -111,7 +132,7 @@ There are several arguments that you can call them with, but here is an example 
 	}
 ```
 
-7. Thats it. You can start reviewing the data. PRO TIP: Use the F1 (show) and Esc (hide) to save time.
+8. Thats it. You can start reviewing the data. PRO TIP: Use the F1 (show) and Esc (hide) to save time.
 
 ### Method OnEnter/OnExit call information
 
