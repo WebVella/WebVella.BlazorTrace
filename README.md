@@ -31,7 +31,7 @@ To start using BlazorTrace you need to do the following simple steps:
 
 1. Add the latest version of the [WebVella.BlazorTrace Nuget package](https://www.nuget.org/packages/WebVella.BlazorTrace) to your component holding project
 2. Add the latest version of the [MethodDecorator.Fody Nuget package](https://www.nuget.org/packages/MethodDecorator.Fody) to your component holding project
-3. Add the following line in your ```Program.cs``` file. You can get more info about options to fine tune it in the wiki.
+3. Add the following lines in your ```Program.cs``` file. You can get more info about options to fine tune it in the wiki.
 
 ``` csharp
 [module: WvBlazorTrace] //<-- This is important to be before the namespace declaration
@@ -178,5 +178,5 @@ He saved time to all of us, by finding a way how to create faster tracer interga
 For helping with the FODY implementation
 
 ### [/r/dotnet](https://www.reddit.com/r/dotnet/), [/r/Blazor](https://www.reddit.com/r/Blazor/), [/r/csharp](https://www.reddit.com/r/csharp/)
-These are Reddit communities of really welcoming and knowledgable people. They are always ready to help with a question, problem or advice. 
+These Reddit communities are home to incredibly welcoming and knowledgeable people, always ready to offer help with questions, problems, or advice. 
 
