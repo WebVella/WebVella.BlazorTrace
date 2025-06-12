@@ -1,3 +1,7 @@
+# v1.0.7
+- FEATURE: trace be decoration component class or methods with [WvBlazorTrace] attribute
+- CODE CLEAN: moving the solution file to the /src folder
+
 # v1.0.6
 - OPTIMIZATION: memory size calculation optimization for large repeatable objects.
 - OPTIMIZATION: adding compression for snapshots in local storage.
