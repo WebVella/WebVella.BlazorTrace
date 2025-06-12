@@ -164,3 +164,19 @@ There are several arguments that you can call them with, but here is an example 
 
 ## License
 BlazorTrace is distributed under the MIT license.
+
+## Acknowledgments
+BlazorTrace wouldn't be possible without the incredible encouragement and support of amazing people and communities. Thanks to all of you!
+
+### [jhsheets](https://github.com/jhsheets)
+For being our fist contributor and thus boosting our motivation to make BlazorTrace better.
+
+### [LlamaNL](https://www.reddit.com/user/LlamaNL/)
+He saved time to all of us, by finding a way how to create faster tracer intergation with an Attribute and FODY
+
+### [Tension-Maleficent](https://www.reddit.com/user/Tension-Maleficent/)
+For helping with the FODY implementation
+
+### [/r/dotnet](https://www.reddit.com/r/dotnet/), [/r/Blazor](https://www.reddit.com/r/Blazor/), [/r/csharp](https://www.reddit.com/r/csharp/)
+These are Reddit communities of really welcoming and knowledgable people. They are always ready to help with a question, problem or advice. 
+
