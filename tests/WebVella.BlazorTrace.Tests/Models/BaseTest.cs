@@ -46,7 +46,6 @@ public class BaseTest
 		this.WvBlazorTraceConfigurationServiceMock.Setup(x => x.GetConfiguraion()).Returns(new WvBlazorTraceConfiguration());
 		this.JsRuntimeMock = new Mock<IJSRuntime>();
 		this.WvBlazorTraceServiceMock = new Mock<WvBlazorTraceService>(
-			this.JsRuntimeMock.Object,
 			this.WvBlazorTraceConfigurationServiceMock.Object,
 			false);
 		this.Component = new TestComponent();

@@ -21,7 +21,7 @@ namespace WebVella.BlazorTrace;
 public partial interface IWvBlazorTraceService
 {
 	ConcurrentQueue<WvTraceQueueAction> GetQueue();
-	Task ForceProcessQueueAsync();
+	Task ForceProcessQueueAsync(IJSRuntime jsRuntime);
 }
 public partial class WvBlazorTraceService : IWvBlazorTraceService
 {
@@ -32,7 +32,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 	{
 		_traceQueue.Enqueue(trace);
 	}
-	private void _processQueue()
+	private void _processQueue(IJSRuntime jsRuntime)
 	{
 		_infiniteLoopCancellationTokenSource = new CancellationTokenSource();
 		_infiniteLoop = Task.Run(async () =>
@@ -49,7 +49,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 						{
 							if (_traceQueue.TryDequeue(out var trace))
 							{
-								await _processQueueTraceAsync(trace);
+								await _processQueueTraceAsync(jsRuntime, trace);
 							}
 						}
 						catch (Exception ex)
@@ -63,17 +63,17 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 			}
 		}, _infiniteLoopCancellationTokenSource.Token);
 	}
-	private async Task _processQueueTraceAsync(WvTraceQueueAction action)
+	private async Task _processQueueTraceAsync(IJSRuntime jsRuntime, WvTraceQueueAction action)
 	{
 		if (action is null) return;
 		if (action.Caller is null) return;
 		var traceInfo = action.Caller.GetInfo(action.TraceId, action.InstanceTag, action.MethodName);
 		if (traceInfo is null)
 			throw new Exception("callerInfo cannot be evaluated");
-		await _saveSessionTrace(traceInfo, action);
+		await _saveSessionTrace(jsRuntime, traceInfo, action);
 	}
 
-	public async Task ForceProcessQueueAsync()
+	public async Task ForceProcessQueueAsync(IJSRuntime jsRuntime)
 	{
 		using (await _queueProcessLock.LockAsync())
 		{
@@ -83,7 +83,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 				{
 					if (_traceQueue.TryDequeue(out var trace))
 					{
-						await _processQueueTraceAsync(trace);
+						await _processQueueTraceAsync(jsRuntime, trace);
 					}
 				}
 				catch (Exception ex)

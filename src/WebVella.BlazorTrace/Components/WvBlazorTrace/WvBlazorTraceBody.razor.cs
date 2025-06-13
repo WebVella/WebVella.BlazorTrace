@@ -103,8 +103,8 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 	public async Task MuteTraceChange(WvTraceMute item)
 	{
 		if (item is null) return;
-		await WvBlazorTraceService.ToggleTraceMuteAsync(item);
-		_currentMutes = await WvBlazorTraceService.GetTraceMutes();
+		await WvBlazorTraceService.ToggleTraceMuteAsync(JSRuntimeSrv,item);
+		_currentMutes = await WvBlazorTraceService.GetTraceMutes(JSRuntimeSrv);
 		await _getData();
 		_initMenu();
 		RegenRenderLock();
@@ -116,7 +116,7 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 	private async Task _show()
 	{
 		await new JsService(JSRuntimeSrv).AddKeyEventListener(_objectRef, "OnShortcutKey", "Escape", _componentId.ToString());
-		_currentMutes = await WvBlazorTraceService.GetTraceMutes();
+		_currentMutes = await WvBlazorTraceService.GetTraceMutes(JSRuntimeSrv);
 		_initMenu();
 		_modalVisible = true;
 		RegenRenderLock();
@@ -245,12 +245,12 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 			var row = (WvMethodTraceRow)rowObject;
 			if (row.IsPinned)
 			{
-				await WvBlazorTraceService.RemovePinAsync(row.Id);
+				await WvBlazorTraceService.RemovePinAsync(JSRuntimeSrv,row.Id);
 				row.IsPinned = false;
 			}
 			else
 			{
-				await WvBlazorTraceService.AddPinAsync(row.Id);
+				await WvBlazorTraceService.AddPinAsync(JSRuntimeSrv,row.Id);
 				row.IsPinned = true;
 			}
 		}
@@ -259,12 +259,12 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 			var row = (WvSignalTraceRow)rowObject;
 			if (row.IsPinned)
 			{
-				await WvBlazorTraceService.RemovePinAsync(row.Id);
+				await WvBlazorTraceService.RemovePinAsync(JSRuntimeSrv,row.Id);
 				row.IsPinned = false;
 			}
 			else
 			{
-				await WvBlazorTraceService.AddPinAsync(row.Id);
+				await WvBlazorTraceService.AddPinAsync(JSRuntimeSrv,row.Id);
 				row.IsPinned = true;
 			}
 		}
@@ -281,7 +281,7 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 		await Task.Delay(1);
 		try
 		{
-			var snapshot = await WvBlazorTraceService.CreateSnapshotAsync();
+			var snapshot = await WvBlazorTraceService.CreateSnapshotAsync(JSRuntimeSrv);
 			_data!.SnapshotList.Add(new WvSnapshotListItem
 			{
 				Id = snapshot.Id,
@@ -318,7 +318,7 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 	{
 		try
 		{
-			await WvBlazorTraceService.ClearCurrentSessionAsync();
+			await WvBlazorTraceService.ClearCurrentSessionAsync(JSRuntimeSrv);
 			await _getData();
 		}
 		catch (Exception ex)
@@ -337,7 +337,7 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 			return;
 		try
 		{
-			await WvBlazorTraceService.RemoveSnapshotAsync(sn.Id);
+			await WvBlazorTraceService.RemoveSnapshotAsync(JSRuntimeSrv,sn.Id);
 			//check update list
 			//if the removed is selected in primary or secondary in request
 			//set to null
@@ -362,7 +362,7 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 
 		try
 		{
-			await WvBlazorTraceService.RenameSnapshotAsync(sn.Id, sn.Name);
+			await WvBlazorTraceService.RenameSnapshotAsync(JSRuntimeSrv, sn.Id, sn.Name);
 			//Check an update list with the new name
 			var snIndex = _data!.SnapshotList.FindIndex(x => x.Id == sn.Id);
 			if (snIndex > -1)
@@ -426,12 +426,12 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 		{
 			if (!fromLoop)
 			{
-				_data = await WvBlazorTraceService.GetModalDataAsync(_data?.Request);
+				_data = await WvBlazorTraceService.GetModalDataAsync(JSRuntimeSrv,_data?.Request);
 				_initSnapshotActions();
 			}
 			else
 			{
-				var data = await WvBlazorTraceService.GetModalDataAsync(_data?.Request);
+				var data = await WvBlazorTraceService.GetModalDataAsync(JSRuntimeSrv,_data?.Request);
 				_data!.MethodTraceRows = data.MethodTraceRows;
 				_data!.SignalTraceRows = data.SignalTraceRows;
 			}

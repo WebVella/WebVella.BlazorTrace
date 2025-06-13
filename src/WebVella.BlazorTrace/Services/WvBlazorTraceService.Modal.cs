@@ -18,7 +18,7 @@ using WebVella.BlazorTrace.Utility;
 namespace WebVella.BlazorTrace;
 public partial interface IWvBlazorTraceService
 {
-	Task<WvTraceModalData> GetModalDataAsync(WvTraceModalRequest? request);
+	Task<WvTraceModalData> GetModalDataAsync(IJSRuntime jsRuntime,WvTraceModalRequest? request);
 }
 public partial class WvBlazorTraceService : IWvBlazorTraceService
 {
@@ -28,11 +28,11 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 	/// <param name="request"></param>
 	/// <returns></returns>
 	/// <exception cref="Exception"></exception>
-	public async Task<WvTraceModalData> GetModalDataAsync(WvTraceModalRequest? request)
+	public async Task<WvTraceModalData> GetModalDataAsync(IJSRuntime jsRuntime,WvTraceModalRequest? request)
 	{
-		await ForceProcessQueueAsync();
+		await ForceProcessQueueAsync(jsRuntime);
 		var result = new WvTraceModalData();
-		var store = await GetLocalStoreAsync();
+		var store = await GetLocalStoreAsync(jsRuntime);
 		//Init request
 		if (request is null || request.IsEmpty)
 		{
@@ -42,22 +42,22 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 				request = new() { Menu = WvTraceModalMenu.MethodCalls };
 		}
 		result.Request = request;
-		await SaveLastestRequestAsync(request);
+		await SaveLastestRequestAsync(jsRuntime,request);
 		//Init snapshots
-		result.SnapshotList = await GetExistingSnapshots();
+		result.SnapshotList = await GetExistingSnapshots(jsRuntime);
 		WvSnapshot primarySN = new();
 		WvSnapshot secondarySN = new();
 		WvSnapshot currentSN = new()
 		{
 			CreatedOn = DateTimeOffset.Now,
 			Id = Guid.Empty,
-			ModuleDict = await GetModuleDictAsync(),
-			SignalDict = await GetSignalDictAsync(),
+			ModuleDict = await GetModuleDictAsync(jsRuntime),
+			SignalDict = await GetSignalDictAsync(jsRuntime),
 			Name = "current"
 		};
 		if (request.PrimarySnapshotId.HasValue)
 		{
-			var snapshot = await GetSnapshotAsync(request.PrimarySnapshotId.Value);
+			var snapshot = await GetSnapshotAsync(jsRuntime,request.PrimarySnapshotId.Value);
 			if (snapshot is null) throw new Exception($"Primary snapshot not found");
 			primarySN = snapshot;
 		}
@@ -67,7 +67,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		}
 		if (request.SecondarySnapshotId.HasValue)
 		{
-			var snapshot = await GetSnapshotAsync(request.SecondarySnapshotId.Value);
+			var snapshot = await GetSnapshotAsync(jsRuntime,request.SecondarySnapshotId.Value);
 			if (snapshot is null) throw new Exception($"Secondary snapshot not found");
 			secondarySN = snapshot;
 		}
@@ -154,7 +154,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		}
 		else if (result.Request.IsTraceMuteMenu)
 		{
-			var traceRows = await GetTraceMutes();
+			var traceRows = await GetTraceMutes(jsRuntime);
 			foreach (var row in traceRows)
 			{
 				if (!row.IsTypeMatches(result.Request.MutedFilter.TypeFilter)) continue;
