@@ -34,7 +34,7 @@ To start using BlazorTrace you need to do the following simple steps:
 3. Add the following lines in your ```Program.cs``` file. You can get more info about options to fine tune it in the wiki.
 
 ``` csharp
-[module: WvBlazorTrace] //<-- This is important to be before the namespace declaration
+[module: WvBlazorTrace] //<-- This is important to be after the usings and before the namespace declaration
 namespace Your.Name.Space;
 
 //code...
