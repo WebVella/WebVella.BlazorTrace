@@ -30,10 +30,9 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 	private static IServiceProvider _serviceProvider = default!;
 	private IJSRuntime _jSRuntime;
 	private const string _sessionStoreKey = "wvbtsession";
-	private const string _snapshotStoreKey = "wvbtstore";
+	private const string _generalStoreKey = "wvbtstore";
+	private const string _snapshotStoreKeyPrefix = "wvbtsnapshot-";
 	private Dictionary<Guid, WvServiceStore> _serviceStoreDict = new();
-	//private Dictionary<string, WvTraceSessionModule> _moduleDictInternal = new();
-	private Dictionary<string, WvTraceSessionSignal> _signalDictInternal = new();
 	private WvBlazorTraceConfiguration _configuration = new();
 	private readonly ConcurrentQueue<WvTraceQueueAction> _traceQueue = new();
 	private int _infiniteLoopDelaySeconds = 1;

@@ -44,17 +44,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		result.Request = request;
 		await SaveLastestRequestAsync(request);
 		//Init snapshots
-		result.SnapshotList = new();
-		foreach (var sn in store.Snapshots)
-		{
-			result.SnapshotList.Add(new WvSnapshotListItem
-			{
-				Id = sn.Id,
-				Name = sn.Name,
-				CreatedOn = sn.CreatedOn
-			});
-		}
-		result.SnapshotList = result.SnapshotList.OrderBy(x => x.Name).ToList();
+		result.SnapshotList = await GetExistingSnapshots();
 		WvSnapshot primarySN = new();
 		WvSnapshot secondarySN = new();
 		WvSnapshot currentSN = new()
