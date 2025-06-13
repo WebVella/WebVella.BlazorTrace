@@ -59,19 +59,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Backport.System.Threading.Lock" Version="3.1.4" />
-    <Using Alias="LockFactory" Include="Backport.System.Threading.LockFactory" />
 	<PackageReference Include="MethodDecorator.Fody" Version="1.1.1" />
+	<PackageReference Include="Nito.AsyncEx" Version="5.1.2" />
   </ItemGroup>
   
   <ItemGroup Condition="'$(TargetFramework)'=='net9.0'">
-	<Using Alias="Lock" Include="System.Threading.Lock" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.5" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='net8.0'">
-    <Using Alias="Lock" Include="Backport.System.Threading.Lock" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="[8.0.16]" />
   </ItemGroup>
-
 </Project>

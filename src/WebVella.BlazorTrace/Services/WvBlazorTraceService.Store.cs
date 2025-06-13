@@ -45,8 +45,8 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 			Id = Guid.NewGuid(),
 			CreatedOn = DateTimeOffset.Now,
 			Name = !String.IsNullOrWhiteSpace(name) ? name : DateTimeOffset.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-			ModuleDict = GetModuleDict(),
-			SignalDict = GetSignalDict(),
+			ModuleDict = await GetModuleDictAsync(),
+			SignalDict = await GetSignalDictAsync(),
 		};
 		WvSnapshotStore snapshotStore = new WvSnapshotStore
 		{
@@ -95,10 +95,10 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 			ModuleDict = new(),
 			SignalDict = new()
 		};
-		if(!String.IsNullOrWhiteSpace(storeSn.CompressedModuleDict)) 
+		if (!String.IsNullOrWhiteSpace(storeSn.CompressedModuleDict))
 			sn.ModuleDict = JsonSerializer.Deserialize<Dictionary<string, WvTraceSessionModule>>(storeSn.CompressedModuleDict.DecompressString()) ?? new();
-		if(!String.IsNullOrWhiteSpace(storeSn.CompressedSignalDict)) 
-			sn.SignalDict = JsonSerializer.Deserialize<Dictionary<string, WvTraceSessionSignal>>(storeSn.CompressedSignalDict.DecompressString()) ?? new();		
+		if (!String.IsNullOrWhiteSpace(storeSn.CompressedSignalDict))
+			sn.SignalDict = JsonSerializer.Deserialize<Dictionary<string, WvTraceSessionSignal>>(storeSn.CompressedSignalDict.DecompressString()) ?? new();
 
 		return sn;
 
@@ -157,14 +157,31 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 			store.MutedTraces.Add(traceMute);
 			await new JsService(_jSRuntime).SetUnprotectedLocalStorageAsync(_snapshotStoreKey, JsonSerializer.Serialize(store));
 		}
-		_traceMutesInternal = store.MutedTraces;
 	}
 	public async Task RemoveTraceMuteAsync(WvTraceMute traceMute)
 	{
 		var store = await GetLocalStoreAsync();
 		store.MutedTraces = store.MutedTraces.Where(x => x.Id != traceMute.Id).ToList();
 		await new JsService(_jSRuntime).SetUnprotectedLocalStorageAsync(_snapshotStoreKey, JsonSerializer.Serialize(store));
-		_traceMutesInternal = store.MutedTraces;
+	}
+
+	public async Task<Guid> GetSessionId()
+	{
+		Guid sessionId = Guid.Empty;
+		var sessionIdString = await new JsService(_jSRuntime).GetUnprotectedSessionStorageAsync(_sessionStoreKey);
+		if (!String.IsNullOrWhiteSpace(sessionIdString))
+		{
+			if (Guid.TryParse(sessionIdString, out Guid outGuid))
+			{
+				sessionId = outGuid;
+			}
+		}
+		if (sessionId == Guid.Empty)
+		{
+			sessionId = Guid.NewGuid();
+			await new JsService(_jSRuntime).SetUnprotectedSessionStorageAsync(_sessionStoreKey, sessionId.ToString());
+		}
+		return sessionId;
 	}
 
 }

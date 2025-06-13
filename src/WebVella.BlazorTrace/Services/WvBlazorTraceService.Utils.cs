@@ -22,7 +22,7 @@ public partial interface IWvBlazorTraceService
 }
 public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 {
-	private void _saveSessionTrace(WvTraceInfo traceInfo, WvTraceQueueAction action)
+	private async Task _saveSessionTrace(WvTraceInfo traceInfo, WvTraceQueueAction action)
 	{
 		if (action.MethodCalled == WvTraceQueueItemMethod.OnEnter)
 		{
@@ -41,10 +41,11 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 				return;
 			}
 
-			if (!_moduleDictInternal.ContainsKey(traceInfo.ModuleName))
-				_moduleDictInternal[traceInfo.ModuleName] = new();
+			var moduleDict = await GetModuleDictAsync(clone: false);
+			if (!moduleDict.ContainsKey(traceInfo.ModuleName))
+				moduleDict[traceInfo.ModuleName] = new();
 
-			var module = _moduleDictInternal[traceInfo.ModuleName];
+			var module = moduleDict[traceInfo.ModuleName];
 			if (!module.ComponentDict.ContainsKey(traceInfo.ComponentFullName))
 			{
 				module.ComponentDict[traceInfo.ComponentFullName] = new()
@@ -130,10 +131,10 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 				return;
 			}
 
-			if (!_moduleDictInternal.ContainsKey(traceInfo.ModuleName))
-				_moduleDictInternal[traceInfo.ModuleName] = new();
-
-			var module = _moduleDictInternal[traceInfo.ModuleName];
+			var moduleDict = await GetModuleDictAsync(clone: false);
+			if (!moduleDict.ContainsKey(traceInfo.ModuleName))
+				moduleDict[traceInfo.ModuleName] = new();
+			var module = moduleDict[traceInfo.ModuleName];
 			if (!module.ComponentDict.ContainsKey(traceInfo.ComponentFullName))
 			{
 				module.ComponentDict[traceInfo.ComponentFullName] = new()
@@ -243,11 +244,11 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 		{
 			if (String.IsNullOrWhiteSpace(action.SignalName))
 				throw new ArgumentNullException(nameof(action), "SignalName is required");
-			if (!_signalDictInternal.ContainsKey(action.SignalName))
-			{
-				_signalDictInternal[action.SignalName] = new();
-			}
-			var signal = _signalDictInternal[action.SignalName];
+
+			var signalDict = await GetSignalDictAsync(clone: false);
+			if (!signalDict.ContainsKey(action.SignalName))
+				signalDict[action.SignalName] = new();
+			var signal = signalDict[action.SignalName];
 			signal.TraceList.Add(new WvTraceSessionSignalTrace
 			{
 				SendOn = action.Timestamp,

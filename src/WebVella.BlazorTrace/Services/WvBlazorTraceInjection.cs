@@ -14,7 +14,7 @@ public static class WvBlazorTraceInjection
 		WvBlazorTraceConfiguration? configuration = null)
 	{
 		services.AddSingleton<IWvBlazorTraceConfigurationService>(provider => new WvBlazorTraceConfigurationService(configuration));
-		services.AddScoped<IWvBlazorTraceService,WvBlazorTraceService>();
+		services.AddSingleton<IWvBlazorTraceService,WvBlazorTraceService>();
 		return services;
 	}
 }

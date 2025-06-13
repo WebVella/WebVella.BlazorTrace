@@ -6,9 +6,9 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 {
 
 	[Fact]
-	public void OnEnterTestBaseCalls()
+	public async Task OnEnterTestBaseCalls()
 	{
-		lock (_locker)
+		using (await _locker.LockAsync())
 		{
 			//given
 			var options = new WvTraceMethodOptions { };
@@ -45,9 +45,9 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 				//than
 				var queue = WvBlazorTraceServiceMock.Object.GetQueue();
 				Assert.NotEmpty(queue);
-				WvBlazorTraceServiceMock.Object.ForceProcessQueue();
+				await WvBlazorTraceServiceMock.Object.ForceProcessQueueAsync();
 				var (method, trace) = CheckTraceExists(
-					moduleDict: WvBlazorTraceServiceMock.Object.GetModuleDict(),
+					moduleDict: await WvBlazorTraceServiceMock.Object.GetModuleDictAsync(),
 					moduleName: moduleName,
 					componentFullName: componentFullName,
 					componentName: componentName,
@@ -63,9 +63,9 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 	}
 
 	[Fact]
-	public void OnExitTestBaseCalls()
+	public async Task OnExitTestBaseCalls()
 	{
-		lock (_locker)
+		using (await _locker.LockAsync())
 		{
 			//given
 			var options = new WvTraceMethodOptions { };
@@ -101,9 +101,9 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 				//than
 				var queue = WvBlazorTraceServiceMock.Object.GetQueue();
 				Assert.NotEmpty(queue);
-				WvBlazorTraceServiceMock.Object.ForceProcessQueue();
+				await WvBlazorTraceServiceMock.Object.ForceProcessQueueAsync();
 				var (method, trace) = CheckTraceExists(
-					moduleDict: WvBlazorTraceServiceMock.Object.GetModuleDict(),
+					moduleDict: await WvBlazorTraceServiceMock.Object.GetModuleDictAsync(),
 					moduleName: moduleName,
 					componentFullName: componentFullName,
 					componentName: componentName,
@@ -119,9 +119,9 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 	}
 
 	[Fact]
-	public void SignalTestBaseCalls()
+	public async Task SignalTestBaseCalls()
 	{
-		lock (_locker)
+		using (await _locker.LockAsync())
 		{
 			//given
 			var options = new WvTraceSignalOptions { };
@@ -148,11 +148,11 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 			//than
 			var queue = WvBlazorTraceServiceMock.Object.GetQueue();
 			Assert.NotEmpty(queue);
-			WvBlazorTraceServiceMock.Object.ForceProcessQueue();
+			await WvBlazorTraceServiceMock.Object.ForceProcessQueueAsync();
 			var (method, trace) = CheckSignalTraceExists(
-				signalDict: WvBlazorTraceServiceMock.Object.GetSignalDict(),
+				signalDict: await WvBlazorTraceServiceMock.Object.GetSignalDictAsync(),
 				moduleName: moduleName,
-				signalName : signalName,
+				signalName: signalName,
 				componentFullName: componentFullName,
 				instanceTag: instanceTag,
 				methodName: methodName

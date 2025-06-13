@@ -318,7 +318,7 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 	{
 		try
 		{
-			WvBlazorTraceService.ClearCurrentSession();
+			await WvBlazorTraceService.ClearCurrentSessionAsync();
 			await _getData();
 		}
 		catch (Exception ex)

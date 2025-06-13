@@ -69,7 +69,22 @@
 			WebVellaBlazorTrace.f1KeyEventListener = null;
 		}
 		return true;
-	}
+	},
+	getLocalStorageKeysWithPrefix: function (prefix) {
+		const keys = [];
+
+		// Iterate over all items in localStorage
+		for (let i = 0; i < localStorage.length; i++) {
+			const key = localStorage.key(i);
+
+			// Check if the key starts with the provided prefix
+			if (key && key.startsWith(prefix)) {
+				keys.push(key);
+			}
+		}
+
+		return keys;
+	},
 }
 
 document.addEventListener("DOMContentLoaded", function () {

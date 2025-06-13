@@ -60,8 +60,50 @@ public class JsService
 		await JSRuntime.InvokeVoidAsync("localStorage.removeItem", key);
 	}
 
-	public async Task<string> GetUnprotectedLocalStorageAsync(string key)
+	public async Task<string?> GetUnprotectedLocalStorageAsync(string key)
 	{
-		return await JSRuntime.InvokeAsync<string>("localStorage.getItem", key);
+		try
+		{
+			return await JSRuntime.InvokeAsync<string?>("localStorage.getItem", key);
+		}
+		catch
+		{
+			return null;
+		}
+
+	}
+
+	public async Task<List<string>> GetUnprotectedLocalStorageKeysAsync(string prefix)
+	{
+		try
+		{
+			return await JSRuntime.InvokeAsync<List<string>>("WebVellaBlazorTrace.getLocalStorageKeysWithPrefix", prefix);
+		}
+		catch
+		{
+			return new List<string>();
+		}
+	}
+
+	public async Task SetUnprotectedSessionStorageAsync(string key, string value)
+	{
+		await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", key, value);
+	}
+
+	public async Task RemoveUnprotectedSessionStorageAsync(string key)
+	{
+		await JSRuntime.InvokeVoidAsync("sessionStorage.removeItem", key);
+	}
+
+	public async Task<string?> GetUnprotectedSessionStorageAsync(string key)
+	{
+		try
+		{
+			return await JSRuntime.InvokeAsync<string?>("sessionStorage.getItem", key);
+		}
+		catch
+		{
+			return null;
+		}
 	}
 }

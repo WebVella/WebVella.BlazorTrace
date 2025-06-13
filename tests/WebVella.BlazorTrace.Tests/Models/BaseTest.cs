@@ -2,18 +2,18 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
 using Moq;
+using Nito.AsyncEx;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Backport.System.Threading;
 using WebVella.BlazorTrace.Models;
 
 namespace WebVella.BlazorTrace.Tests;
 public class BaseTest
 {
-	protected static readonly Lock _locker = LockFactory.Create();
+	protected static readonly AsyncLock _locker = new AsyncLock();
 	public Mock<IWvBlazorTraceConfigurationService> WvBlazorTraceConfigurationServiceMock;
 	public Mock<IJSRuntime> JsRuntimeMock;
 	public Mock<WvBlazorTraceService> WvBlazorTraceServiceMock;

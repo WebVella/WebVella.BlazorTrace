@@ -30,7 +30,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 	/// <exception cref="Exception"></exception>
 	public async Task<WvTraceModalData> GetModalDataAsync(WvTraceModalRequest? request)
 	{
-		ForceProcessQueue();
+		await ForceProcessQueueAsync();
 		var result = new WvTraceModalData();
 		var store = await GetLocalStoreAsync();
 		//Init request
@@ -61,8 +61,8 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		{
 			CreatedOn = DateTimeOffset.Now,
 			Id = Guid.Empty,
-			ModuleDict = GetModuleDict(),
-			SignalDict = GetSignalDict(),
+			ModuleDict = await GetModuleDictAsync(),
+			SignalDict = await GetSignalDictAsync(),
 			Name = "current"
 		};
 		if (request.PrimarySnapshotId.HasValue)

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using Nito.AsyncEx;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -20,13 +21,13 @@ namespace WebVella.BlazorTrace;
 public partial interface IWvBlazorTraceService
 {
 	ConcurrentQueue<WvTraceQueueAction> GetQueue();
-	void ForceProcessQueue();
+	Task ForceProcessQueueAsync();
 }
 public partial class WvBlazorTraceService : IWvBlazorTraceService
 {
 	public ConcurrentQueue<WvTraceQueueAction> GetQueue() => _traceQueue;
 	// Because of the force process the queue process could be triggered from two methods
-	public Lock _queueProcessLock = LockFactory.Create();
+	public AsyncLock _queueProcessLock = new AsyncLock();
 	private void _addToQueue(WvTraceQueueAction trace)
 	{
 		_traceQueue.Enqueue(trace);
@@ -37,11 +38,10 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		_infiniteLoop = Task.Run(async () =>
 		{
 			//Just to be sure that local trace mutes are loaded
-			_ = await GetTraceMutes();
 			while (!_infiniteLoopCancellationTokenSource.IsCancellationRequested)
 			{
 				await Task.Delay(_infiniteLoopDelaySeconds * 1000);
-				lock (_queueProcessLock)
+				using (await _queueProcessLock.LockAsync())
 				{
 					while (!_traceQueue.IsEmpty)
 					{
@@ -49,7 +49,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 						{
 							if (_traceQueue.TryDequeue(out var trace))
 							{
-								_processQueueTrace(trace);
+								await _processQueueTraceAsync(trace);
 							}
 						}
 						catch (Exception ex)
@@ -63,19 +63,19 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 			}
 		}, _infiniteLoopCancellationTokenSource.Token);
 	}
-	private void _processQueueTrace(WvTraceQueueAction action)
+	private async Task _processQueueTraceAsync(WvTraceQueueAction action)
 	{
 		if (action is null) return;
 		if (action.Caller is null) return;
 		var traceInfo = action.Caller.GetInfo(action.TraceId, action.InstanceTag, action.MethodName);
 		if (traceInfo is null)
 			throw new Exception("callerInfo cannot be evaluated");
-		_saveSessionTrace(traceInfo, action);
+		await _saveSessionTrace(traceInfo, action);
 	}
 
-	public void ForceProcessQueue()
+	public async Task ForceProcessQueueAsync()
 	{
-		lock (_queueProcessLock)
+		using (await _queueProcessLock.LockAsync())
 		{
 			while (!_traceQueue.IsEmpty)
 			{
@@ -83,7 +83,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 				{
 					if (_traceQueue.TryDequeue(out var trace))
 					{
-						_processQueueTrace(trace);
+						await _processQueueTraceAsync(trace);
 					}
 				}
 				catch (Exception ex)

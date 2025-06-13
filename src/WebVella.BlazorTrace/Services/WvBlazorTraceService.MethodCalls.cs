@@ -1,5 +1,5 @@
-﻿using Backport.System.Threading;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
+using Nito.AsyncEx;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using WebVella.BlazorTrace.Models;
@@ -68,8 +68,9 @@ public partial interface IWvBlazorTraceService
 }
 public partial class WvBlazorTraceService : IWvBlazorTraceService
 {
-	private readonly Lock _onEnterLock = LockFactory.Create();
-	private readonly Lock _onExitLock = LockFactory.Create();
+	private static readonly AsyncLock _onEnterLock = new AsyncLock();
+	private static readonly AsyncLock _onExitLock = new AsyncLock();
+	private static readonly AsyncLock _onSignalLock = new AsyncLock();
 	public void OnEnter(
 		ComponentBase component,
 		Guid? traceId = null,
@@ -81,7 +82,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 	)
 	{
 		if (!_configuration.EnableTracing) return;
-		lock (_onEnterLock)
+		using (_onEnterLock.Lock())
 		{
 			_addToQueue(new WvTraceQueueAction
 			{
@@ -110,7 +111,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 	)
 	{
 		if (!_configuration.EnableTracing) return;
-		lock (_onExitLock)
+		using (_onExitLock.Lock())
 		{
 			_addToQueue(new WvTraceQueueAction
 			{
@@ -139,7 +140,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		)
 	{
 		if (!_configuration.EnableTracing) return;
-		lock (_onExitLock)
+		using (_onSignalLock.Lock())
 		{
 			_addToQueue(new WvTraceQueueAction
 			{

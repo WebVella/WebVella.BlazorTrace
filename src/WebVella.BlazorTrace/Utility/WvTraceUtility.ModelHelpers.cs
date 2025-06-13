@@ -470,36 +470,36 @@ public static partial class WvTraceUtility
 		return target;
 	}
 
-	public static List<WvTraceMute> Clone(this List<WvTraceMute> original)
-	{
-		if (original is null) throw new Exception("Cannot clone nullable object ");
-		var target = new List<WvTraceMute>();
-		foreach (var item in original)
-		{
-			target.Add(item.Clone());
-		}
+	//public static List<WvTraceMute> Clone(this List<WvTraceMute> original)
+	//{
+	//	if (original is null) throw new Exception("Cannot clone nullable object ");
+	//	var target = new List<WvTraceMute>();
+	//	foreach (var item in original)
+	//	{
+	//		target.Add(item.Clone());
+	//	}
 
-		return target;
-	}
+	//	return target;
+	//}
 
-	public static WvTraceMute Clone(this WvTraceMute original)
-	{
-		if (original is null) throw new Exception("Cannot clone nullable object ");
-		var target = new WvTraceMute()
-		{
-			ComponentName = original.ComponentName,
-			ComponentFullName = original.ComponentFullName,
-			OnEnterCustomData = original.OnEnterCustomData,
-			InstanceTag = original.InstanceTag,
-			Field = original.Field,
-			IsPinned = original.IsPinned,
-			Method = original.Method,
-			Module = original.Module,
-			Signal = original.Signal,
-			Type = original.Type,
-		};
+	//public static WvTraceMute Clone(this WvTraceMute original)
+	//{
+	//	if (original is null) throw new Exception("Cannot clone nullable object ");
+	//	var target = new WvTraceMute()
+	//	{
+	//		ComponentName = original.ComponentName,
+	//		ComponentFullName = original.ComponentFullName,
+	//		OnEnterCustomData = original.OnEnterCustomData,
+	//		InstanceTag = original.InstanceTag,
+	//		Field = original.Field,
+	//		IsPinned = original.IsPinned,
+	//		Method = original.Method,
+	//		Module = original.Module,
+	//		Signal = original.Signal,
+	//		Type = original.Type,
+	//	};
 
-		return target;
-	}
+	//	return target;
+	//}
 
 }

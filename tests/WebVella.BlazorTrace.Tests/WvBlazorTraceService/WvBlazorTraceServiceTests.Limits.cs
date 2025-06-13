@@ -6,12 +6,13 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 {
 
 	[Fact]
-	public void LimitDuration1()
+	public async Task LimitDuration1()
 	{
-		lock (_locker)
+		using (await _locker.LockAsync())
 		{
 			//given
-			var options = new WvTraceMethodOptions { 
+			var options = new WvTraceMethodOptions
+			{
 				DurationLimitMS = 1
 			};
 			var firstRender = true;
@@ -42,13 +43,13 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 				customData: customData,
 				methodName: methodName
 			);
-			
+
 			//than
 			var queue = WvBlazorTraceServiceMock.Object.GetQueue();
 			Assert.NotEmpty(queue);
-			WvBlazorTraceServiceMock.Object.ForceProcessQueue();
-			var (method,trace) = CheckTraceExists(
-				moduleDict: WvBlazorTraceServiceMock.Object.GetModuleDict(),
+			await WvBlazorTraceServiceMock.Object.ForceProcessQueueAsync();
+			var (method, trace) = CheckTraceExists(
+				moduleDict: await WvBlazorTraceServiceMock.Object.GetModuleDictAsync(),
 				moduleName: moduleName,
 				componentFullName: componentFullName,
 				componentName: componentName,
@@ -58,10 +59,9 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 			);
 			Assert.Single(method.LimitHits);
 			var limitHit = method.LimitHits.First();
-			Assert.Equal(WvTraceSessionLimitType.Duration,limitHit.Type);
-			Assert.Equal(options.DurationLimitMS,limitHit.Limit);
+			Assert.Equal(WvTraceSessionLimitType.Duration, limitHit.Type);
+			Assert.Equal(options.DurationLimitMS, limitHit.Limit);
 			Assert.False(limitHit.IsOnEnter);
 		}
 	}
-
 }
