@@ -63,13 +63,11 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 				TraceId = traceInfo.TraceId ?? Guid.NewGuid(),
 				OnEnterMemoryInfo = new List<WvTraceMemoryInfo>(),
 				EnteredOn = action.Timestamp,
-				OnEnterFirstRender = action.FirstRender,
 				OnEnterCustomData = action.CustomData,
 				OnEnterMemoryBytes = null,
 				OnEnterOptions = action.MethodOptions,
 				ExitedOn = null,
 				OnExitCustomData = null,
-				OnExitFirstRender = null,
 				OnExitMemoryBytes = null,
 				OnExitMemoryInfo = null,
 				OnExitOptions = new()
@@ -235,7 +233,6 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 			trace.OnExitMemoryInfo = new List<WvTraceMemoryInfo>();
 			trace.ExitedOn = action.Timestamp;
 			trace.OnExitCustomData = action.CustomData;
-			trace.OnExitFirstRender = action.FirstRender;
 			trace.OnExitMemoryBytes = action.Caller is null ? null : action.Caller.GetSize(trace.OnExitMemoryInfo, _configuration);
 			trace.OnExitOptions = action.MethodOptions;
 

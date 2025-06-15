@@ -10,15 +10,13 @@ namespace WebVella.BlazorTrace;
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Module)]
 public class WvBlazorTraceAttribute : Attribute, IMethodDecorator
 {
-	private ComponentBase? _targetInstance = null;
+	private object? _targetInstance = null;
 	private MethodBase _method = default!;
 	private bool _isAsync = false;
 
 	public void Init(object instance, MethodBase method, object[] args)
 	{
-		if (instance is not null && instance.GetType().InheritsClass(typeof(ComponentBase)))
-			_targetInstance = (instance as ComponentBase)!;
-
+		_targetInstance = instance;
 		_method = method;
 		_isAsync = method.IsDefined(typeof(AsyncStateMachineAttribute), false);
 	}

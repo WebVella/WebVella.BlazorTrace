@@ -105,8 +105,6 @@ public class WvTraceSessionMethodTrace
 	public DateTimeOffset? ExitedOn { get; set; } = null;
 	public long? OnEnterMemoryBytes { get; set; } = null;
 	public long? OnExitMemoryBytes { get; set; } = null;
-	public bool? OnEnterFirstRender { get; set; } = null;
-	public bool? OnExitFirstRender { get; set; } = null;
 	public string? OnEnterCustomData { get; set; } = null;
 	public string? OnExitCustomData { get; set; } = null;
 	public WvTraceMethodOptions OnEnterOptions { get; set; } = new();

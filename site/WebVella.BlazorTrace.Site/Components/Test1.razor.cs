@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Components;
 
 namespace WebVella.BlazorTrace.Site.Components;
 
-[WvBlazorTrace]
 public partial class Test1 : ComponentBase
 {
 	[Parameter] public string? InstanceTag { get; set; }
@@ -17,7 +16,6 @@ public partial class Test1 : ComponentBase
 
 	private void _countTest1()
 	{
-		WvBlazorTraceService.OnEnter(component: this,instanceTag: InstanceTag);
 		_counter++;
 		WvBlazorTraceService.OnSignal(caller: this, signalName: "counter", instanceTag: InstanceTag,
 			customData: $"counter:{_counter}",
@@ -25,6 +23,5 @@ public partial class Test1 : ComponentBase
 			{
 				CallLimit = 0
 			});
-		WvBlazorTraceService.OnExit(component: this,instanceTag: InstanceTag);
 	}
 }

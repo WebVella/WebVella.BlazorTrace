@@ -379,8 +379,6 @@ public static partial class WvTraceUtility
 			ExitedOn = original.ExitedOn,
 			OnEnterMemoryBytes = original.OnEnterMemoryBytes,
 			OnExitMemoryBytes = original.OnExitMemoryBytes,
-			OnEnterFirstRender = original.OnEnterFirstRender,
-			OnExitFirstRender = original.OnExitFirstRender,
 			OnEnterCustomData = original.OnEnterCustomData,
 			OnExitCustomData = original.OnExitCustomData,
 			OnEnterOptions = original.OnEnterOptions.Clone(),

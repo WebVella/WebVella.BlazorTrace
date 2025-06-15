@@ -21,7 +21,7 @@ public partial interface IWvBlazorTraceService
 	/// <summary>
 	/// A tracer that will log a signal call. Can be placed anywhere in a component or service method.
 	/// </summary>
-	/// <param name="caller">the caller instance that calls the method. Usually provided with 'this'</param>
+	/// <param name="caller">the class instance that calls the method. Usually provided with 'this'</param>
 	/// <param name="signalName">Unique identifier of the signal</param>
 	/// <param name="instanceTag">NULL by default, will group all instances of the caller in the trace. To tag each separate instance of the caller you need to provide unique tag for it.</param>
 	/// <param name="customData">custom string or JSON that you need stored with each call for more advanced tracing</param>
@@ -57,7 +57,6 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 				SignalName = signalName,
 				TraceId = null,
 				CustomData = customData,
-				FirstRender = null,
 				InstanceTag = instanceTag,
 				MethodName = methodName,
 				MethodOptions = new(),

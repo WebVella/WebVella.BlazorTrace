@@ -21,7 +21,6 @@ public class BaseTest
 
 	public WvTraceMethodOptions MethodOptions { get; set; } = new();
 	public WvTraceSignalOptions SignalOptions { get; set; } = new();
-	public bool FirstRender { get; set; } = true;
 	public string AssemblyName { get; set; } = "Microsoft.System";
 	public string ModuleName { get; set; } = "WebVella.BlazorTrace.Tests";
 	public string ComponentName { get; set; } = "TestComponent";
@@ -204,8 +203,6 @@ public class BaseTest
 													OnExitCustomData = OnExitCustomData,
 													EnteredOn = TimeStamp,
 													ExitedOn = TimeStamp2,
-													OnEnterFirstRender = FirstRender,
-													OnExitFirstRender = FirstRender,
 													OnEnterMemoryBytes = MemoryBytes,
 													OnEnterMemoryInfo = new List<WvTraceMemoryInfo>{
 														new WvTraceMemoryInfo{

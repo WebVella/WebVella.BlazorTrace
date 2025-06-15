@@ -33,7 +33,7 @@ public partial class WvBlazorTraceConfigurationService : IWvBlazorTraceConfigura
 
 			_configuration.TraceExcludeMethodList.AddRange(
 				new[]{
-					"<>",
+					"<",
 					"get_",
 					"set_"
 				}

@@ -15,7 +15,6 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 			{
 				DurationLimitMS = 1
 			};
-			var firstRender = true;
 			var moduleName = "WebVella.BlazorTrace.Tests";
 			var componentName = "TestComponent";
 			var componentFullName = moduleName + "." + componentName;
@@ -28,7 +27,6 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 				component: Component,
 				traceId: traceId,
 				options: options,
-				firstRender: firstRender,
 				instanceTag: instanceTag,
 				customData: customData,
 				methodName: methodName
@@ -38,7 +36,6 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 				component: Component,
 				traceId: traceId,
 				options: options,
-				firstRender: firstRender,
 				instanceTag: instanceTag,
 				customData: customData,
 				methodName: methodName

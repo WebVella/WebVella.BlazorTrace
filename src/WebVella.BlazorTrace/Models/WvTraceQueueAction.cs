@@ -16,7 +16,6 @@ public class WvTraceQueueAction
 	public Guid? TraceId { get; set; } = null;
 	public WvTraceMethodOptions MethodOptions { get; set; } = default!;
 	public WvTraceSignalOptions SignalOptions { get; set; } = default!;
-	public bool? FirstRender { get; set; } = null;
 	public string SignalName { get; set; } = default!;
 	public string? InstanceTag { get; set; } = null;
 	public string? CustomData { get; set; } = null;

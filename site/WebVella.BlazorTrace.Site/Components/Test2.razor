@@ -1,7 +1,6 @@
 ﻿@using System.Diagnostics
 @using WebVella.BlazorTrace
 @using WebVella.BlazorTrace.Models
-@attribute [WvBlazorTrace]
 @inject IWvBlazorTraceService WvBlazorTraceService
 <div style="padding:10px;border:1px solid #7e22ce; background:#d8b4fe;">
 	<div style="padding-top:15px">
@@ -24,7 +23,7 @@
 
 	private void _countTest2()
 	{
-		WvBlazorTraceService.OnEnter(component: this, instanceTag: InstanceTag);
+		WvBlazorTraceService.OnEnter(caller: this, instanceTag: InstanceTag);
 		_counter++;
 		WvBlazorTraceService.OnSignal(caller: this, signalName: "counter2", instanceTag: InstanceTag,
 			customData: $"counter:{_counter}",
@@ -32,6 +31,6 @@
 			{
 				CallLimit = 0
 			});
-		WvBlazorTraceService.OnExit(component: this, instanceTag: InstanceTag);
+		WvBlazorTraceService.OnExit(caller: this, instanceTag: InstanceTag);
 	}
 }

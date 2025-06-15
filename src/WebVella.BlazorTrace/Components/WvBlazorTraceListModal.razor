@@ -25,12 +25,10 @@
 							<th>timestamp</th>
 							<th>memory</th>
 							<th>custom data</th>
-							<th>first render</th>
 							<th style="width:100px">limits</th>
 							<th>timestamp</th>
 							<th>memory</th>
 							<th>custom data</th>
-							<th>first render</th>
 							<th style="width:100px">limits</th>
 						</tr>
 					</thead>
@@ -59,7 +57,6 @@
 									</div>
 								</td>
 								<td class="wv-tag">@item.OnEnterCustomData</td>
-								<td>@item.OnEnterFirstRender.WvBTGetFirstRenderString()</td>
 								<td>
 									<button class="wv-mute" @onclick=@(()=> _showLimitInfoModal(item,true))>limit info</button>
 								</td>
@@ -76,7 +73,6 @@
 									</div>
 								</td>
 								<td class="wv-tag">@item.OnExitCustomData</td>
-								<td>@item.OnExitFirstRender.WvBTGetFirstRenderString()</td>
 								<td>
 									<button class="wv-mute" @onclick=@(()=> _showLimitInfoModal(item,false))>limit info</button>
 								</td>

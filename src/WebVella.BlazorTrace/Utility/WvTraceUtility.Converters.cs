@@ -34,12 +34,6 @@ public static partial class WvTraceUtility
 	}
 	public static string WvBTGetMemoryInfoId(string assemblyFullName, string fieldName)
 		=> $"{assemblyFullName}$$${fieldName}";
-	public static string WvBTGetFirstRenderString(this bool? firstRender)
-	{
-		if (firstRender == null) return "n/a";
-		if (!firstRender.Value) return "no";
-		return "yes";
-	}
 	public static string WvBTToDurationMSString(this long? duration)
 	{
 		if (duration == null) return "n/a";

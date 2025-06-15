@@ -256,8 +256,6 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 				OnExitCustomData = OnEnterCustomData,
 				EnteredOn = TimeStamp,
 				ExitedOn = TimeStamp2,
-				OnEnterFirstRender = FirstRender,
-				OnExitFirstRender = FirstRender,
 				OnEnterMemoryBytes = MemoryBytes,
 				OnExitMemoryBytes = MemoryBytes + ExtraMemoryBytes,
 				OnEnterMemoryInfo = new List<WvTraceMemoryInfo>{
@@ -325,8 +323,6 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 				OnExitCustomData = OnEnterCustomData,
 				EnteredOn = TimeStamp,
 				ExitedOn = TimeStamp2,
-				OnEnterFirstRender = FirstRender,
-				OnExitFirstRender = FirstRender,
 				OnEnterMemoryBytes = MemoryBytes,
 				OnExitMemoryBytes = MemoryBytes + ExtraMemoryBytes,
 				OnEnterMemoryInfo = new List<WvTraceMemoryInfo>{
@@ -396,8 +392,6 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 				OnExitCustomData = OnEnterCustomData,
 				EnteredOn = TimeStamp,
 				ExitedOn = TimeStamp2,
-				OnEnterFirstRender = FirstRender,
-				OnExitFirstRender = FirstRender,
 				OnEnterMemoryBytes = MemoryBytes,
 				OnExitMemoryBytes = MemoryBytes + ExtraMemoryBytes,
 				OnEnterMemoryInfo = new List<WvTraceMemoryInfo>{
@@ -468,8 +462,6 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 				OnExitCustomData = OnEnterCustomData,
 				EnteredOn = TimeStamp,
 				ExitedOn = TimeStamp2,
-				OnEnterFirstRender = FirstRender,
-				OnExitFirstRender = FirstRender,
 				OnEnterMemoryBytes = MemoryBytes,
 				OnExitMemoryBytes = MemoryBytes + ExtraMemoryBytes,
 				OnEnterMemoryInfo = new List<WvTraceMemoryInfo>{
@@ -541,8 +533,6 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 				OnExitCustomData = OnEnterCustomData,
 				EnteredOn = TimeStamp,
 				ExitedOn = TimeStamp2,
-				OnEnterFirstRender = FirstRender,
-				OnExitFirstRender = FirstRender,
 				OnEnterMemoryBytes = MemoryBytes,
 				OnExitMemoryBytes = MemoryBytes + ExtraMemoryBytes,
 				OnEnterMemoryInfo = new List<WvTraceMemoryInfo>{
@@ -613,8 +603,6 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 				OnExitCustomData = OnEnterCustomData,
 				EnteredOn = TimeStamp,
 				ExitedOn = TimeStamp2,
-				OnEnterFirstRender = FirstRender,
-				OnExitFirstRender = FirstRender,
 				OnEnterMemoryBytes = MemoryBytes,
 				OnExitMemoryBytes = MemoryBytes + ExtraMemoryBytes,
 				OnEnterMemoryInfo = new List<WvTraceMemoryInfo>{

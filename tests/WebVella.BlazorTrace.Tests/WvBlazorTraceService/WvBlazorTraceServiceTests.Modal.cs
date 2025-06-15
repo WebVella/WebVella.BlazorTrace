@@ -60,8 +60,6 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 					OnExitCustomData = OnEnterCustomData,
 					EnteredOn = TimeStamp.AddSeconds(30),
 					ExitedOn = TimeStamp2.AddSeconds(30).AddMilliseconds(DelayMS),
-					OnEnterFirstRender = FirstRender,
-					OnExitFirstRender = FirstRender,
 					OnEnterMemoryBytes = MemoryBytes,
 					OnEnterMemoryInfo = new List<WvTraceMemoryInfo>{
 														new WvTraceMemoryInfo{
