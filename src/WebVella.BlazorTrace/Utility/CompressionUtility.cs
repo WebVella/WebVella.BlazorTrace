@@ -81,27 +81,4 @@ public static class CompressionUtility
             }
         }
     }
-
-    // Example Usage (for demonstration purposes, typically in a separate Main method or test)
-    public static void Main(string[] args)
-    {
-        string originalJson = "{\"name\": \"John Doe\", \"age\": 30, \"city\": \"New York\", \"occupation\": \"Software Engineer\", \"hobbies\": [\"reading\", \"hiking\", \"coding\"], \"address\": {\"street\": \"123 Main St\", \"zip\": \"10001\"}}";
-
-        Console.WriteLine("Original JSON String Length: " + originalJson.Length);
-        Console.WriteLine("Original JSON String: " + originalJson);
-
-        // Compress the string
-        string compressedBase64 = CompressString(originalJson);
-        Console.WriteLine("\nCompressed (Base64) String Length: " + compressedBase64.Length);
-        Console.WriteLine("Compressed (Base64) String: " + compressedBase64);
-
-        // Decompress the string
-        string decompressedJson = DecompressString(compressedBase64);
-        Console.WriteLine("\nDecompressed JSON String Length: " + decompressedJson.Length);
-        Console.WriteLine("Decompressed JSON String: " + decompressedJson);
-
-        // Verify if the decompressed string is identical to the original
-        bool areEqual = originalJson.Equals(decompressedJson);
-        Console.WriteLine("\nOriginal and Decompressed strings are equal: " + areEqual);
-    }
 }

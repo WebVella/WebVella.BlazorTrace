@@ -47,9 +47,9 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 			//than
 			var queue = WvBlazorTraceServiceMock.Object.GetQueue();
 			Assert.NotEmpty(queue);
-			await WvBlazorTraceServiceMock.Object.ForceProcessQueueAsync(JsRuntimeMock.Object);
+			WvBlazorTraceServiceMock.Object.ProcessQueue();
 			var (method, trace) = CheckTraceExists(
-				moduleDict: await WvBlazorTraceServiceMock.Object.GetModuleDictAsync(JsRuntimeMock.Object),
+				moduleDict: WvBlazorTraceServiceMock.Object.GetModuleDict(),
 				moduleName: moduleName,
 				componentFullName: componentFullName,
 				componentName: componentName,

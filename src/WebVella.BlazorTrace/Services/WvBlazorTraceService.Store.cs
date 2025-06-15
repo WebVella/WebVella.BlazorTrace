@@ -69,8 +69,8 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 			Id = Guid.NewGuid(),
 			CreatedOn = DateTimeOffset.Now,
 			Name = !String.IsNullOrWhiteSpace(name) ? name : DateTimeOffset.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-			ModuleDict = await GetModuleDictAsync(jsRuntime),
-			SignalDict = await GetSignalDictAsync(jsRuntime),
+			ModuleDict = GetModuleDict(),
+			SignalDict = GetSignalDict(),
 		};
 		WvSnapshotStore snapshotStore = new WvSnapshotStore
 		{

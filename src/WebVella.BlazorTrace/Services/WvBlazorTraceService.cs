@@ -20,9 +20,9 @@ using WebVella.BlazorTrace.Utility;
 namespace WebVella.BlazorTrace;
 public partial interface IWvBlazorTraceService
 {
-	Task<Dictionary<string, WvTraceSessionModule>> GetModuleDictAsync(IJSRuntime jsRuntime,bool clone = true);
-	Task<Dictionary<string, WvTraceSessionSignal>> GetSignalDictAsync(IJSRuntime jsRuntime,bool clone = true);
-	Task ClearCurrentSessionAsync(IJSRuntime jsRuntime);
+	Dictionary<string, WvTraceSessionModule> GetModuleDict(bool clone = true);
+	Dictionary<string, WvTraceSessionSignal> GetSignalDict(bool clone = true);
+	void ClearCurrentSession();
 	Task<List<WvTraceMute>> GetTraceMutes(IJSRuntime jsRuntime);
 }
 public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
@@ -31,7 +31,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 	private const string _sessionStoreKey = "wvbtsession";
 	private const string _generalStoreKey = "wvbtstore";
 	private const string _snapshotStoreKeyPrefix = "wvbtsnapshot-";
-	private Dictionary<Guid, WvServiceStore> _serviceStoreDict = new();
+	private WvServiceStore _serviceStore = new();
 	private WvBlazorTraceConfiguration _configuration = new();
 	private readonly ConcurrentQueue<WvTraceQueueAction> _traceQueue = new();
 	private int _infiniteLoopDelaySeconds = 1;
@@ -56,38 +56,31 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 		this._configuration = configurationService.GetConfiguraion();
 	}
 
-	public async Task<Dictionary<string, WvTraceSessionModule>> GetModuleDictAsync(IJSRuntime jsRuntime,bool clone = true)
+	public Dictionary<string, WvTraceSessionModule> GetModuleDict(bool clone = true)
 	{
-		Guid sessionId = await GetSessionId(jsRuntime);
-		if (!_serviceStoreDict.ContainsKey(sessionId))
-			_serviceStoreDict[sessionId] = new();
 		if (clone)
-			return _serviceStoreDict[sessionId].ModuleDict.Clone();
+			return _serviceStore.ModuleDict.Clone();
 		else
-			return _serviceStoreDict[sessionId].ModuleDict;
+			return _serviceStore.ModuleDict;
 	}
 
-	public async Task<Dictionary<string, WvTraceSessionSignal>> GetSignalDictAsync(IJSRuntime jsRuntime,bool clone = true)
+	public Dictionary<string, WvTraceSessionSignal> GetSignalDict(bool clone = true)
 	{
-		Guid sessionId = await GetSessionId(jsRuntime);
-		if (!_serviceStoreDict.ContainsKey(sessionId))
-			_serviceStoreDict[sessionId] = new();
-
 		if (clone)
-			return _serviceStoreDict[sessionId].SignalDict.Clone();
+			return _serviceStore.SignalDict.Clone();
 		else
-			return _serviceStoreDict[sessionId].SignalDict;
+			return _serviceStore.SignalDict;
 	}
+
 
 	public async Task<List<WvTraceMute>> GetTraceMutes(IJSRuntime jsRuntime)
 	{
 		var store = await GetLocalStoreAsync(jsRuntime);
 		return store.MutedTraces;
 	}
-	public async Task ClearCurrentSessionAsync(IJSRuntime jsRuntime)
+	public void ClearCurrentSession()
 	{
-		Guid sessionId = await GetSessionId(jsRuntime);
-		_serviceStoreDict[sessionId] = new();
+		_serviceStore = new();
 	}
 
 	internal static IWvBlazorTraceService? GetScopedService()

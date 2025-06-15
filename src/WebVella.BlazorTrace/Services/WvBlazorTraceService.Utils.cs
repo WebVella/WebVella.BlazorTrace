@@ -22,7 +22,7 @@ public partial interface IWvBlazorTraceService
 }
 public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 {
-	private async Task _saveSessionTrace(IJSRuntime jsRuntime,WvTraceInfo traceInfo, WvTraceQueueAction action)
+	private void _saveSessionTrace(WvTraceInfo traceInfo, WvTraceQueueAction action)
 	{
 		if (action.MethodCalled == WvTraceQueueItemMethod.OnEnter)
 		{
@@ -41,7 +41,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 				return;
 			}
 
-			var moduleDict = await GetModuleDictAsync(jsRuntime,clone: false);
+			var moduleDict = GetModuleDict(clone: false);
 			if (!moduleDict.ContainsKey(traceInfo.ModuleName))
 				moduleDict[traceInfo.ModuleName] = new();
 
@@ -131,7 +131,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 				return;
 			}
 
-			var moduleDict = await GetModuleDictAsync(jsRuntime,clone: false);
+			var moduleDict = GetModuleDict(clone: false);
 			if (!moduleDict.ContainsKey(traceInfo.ModuleName))
 				moduleDict[traceInfo.ModuleName] = new();
 			var module = moduleDict[traceInfo.ModuleName];
@@ -245,7 +245,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 			if (String.IsNullOrWhiteSpace(action.SignalName))
 				throw new ArgumentNullException(nameof(action), "SignalName is required");
 
-			var signalDict = await GetSignalDictAsync(jsRuntime,clone: false);
+			var signalDict = GetSignalDict(clone: false);
 			if (!signalDict.ContainsKey(action.SignalName))
 				signalDict[action.SignalName] = new();
 			var signal = signalDict[action.SignalName];

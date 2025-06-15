@@ -2,7 +2,7 @@
 @using WebVella.BlazorTrace
 @using WebVella.BlazorTrace.Models
 @attribute [WvBlazorTrace]
-@* @inject IWvBlazorTraceService WvBlazorTraceService *@
+@inject IWvBlazorTraceService WvBlazorTraceService
 <div style="padding:10px;border:1px solid #7e22ce; background:#d8b4fe;">
 	<div style="padding-top:15px">
 		Test 1 Parent: @ParentCounter
@@ -22,29 +22,16 @@
 	private List<Guid> _list = new();
 	private static string _staticTest = Guid.NewGuid().ToString();
 
-	protected override void OnInitialized()
-	{
-		base.OnInitialized();
-		for (int i = 0; i < 5; i++)
-		{
-			_list.Add(Guid.NewGuid());
-			//WvBlazorTraceService.OnSignal(this, signalName: "test-signal", instanceTag: InstanceTag,
-			// customData: $"index={i}",
-			// options: new WvTraceSignalOptions
-			// {
-			// 	CallLimit = 5 - i
-			// });
-		}
-	}
-
-	protected override async Task OnAfterRenderAsync(bool firstRender)
-	{
-		base.OnAfterRender(firstRender);
-		await Task.Delay(50);
-	}
-
 	private void _countTest2()
 	{
+		WvBlazorTraceService.OnEnter(component: this, instanceTag: InstanceTag);
 		_counter++;
+		WvBlazorTraceService.OnSignal(caller: this, signalName: "counter2", instanceTag: InstanceTag,
+			customData: $"counter:{_counter}",
+			options: new Models.WvTraceSignalOptions
+			{
+				CallLimit = 0
+			});
+		WvBlazorTraceService.OnExit(component: this, instanceTag: InstanceTag);
 	}
 }

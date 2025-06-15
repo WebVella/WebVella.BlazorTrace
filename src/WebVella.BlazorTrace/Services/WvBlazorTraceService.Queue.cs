@@ -21,7 +21,7 @@ namespace WebVella.BlazorTrace;
 public partial interface IWvBlazorTraceService
 {
 	ConcurrentQueue<WvTraceQueueAction> GetQueue();
-	Task ForceProcessQueueAsync(IJSRuntime jsRuntime);
+	void ProcessQueue();
 }
 public partial class WvBlazorTraceService : IWvBlazorTraceService
 {
@@ -32,50 +32,50 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 	{
 		_traceQueue.Enqueue(trace);
 	}
-	private void _processQueue(IJSRuntime jsRuntime)
-	{
-		_infiniteLoopCancellationTokenSource = new CancellationTokenSource();
-		_infiniteLoop = Task.Run(async () =>
-		{
-			//Just to be sure that local trace mutes are loaded
-			while (!_infiniteLoopCancellationTokenSource.IsCancellationRequested)
-			{
-				await Task.Delay(_infiniteLoopDelaySeconds * 1000);
-				using (await _queueProcessLock.LockAsync())
-				{
-					while (!_traceQueue.IsEmpty)
-					{
-						try
-						{
-							if (_traceQueue.TryDequeue(out var trace))
-							{
-								await _processQueueTraceAsync(jsRuntime, trace);
-							}
-						}
-						catch (Exception ex)
-						{
-							Console.Error.WriteLine(ex.Message.ToString() + Environment.NewLine + ex.StackTrace);
-							break;
-						}
-					}
-				}
+	//private void _processQueue(IJSRuntime jsRuntime)
+	//{
+	//	_infiniteLoopCancellationTokenSource = new CancellationTokenSource();
+	//	_infiniteLoop = Task.Run(async () =>
+	//	{
+	//		//Just to be sure that local trace mutes are loaded
+	//		while (!_infiniteLoopCancellationTokenSource.IsCancellationRequested)
+	//		{
+	//			await Task.Delay(_infiniteLoopDelaySeconds * 1000);
+	//			using (await _queueProcessLock.LockAsync())
+	//			{
+	//				while (!_traceQueue.IsEmpty)
+	//				{
+	//					try
+	//					{
+	//						if (_traceQueue.TryDequeue(out var trace))
+	//						{
+	//							await _processQueueTraceAsync(jsRuntime, trace);
+	//						}
+	//					}
+	//					catch (Exception ex)
+	//					{
+	//						Console.Error.WriteLine(ex.Message.ToString() + Environment.NewLine + ex.StackTrace);
+	//						break;
+	//					}
+	//				}
+	//			}
 
-			}
-		}, _infiniteLoopCancellationTokenSource.Token);
-	}
-	private async Task _processQueueTraceAsync(IJSRuntime jsRuntime, WvTraceQueueAction action)
+	//		}
+	//	}, _infiniteLoopCancellationTokenSource.Token);
+	//}
+	private void _processQueueTrace(WvTraceQueueAction action)
 	{
 		if (action is null) return;
 		if (action.Caller is null) return;
 		var traceInfo = action.Caller.GetInfo(action.TraceId, action.InstanceTag, action.MethodName);
 		if (traceInfo is null)
 			throw new Exception("callerInfo cannot be evaluated");
-		await _saveSessionTrace(jsRuntime, traceInfo, action);
+		_saveSessionTrace(traceInfo, action);
 	}
 
-	public async Task ForceProcessQueueAsync(IJSRuntime jsRuntime)
+	public void ProcessQueue()
 	{
-		using (await _queueProcessLock.LockAsync())
+		using (_queueProcessLock.Lock())
 		{
 			while (!_traceQueue.IsEmpty)
 			{
@@ -83,7 +83,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 				{
 					if (_traceQueue.TryDequeue(out var trace))
 					{
-						await _processQueueTraceAsync(jsRuntime, trace);
+						_processQueueTrace(trace);
 					}
 				}
 				catch (Exception ex)
