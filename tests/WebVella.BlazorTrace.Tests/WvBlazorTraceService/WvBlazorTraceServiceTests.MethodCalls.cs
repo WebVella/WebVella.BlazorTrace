@@ -31,7 +31,7 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 				var customData = Guid.NewGuid().ToString();
 				//when
 				Action action = () => WvBlazorTraceServiceMock.Object.OnEnter(
-					component: Component,
+					caller: Component,
 					traceId: traceId,
 					options: options,
 					instanceTag: instanceTag,
@@ -85,7 +85,7 @@ public partial class WvBlazorTraceServiceTests : BaseTest
 				var customData = Guid.NewGuid().ToString();
 				//when
 				Action action = () => WvBlazorTraceServiceMock.Object.OnExit(
-					component: Component,
+					caller: Component,
 					traceId: traceId,
 					options: options,
 					instanceTag: instanceTag,
