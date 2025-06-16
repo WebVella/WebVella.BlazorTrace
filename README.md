@@ -6,7 +6,7 @@
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](https://github.com/WebVella/WebVella.BlazorTrace/blob/main/LICENSE)
 
 ## What is BlazorTrace?
-An easy to add library that will enable you to get detailed information about your Blazor components rerenders and memory, as well as compare it with different snapshots that you created. It is targeting Blazor UI developers and presents the information in a simple and focused way. BlazorTrace will help you build better, faster and more consistent user experience with your Blazor applications.
+An easy to add library that will enable you to get detailed information about your Blazor components rerenders and memory, as well as compare it with different snapshots that you created. It is targeting Blazor UI developers and presents the information in a simple and focused way. BlazorTrace will help you develop better, faster and more consistent user experience with your Blazor applications.
 
 ## About Us
 We are a small team of early Blazor adopters that created several complex Blazor applications that work in production. We prefer working with WebAssembly deployments but SSR is getting a favorite fast. We have 15+ experience in creating .net projects. Here is some examples of our work
