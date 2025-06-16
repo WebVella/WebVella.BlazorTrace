@@ -18,6 +18,9 @@
 		<PackageReleaseNotes>Initial release</PackageReleaseNotes>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 	</PropertyGroup>
+
+
+
 	<ItemGroup>
 		<Content Remove="compilerconfig.json" />
 	</ItemGroup>
@@ -65,9 +68,18 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Update="FodyWeavers.xml">
+	  <Compile Remove="WebVella.BlazorTrace.Module.cs" />
+	  <Content Update="FodyWeavers.xml">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
+	  </Content>
+	  <Content Update="WebVella.BlazorTrace.Module.cs">
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+
+	  <Content Include="FodyWeavers.xml" Pack="true" PackagePath="FodyWeavers.xml" />
+	  <Content Include="WebVella.BlazorTrace.Module.cs" Pack="true" PackagePath="WebVella.BlazorTrace.Module.cs" />
+	  <Content Include="WebVella.BlazorTrace.targets" Pack="true" PackagePath=".\build\WebVella.BlazorTrace.targets" />
 	</ItemGroup>
-	
+
+
 </Project>

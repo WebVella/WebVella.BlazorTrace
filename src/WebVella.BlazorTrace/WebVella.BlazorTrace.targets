@@ -1,0 +1,6 @@
+<Project>
+	<Target Name="CopyCustomContent" BeforeTargets="BeforeBuild">
+		<Copy SourceFiles="$(MSBuildThisFileDirectory)..\FodyWeavers.xml"  DestinationFolder="$(ProjectDir)" />
+		<Copy SourceFiles="$(MSBuildThisFileDirectory)..\WebVella.BlazorTrace.Module.cs"  DestinationFolder="$(ProjectDir)" />
+	</Target>
+</Project>
