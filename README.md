@@ -30,28 +30,26 @@ You can find our documentation in the [Wiki section of this repository](https://
 To start using BlazorTrace you need to do the following simple steps:
 
 1. Add the latest version of the [WebVella.BlazorTrace Nuget package](https://www.nuget.org/packages/WebVella.BlazorTrace) to your component holding projects directly. It is important to be directly referenced, so the ```FodyWeavers.xml``` and ```WvBlazorTraceModule.cs``` can be generated in the projects root!
-2. Add the latest version of the [MethodDecorator.Fody Nuget package](https://www.nuget.org/packages/MethodDecorator.Fody) to your component holding project directly. It is required by the Fody library used for method decoration.
-3. Add the following lines in your ```Program.cs``` file. You can get more info about options to fine tune or extending SignalR hub size for larger snapshot in the [wiki](https://github.com/WebVella/WebVella.BlazorTrace/wiki).
+2. Add the following lines in your ```Program.cs``` file. You can get more info about options to fine tune or extending SignalR hub size for larger snapshot in the [wiki](https://github.com/WebVella/WebVella.BlazorTrace/wiki).
 
 ``` csharp
 builder.Services.AddBlazorTrace();
 ```
-4. Add the BlazorTrace component at the end of your ```App.razor``` or ```Routes.razor``` component (depending on your project type)
-
-``` razor
-<Router AppAssembly="@typeof(App).Assembly">
-    <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
-    </Found>
-</Router>
-<WvBlazorTrace/> @* <-- INSERT HERE *@
-```
-5. In your ```_Imports.razor``` file add the following lines so all supported components can start being monitored
+3. In your ```_Imports.razor``` file add the following lines so all supported components can start being monitored
 
 ``` razor
 @using WebVella.BlazorTrace;
 @attribute [WvBlazorTrace]
 ```
+4. Add the BlazorTrace component at the end of your ```App.razor``` or ```Routes.razor``` component (depending on your project type)
+
+``` razor
+<Router AppAssembly="@typeof(App).Assembly">
+...
+</Router>
+<WvBlazorTrace/> @* <-- INSERT HERE *@
+```
+5. Rebuild the solution
 6. Thats it. You can start reviewing the data. PRO TIP: Use the F1 (show) and Esc (hide) to save time.
 
 ### Method OnEnter/OnExit call information
