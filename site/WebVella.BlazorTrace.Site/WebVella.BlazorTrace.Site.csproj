@@ -8,24 +8,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Content Include="FodyWeavers.xml">
-	    <PackagePath>FodyWeavers.xml</PackagePath>
-	    <Pack>true</Pack>
-	  </Content>
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.6" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.6" PrivateAssets="all" />
 	</ItemGroup>
-
-	<!--<ItemGroup Condition="'$(TargetFramework)'=='net9.0'">-->
-	<ItemGroup>
-		<PackageReference Include="MethodDecorator.Fody" Version="1.1.1" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.5" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.5" PrivateAssets="all" />
-	</ItemGroup>
-
-	<!--<ItemGroup Condition="'$(TargetFramework)'=='net8.0'">
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.16" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.16" PrivateAssets="all" />
-		<PackageReference Include="Microsoft.NET.Sdk.WebAssembly.Pack" Version="8.0.16" />
-	</ItemGroup>-->
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\src\WebVella.BlazorTrace\WebVella.BlazorTrace.csproj" />

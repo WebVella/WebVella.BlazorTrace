@@ -20,7 +20,7 @@ public static partial class WvTraceUtility
 			TraceId = traceId,
 			MethodName = methodName,
 			ComponentFullName = componentType.FullName,
-			ComponentName = (componentType.FullName ?? "").Split(".", StringSplitOptions.RemoveEmptyEntries).LastOrDefault(),
+			ComponentName = componentType.Name,
 			InstanceTag = instanceTag,
 			ModuleName = componentType?.Module.Name?.Replace(".dll", "")
 		};
