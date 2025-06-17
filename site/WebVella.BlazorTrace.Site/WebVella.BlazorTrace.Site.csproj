@@ -7,6 +7,13 @@
 		<ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
 	</PropertyGroup>
 
+	<ItemGroup>
+	  <Content Include="FodyWeavers.xml">
+	    <PackagePath>FodyWeavers.xml</PackagePath>
+	    <Pack>true</Pack>
+	  </Content>
+	</ItemGroup>
+
 	<!--<ItemGroup Condition="'$(TargetFramework)'=='net9.0'">-->
 	<ItemGroup>
 		<PackageReference Include="MethodDecorator.Fody" Version="1.1.1" />
