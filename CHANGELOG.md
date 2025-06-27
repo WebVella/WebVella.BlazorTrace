@@ -1,7 +1,10 @@
-#v1.0.10
+# v1.0.11
+-- FIX
+
+# v1.0.10
 -- add ability to review the traces as a chronological log
 
-#v1.0.9
+# v1.0.9
 - [[LlamaNL](https://github.com/LlamaNL)] Made Fody dependency transitive to user project can use the library
 - addon nugets updated
 - trace component name now uses Type.Name 
