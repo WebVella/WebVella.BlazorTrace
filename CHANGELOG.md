@@ -1,3 +1,14 @@
+#v1.0.10
+-- add ability to review the traces as a chronological log
+
+#v1.0.9
+- [[LlamaNL](https://github.com/LlamaNL)] Made Fody dependency transitive to user project can use the library
+- addon nugets updated
+- trace component name now uses Type.Name 
+
+# v1.0.8
+- greatly simplifying the way the library is configured for use
+  
 # v1.0.7
 - FEATURE: trace be decoration component class or methods with [WvBlazorTrace] attribute
 - CODE CLEAN: moving the solution file to the /src folder
