@@ -66,6 +66,83 @@ public static class WvModalUtility
 		return result;
 	}
 
+	public static List<WvConsoleLog> GenerateMethodLogRows(this WvSnapshot primarySn, List<WvTraceMute> muteTraces)
+	{
+		var result = new List<WvConsoleLog>();
+		foreach (var moduleName in primarySn.ModuleDict.Keys)
+		{
+			var module = primarySn.ModuleDict[moduleName];
+			foreach (var componentFullName in module.ComponentDict.Keys)
+			{
+				var component = module.ComponentDict[componentFullName];
+				foreach (var componentTaggedInstance in component.TaggedInstances)
+				{
+					foreach (var method in componentTaggedInstance.MethodsTotal())
+					{
+						if (method.Name.IsMethodMuted(
+							moduleName: moduleName,
+							componentFullName: componentFullName,
+							instanceTag: componentTaggedInstance.Tag,
+							muteList: muteTraces
+							)) continue;
+						foreach (var trace in method.TraceList)
+						{
+							if (trace.EnteredOn is not null)
+							{
+								result.Add(trace.ConvertTraceToLog(
+									isOnEnter: true,
+									moduleName: moduleName,
+									componentName: component.Name,
+									instanceTag: componentTaggedInstance.Tag,
+									methodName: method.Name,
+									signal: null
+									));
+							}
+							if (trace.ExitedOn is not null)
+							{
+								result.Add(trace.ConvertTraceToLog(
+									isOnEnter: false,
+									moduleName: moduleName,
+									componentName: component.Name,
+									instanceTag: componentTaggedInstance.Tag,
+									methodName: method.Name,
+									signal: null
+									));
+							}
+						}
+					}
+				}
+			}
+		}
+		result.AddRange(result);
+		result.AddRange(result);
+		result.AddRange(result);
+		result.AddRange(result);
+		result.AddRange(result);
+		return result.OrderBy(x => x.CreatedOn).ToList();
+	}
+
+	public static List<WvConsoleLog> GenerateSignalLogRows(this WvSnapshot primarySn, List<WvTraceMute> muteTraces)
+	{
+		var result = new List<WvConsoleLog>();
+		foreach (var signalName in primarySn.SignalDict.Keys)
+		{
+			var signal = primarySn.SignalDict[signalName];
+			foreach (var trace in signal.TraceList)
+			{
+				result.Add(trace.ConvertTraceToLog(
+					moduleName: trace.ModuleName,
+					componentName: trace.ComponentName,
+					instanceTag: trace.InstanceTag,
+					methodName: trace.MethodName,
+					signal: signalName
+					));
+			}
+		}
+
+		return result.OrderBy(x => x.CreatedOn).ToList();
+	}
+
 	public static List<WvSignalTraceRow> GenerateSignalTraceRows(this WvSnapshot primarySn,
 		WvSnapshot secondarySn, List<WvTraceMute> muteTraces, List<string> pins)
 	{
@@ -317,7 +394,7 @@ public static class WvModalUtility
 		}
 		return result;
 	}
-	private static void SetModuleUnionData(this Dictionary<string, WvModuleUnionData> unionDict,
+	public static void SetModuleUnionData(this Dictionary<string, WvModuleUnionData> unionDict,
 		string moduleName,
 		WvTraceSessionModule module,
 		bool isPrimary)
@@ -331,7 +408,7 @@ public static class WvModalUtility
 			unionDict[moduleName].Secondary = module;
 	}
 
-	private static void SetComponentUnionData(this Dictionary<string, WvModuleUnionData> unionDict,
+	public static void SetComponentUnionData(this Dictionary<string, WvModuleUnionData> unionDict,
 		string moduleName,
 		string componentFullName,
 		WvTraceSessionComponent component,
@@ -347,7 +424,7 @@ public static class WvModalUtility
 			unionDict[moduleName].ComponentDict[componentFullName].Secondary = component;
 	}
 
-	private static void SetSignalUnionData(this Dictionary<string, WvSignalUnionData> unionDict,
+	public static void SetSignalUnionData(this Dictionary<string, WvSignalUnionData> unionDict,
 		string signalName,
 		WvTraceSessionSignal signal,
 		bool isPrimary)
@@ -362,7 +439,7 @@ public static class WvModalUtility
 			unionDict[signalName].Secondary = signal;
 	}
 
-	private static void SetTaggedInstanceUnionData(this Dictionary<string, WvModuleUnionData> unionDict,
+	public static void SetTaggedInstanceUnionData(this Dictionary<string, WvModuleUnionData> unionDict,
 		string moduleName,
 		string componentFullName,
 		WvTraceSessionComponentTaggedInstance taggedInstance,
@@ -384,7 +461,7 @@ public static class WvModalUtility
 			matchedInstanceUnionData.Secondary = taggedInstance;
 	}
 
-	private static void SetMethodUnionData(this Dictionary<string, WvModuleUnionData> unionDict,
+	public static void SetMethodUnionData(this Dictionary<string, WvModuleUnionData> unionDict,
 		string moduleName,
 		string componentFullName,
 		string? taggedInstanceTag,
@@ -497,5 +574,53 @@ public static class WvModalUtility
 		}
 
 		return String.Empty;
+	}
+
+	public static WvConsoleLog ConvertTraceToLog(this WvTraceSessionMethodTrace trace,
+		bool isOnEnter,
+		string? moduleName,
+		string? componentName,
+		string? instanceTag,
+		string? methodName,
+		string? signal
+		)
+	{
+		if (isOnEnter && trace.EnteredOn is null)
+			throw new Exception("EnteredOn is null");
+
+		if (!isOnEnter && trace.ExitedOn is null)
+			throw new Exception("ExitedOn is null");
+
+		return new WvConsoleLog()
+		{
+			CreatedOn = isOnEnter ? trace.EnteredOn!.Value : trace.ExitedOn!.Value,
+			Type = isOnEnter ? "OnEnter" : "OnExit",
+			Module = moduleName,
+			Component = componentName,
+			InstanceTag = instanceTag,
+			Method = methodName,
+			Signal = signal
+		};
+	}
+
+	public static WvConsoleLog ConvertTraceToLog(this WvTraceSessionSignalTrace trace,
+		string? moduleName,
+		string? componentName,
+		string? instanceTag,
+		string? methodName,
+		string? signal
+		)
+	{
+
+		return new WvConsoleLog()
+		{
+			CreatedOn = trace.SendOn,
+			Type = "Signal",
+			Module = moduleName,
+			Component = componentName,
+			InstanceTag = instanceTag,
+			Method = methodName,
+			Signal = signal
+		};
 	}
 }

@@ -18,7 +18,7 @@ using WebVella.BlazorTrace.Utility;
 namespace WebVella.BlazorTrace;
 public partial interface IWvBlazorTraceService
 {
-	Task<WvTraceModalData> GetModalDataAsync(IJSRuntime jsRuntime,WvTraceModalRequest? request);
+	Task<WvTraceModalData> GetModalDataAsync(IJSRuntime jsRuntime, WvTraceModalRequest? request);
 }
 public partial class WvBlazorTraceService : IWvBlazorTraceService
 {
@@ -28,7 +28,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 	/// <param name="request"></param>
 	/// <returns></returns>
 	/// <exception cref="Exception"></exception>
-	public async Task<WvTraceModalData> GetModalDataAsync(IJSRuntime jsRuntime,WvTraceModalRequest? request)
+	public async Task<WvTraceModalData> GetModalDataAsync(IJSRuntime jsRuntime, WvTraceModalRequest? request)
 	{
 		ProcessQueue();
 		var result = new WvTraceModalData();
@@ -42,7 +42,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 				request = new() { Menu = WvTraceModalMenu.MethodCalls };
 		}
 		result.Request = request;
-		await SaveLastestRequestAsync(jsRuntime,request);
+		await SaveLastestRequestAsync(jsRuntime, request);
 		//Init snapshots
 		result.SnapshotList = await GetExistingSnapshots(jsRuntime);
 		WvSnapshot primarySN = new();
@@ -57,7 +57,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		};
 		if (request.PrimarySnapshotId.HasValue)
 		{
-			var snapshot = await GetSnapshotAsync(jsRuntime,request.PrimarySnapshotId.Value);
+			var snapshot = await GetSnapshotAsync(jsRuntime, request.PrimarySnapshotId.Value);
 			if (snapshot is null) throw new Exception($"Primary snapshot not found");
 			primarySN = snapshot;
 		}
@@ -67,7 +67,7 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 		}
 		if (request.SecondarySnapshotId.HasValue)
 		{
-			var snapshot = await GetSnapshotAsync(jsRuntime,request.SecondarySnapshotId.Value);
+			var snapshot = await GetSnapshotAsync(jsRuntime, request.SecondarySnapshotId.Value);
 			if (snapshot is null) throw new Exception($"Secondary snapshot not found");
 			secondarySN = snapshot;
 		}
@@ -76,12 +76,12 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 			secondarySN = currentSN;
 		}
 
-		if (result.Request.IsMethodMenu)
+		if (result.Request.IsMethodDataMenu)
 		{
 			var traceRows = primarySN.GenerateMethodTraceRows(
 				secondarySn: secondarySN,
-				muteTraces:store.MutedTraces,
-				pins:store.Pins
+				muteTraces: store.MutedTraces,
+				pins: store.Pins
 			);
 			foreach (var row in traceRows)
 			{
@@ -120,12 +120,16 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 				result.MethodTraceRows = result.MethodTraceRows.OrderBy(x => $"{x.Module}{x.ComponentFullName}{x.Method}").ToList();
 			}
 		}
-		else if (result.Request.IsSignalMenu)
+		else if (result.Request.IsMethodLogMenu)
+		{
+			result.MethodLog = primarySN.GenerateMethodLogRows(muteTraces: store.MutedTraces);
+		}
+		else if (result.Request.IsSignalDataMenu)
 		{
 			var signalTraceRows = primarySN.GenerateSignalTraceRows(
 				secondarySn: secondarySN,
-				muteTraces:store.MutedTraces,
-				pins:store.Pins
+				muteTraces: store.MutedTraces,
+				pins: store.Pins
 			);
 			foreach (var row in signalTraceRows)
 			{
@@ -151,6 +155,10 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService
 			{
 				result.SignalTraceRows = result.SignalTraceRows.OrderBy(x => $"{x.SignalName}").ToList();
 			}
+		}
+		else if (result.Request.IsSignalLogMenu)
+		{
+			result.SignalLog = primarySN.GenerateSignalLogRows(muteTraces: store.MutedTraces);
 		}
 		else if (result.Request.IsTraceMuteMenu)
 		{

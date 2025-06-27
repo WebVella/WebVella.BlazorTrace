@@ -1,0 +1,62 @@
+﻿@namespace WebVella.BlazorTrace
+@using WebVella.BlazorTrace.Utility
+
+<div class="wv-log">
+	<div class="wv-log__items">
+		<Virtualize Items=Items Context="item" TItem="WvConsoleLog">
+			<div class="wv-log__item">
+				<div class="wv-log__item__datetype">
+					<span class="wv-log__item__datetype__separator">[</span><span class="wv-log__item__datetype__date">@item.CreatedOn.ToString("HH:mm:ss:fff")</span> <span class="wv-log__item__datetype__type">@item.Type</span><span class="wv-log__item__datetype__separator">]</span>
+				</div>
+
+				@if (!String.IsNullOrWhiteSpace(item.Signal))
+				{
+					<div class="wv-log__item__name">@item.Signal</div>
+					<div class="wv-log__item__description">
+						<span class="text">@item.Module</span>
+						<span class="wv-log__item__description__separator">></span>
+						<span class="text">
+							<span>@item.Component</span>
+							@if (!String.IsNullOrWhiteSpace(item.InstanceTag))
+							{
+								<span> [@item.InstanceTag]</span>
+							}
+						</span>
+						<span class="wv-log__item__description__separator">></span>
+						<span class="text">@item.Method</span>
+					</div>
+				}
+				else
+				{
+					<div class="wv-log__item__name">@item.Method</div>
+					<div class="wv-log__item__description">
+						<span class="text">@item.Module</span>
+						<span class="wv-log__item__description__separator">></span>
+						<span class="text">
+							<span>@item.Component</span>
+							@if (!String.IsNullOrWhiteSpace(item.InstanceTag))
+							{
+								<span> [@item.InstanceTag]</span>
+							}
+						</span>
+					</div>
+				}
+
+
+			</div>
+		</Virtualize>
+		@if (Items.Count == 0)
+		{
+			<div class="wv-log__item wv-log__item--noitems">
+				<div class="wv-log__item__description">
+					No items in the log
+				</div>
+			</div>
+		}
+	</div>
+</div>
+
+
+@code {
+	[Parameter] public List<WvConsoleLog> Items { get; set; } = new();
+}

@@ -600,3 +600,37 @@
 .wv-trace-nav li > span svg {
   margin-left: 5px;
 }
+.wv-log {
+  background: #09090b;
+  border: 1px solid #27272a;
+  height: 100%;
+}
+.wv-log__items {
+  padding: 10px;
+  height: 100%;
+  overflow-y: auto;
+}
+.wv-log__item {
+  margin-bottom: 5px;
+  display: flex;
+}
+.wv-log__item__datetype {
+  color: #fff;
+  margin-right: 15px;
+}
+.wv-log__item__datetype__date {
+  color: #9ca3af;
+}
+.wv-log__item__datetype__separator {
+  color: #9ca3af;
+}
+.wv-log__item__name {
+  color: #06b6d4;
+  margin-right: 15px;
+}
+.wv-log__item__description {
+  color: #9ca3af;
+}
+.wv-log__item__description__separator {
+  color: #9ca3af;
+}

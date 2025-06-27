@@ -1,0 +1,10 @@
+﻿@namespace WebVella.BlazorTrace
+@using WebVella.BlazorTrace.Utility
+
+@if (Data is not null && Data.Request is not null && Data.Request!.IsMethodLogMenu)
+{
+	<WvBlazorTraceConsole Items="Data.MethodLog"/>
+}
+@code {
+	[Parameter] public WvTraceModalData? Data { get; set; } = null;
+}

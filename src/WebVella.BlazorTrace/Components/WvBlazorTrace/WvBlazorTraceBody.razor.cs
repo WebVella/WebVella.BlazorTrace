@@ -397,11 +397,13 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 			new WvTraceModalMenuItem{ Id = WvTraceModalMenu.MethodDuration},
 			new WvTraceModalMenuItem{ Id = WvTraceModalMenu.MethodLimits},
 			new WvTraceModalMenuItem{ Id = WvTraceModalMenu.MethodName},
+			new WvTraceModalMenuItem{ Id = WvTraceModalMenu.MethodLog},
 		};
 		_signalMenu = new(){
 			new WvTraceModalMenuItem{ Id = WvTraceModalMenu.SignalCalls},
 			new WvTraceModalMenuItem{ Id = WvTraceModalMenu.SignalLimits},
-			new WvTraceModalMenuItem{ Id = WvTraceModalMenu.SignalName}
+			new WvTraceModalMenuItem{ Id = WvTraceModalMenu.SignalName},
+			new WvTraceModalMenuItem{ Id = WvTraceModalMenu.SignalLog},
 		};
 		_asideMenu = new(){
 			new WvTraceModalMenuItem{ Id = WvTraceModalMenu.TraceMutes, Counter = _currentMutes.Count},
@@ -439,6 +441,8 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 				var data = await WvBlazorTraceService.GetModalDataAsync(JSRuntimeSrv, _data?.Request);
 				_data!.MethodTraceRows = data.MethodTraceRows;
 				_data!.SignalTraceRows = data.SignalTraceRows;
+				_data!.MethodLog = data.MethodLog;
+				_data!.SignalLog = data.SignalLog;
 			}
 		}
 		catch (Exception ex)
@@ -506,7 +510,9 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 					continue;
 				WvBlazorTraceService.ProcessQueue();
 				if (_data!.Request.IsAutoRefresh)
+				{
 					await _getData(fromLoop: true);
+				}
 			}
 		}, _infiniteLoopCancellationTokenSource.Token);
 	}

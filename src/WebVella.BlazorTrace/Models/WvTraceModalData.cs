@@ -32,7 +32,7 @@ public class WvTraceModalRequest
 		&& !IsAutoRefresh;
 	}
 	[JsonIgnore]
-	public bool IsMethodMenu
+	public bool IsMethodDataMenu
 	{
 		get
 		{
@@ -47,9 +47,21 @@ public class WvTraceModalRequest
 			return false;
 		}
 	}
+	[JsonIgnore]
+	public bool IsMethodLogMenu
+	{
+		get
+		{
+			if (
+				Menu == WvTraceModalMenu.MethodLog
+			) return true;
+
+			return false;
+		}
+	}
 
 	[JsonIgnore]
-	public bool IsSignalMenu
+	public bool IsSignalDataMenu
 	{
 		get
 		{
@@ -57,6 +69,19 @@ public class WvTraceModalRequest
 				Menu == WvTraceModalMenu.SignalCalls
 				|| Menu == WvTraceModalMenu.SignalLimits
 				|| Menu == WvTraceModalMenu.SignalName
+			) return true;
+
+			return false;
+		}
+	}
+
+	[JsonIgnore]
+	public bool IsSignalLogMenu
+	{
+		get
+		{
+			if (
+				Menu == WvTraceModalMenu.SignalLog
 			) return true;
 
 			return false;
@@ -110,6 +135,11 @@ public enum WvTraceModalMenu
 	Snapshots = 9,
 	[Description("Muted")]
 	TraceMutes = 10,
+	[Description("Log")]
+	MethodLog = 11,
+	[Description("Log")]
+	SignalLog = 12,
+	
 }
 public enum WvTraceModalCallsFilter
 {
@@ -178,6 +208,8 @@ public class WvTraceModalData
 	public List<WvMethodTraceRow> MethodTraceRows { get; set; } = new();
 	public List<WvSignalTraceRow> SignalTraceRows { get; set; } = new();
 	public List<WvTraceMute> MutedTraceRows { get; set; } = new();
+	public List<WvConsoleLog> MethodLog { get; set; } = new();
+	public List<WvConsoleLog> SignalLog { get; set; } = new();
 }
 public class WvTraceModalRequestMethodsFilter
 {
