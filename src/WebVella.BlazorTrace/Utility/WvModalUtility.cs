@@ -114,11 +114,6 @@ public static class WvModalUtility
 				}
 			}
 		}
-		result.AddRange(result);
-		result.AddRange(result);
-		result.AddRange(result);
-		result.AddRange(result);
-		result.AddRange(result);
 		return result.OrderBy(x => x.CreatedOn).ToList();
 	}
 
