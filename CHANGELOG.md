@@ -1,8 +1,11 @@
+# v1.0.12
+- updating .net 8 version
+
 # v1.0.11
--- FIX
+- FIX
 
 # v1.0.10
--- add ability to review the traces as a chronological log
+- add ability to review the traces as a chronological log
 
 # v1.0.9
 - [[LlamaNL](https://github.com/LlamaNL)] Made Fody dependency transitive to user project can use the library
