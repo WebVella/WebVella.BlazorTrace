@@ -86,7 +86,3 @@
 		return keys;
 	},
 }
-
-document.addEventListener("DOMContentLoaded", function () {
-	WebVellaBlazorTrace.init();
-});

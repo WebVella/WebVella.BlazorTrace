@@ -12,19 +12,19 @@ public class Program
 		builder.RootComponents.Add<HeadOutlet>("head::after");
 
 		builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
-//		builder.Services.AddBlazorTrace(new WvBlazorTraceConfiguration()
-//		{
-//#if DEBUG
-//			EnableTracing = true,
-//			AutoShowModal = true,
-//#else
-//			EnableTracing = false,
-//#endif
-//			EnableF1Shortcut = true,
-//			MemoryIncludeAssemblyList = new(){
-//				"WebVella.BlazorTrace.Site"
-//			}
-//		});
+		builder.Services.AddBlazorTrace(new WvBlazorTraceConfiguration()
+		{
+#if DEBUG
+			EnableTracing = true,
+			AutoShowModal = true,
+#else
+			EnableTracing = false,
+#endif
+			EnableF1Shortcut = true,
+			MemoryIncludeAssemblyList = new(){
+				"WebVella.BlazorTrace.Site"
+			}
+		});
 
 		await builder.Build().RunAsync();
 	}
