@@ -96,6 +96,9 @@ He saved time to all of us, by finding a way how to create faster tracer interga
 ### [Tension-Maleficent](https://www.reddit.com/user/Tension-Maleficent/)
 For helping with the FODY implementation
 
+### [derekwelton](https://github.com/derekwelton)
+Provided the idea of creating CSV and JSON exports of the data for easier postpocessing and analizing
+
 ### [/r/dotnet](https://www.reddit.com/r/dotnet/), [/r/Blazor](https://www.reddit.com/r/Blazor/), [/r/csharp](https://www.reddit.com/r/csharp/)
 These Reddit communities are home to incredibly welcoming and knowledgeable people, always ready to offer help with questions, problems, or advice. 
 
