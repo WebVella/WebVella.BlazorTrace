@@ -38,7 +38,6 @@ public partial class WvBlazorTraceService : IWvBlazorTraceService, IDisposable
 	private Task? _infiniteLoop;
 	private CancellationTokenSource? _infiniteLoopCancellationTokenSource;
 
-
 	/// <summary>
 	/// Needs to be implemented to destroy the infinite loop
 	/// </summary>

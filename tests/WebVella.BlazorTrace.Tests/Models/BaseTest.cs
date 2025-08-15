@@ -46,7 +46,7 @@ public class BaseTest
 		this.JsRuntimeMock = new Mock<IJSRuntime>();
 		this.WvBlazorTraceServiceMock = new Mock<WvBlazorTraceService>(
 			this.WvBlazorTraceConfigurationServiceMock.Object,
-			false);
+			null);
 		this.Component = new TestComponent();
 	}
 

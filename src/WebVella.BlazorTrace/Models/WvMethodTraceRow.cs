@@ -167,5 +167,39 @@ public class WvMethodTraceRow
 
 		return false;
 	}
+
+	public List<WvMethodTraceCSVRow> GetAsCsvRow()
+	{
+		var result = new List<WvMethodTraceCSVRow>();
+		var generalDataRow = new WvMethodTraceCSVRow
+		{
+			Module = Module,
+			Component = Component,
+			ComponentFullName = ComponentFullName,
+			InstanceTag = InstanceTag,
+			Method = Method,
+		};
+
+		foreach (var trace in TraceList)
+		{
+			var memoryDelta = WvTraceUtility.GetMemoryDelta(trace.OnEnterMemoryBytes,trace.OnExitMemoryBytes);
+			var traceRow = generalDataRow with
+			{
+				TraceId = trace.TraceId.ToString(),
+				EnteredOn = trace.EnteredOn?.WvBTToTimeString(),
+				ExitedOn = trace.ExitedOn?.WvBTToTimeString(),
+				DurationMs = trace.DurationMs is not null ? $"{trace.DurationMs} ms" : "n/a",
+				OnEnterMemory = trace.OnEnterMemoryBytes.WvBTToKilobytesString(),
+				OnExitMemory = trace.OnExitMemoryBytes.WvBTToKilobytesString(),
+				MemoryDelta = memoryDelta is not null ? memoryDelta.WvBTToKilobytesString() : "n/a",
+				OnEnterCustomData = trace.OnEnterCustomData,
+				OnExitCustomData = trace.OnExitCustomData,
+			};
+			result.Add(traceRow);
+		}
+
+
+		return result;
+	}
 }
 

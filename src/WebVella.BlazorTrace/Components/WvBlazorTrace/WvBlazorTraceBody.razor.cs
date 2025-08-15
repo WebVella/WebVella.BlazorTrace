@@ -46,6 +46,7 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 	private WvBlazorTraceSignalLimitModal? _signalLimitModal = null;
 	private WvBlazorTraceMuteMethodModal? _traceMuteModal = null;
 	private WvBlazorTraceMuteSignalModal? _signalMuteModal = null;
+	private WvBlazorTraceExportModal? _exportModal = null;
 	private string? _primarySnHighlightClass = null;
 
 	private List<WvTraceModalMenuItem> _methodMenu = new();
@@ -193,8 +194,16 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 	private async Task _menuClick(WvTraceModalMenuItem item)
 	{
 		if (_data?.Request is null) return;
-		_data.Request.Menu = item.Id;
-		await _getData();
+		if (item.Id == WvTraceModalMenu.Export)
+		{
+			if (_exportModal is null) return;
+			await _exportModal.Show(_data);
+		}
+		else
+		{
+			_data.Request.Menu = item.Id;
+			await _getData();
+		}
 	}
 	private async Task _showTraceListModal(object row)
 	{
@@ -408,6 +417,7 @@ public partial class WvBlazorTraceBody : WvBlazorTraceComponentBase, IAsyncDispo
 		_asideMenu = new(){
 			new WvTraceModalMenuItem{ Id = WvTraceModalMenu.TraceMutes, Counter = _currentMutes.Count},
 			new WvTraceModalMenuItem{ Id = WvTraceModalMenu.Snapshots},
+			new WvTraceModalMenuItem{ Id = WvTraceModalMenu.Export},
 		};
 
 

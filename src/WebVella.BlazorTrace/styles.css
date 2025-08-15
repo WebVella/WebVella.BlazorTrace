@@ -1,4 +1,10 @@
-﻿.wv-trace-button {
+﻿.wv-trace-alert {
+  background: #09090b;
+  border: 1px solid #27272a;
+  color: #fff;
+  padding: 1rem 10px;
+}
+.wv-trace-button {
   position: fixed;
   z-index: 19000;
 }
@@ -430,6 +436,9 @@
 .wv-trace-modal__body table tr.wv-selected-row:hover {
   background: rgba(6, 182, 212, 0.2);
 }
+.wv-trace-modal__body > .wv-trace-modal__subheader {
+  margin-bottom: 1rem;
+}
 .wv-trace-modal__footer {
   flex: 0 0 40px;
   background: #020617;
@@ -633,4 +642,14 @@
 }
 .wv-log__item__description__separator {
   color: #9ca3af;
+}
+.wv-trace-textarea {
+  background: #09090b;
+  border: 1px solid #27272a;
+  color: #fff;
+  height: 500px;
+  width: 100%;
+}
+.wv-trace-textarea-wrapper {
+  padding-right: 5px;
 }

@@ -139,6 +139,8 @@ public enum WvTraceModalMenu
 	MethodLog = 11,
 	[Description("Log")]
 	SignalLog = 12,
+	[Description("Export")]
+	Export = 13,
 	
 }
 public enum WvTraceModalCallsFilter

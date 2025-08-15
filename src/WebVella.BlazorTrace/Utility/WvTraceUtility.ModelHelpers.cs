@@ -121,6 +121,16 @@ public static partial class WvTraceUtility
 		}
 		return maxMemoryDelta == -1 ? null : maxMemoryDelta;
 	}
+	public static long? GetMemoryDelta(long? onEnterMemory, long? onExitMemory)
+	{
+		long? memoryDelta = null;
+		if (onEnterMemory.HasValue && onExitMemory.HasValue)
+		{ 
+			memoryDelta = onExitMemory.Value - onEnterMemory.Value;
+		}
+		return memoryDelta;
+	}
+
 	public static (long?, List<WvTraceMemoryInfo>?) GetLastMemory(this WvTraceSessionMethod method)
 	{
 		var lastExitedTrace = method.LastExitedTrace;

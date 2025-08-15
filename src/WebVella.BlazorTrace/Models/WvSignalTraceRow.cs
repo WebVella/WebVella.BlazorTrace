@@ -80,5 +80,32 @@ public class WvSignalTraceRow
 
 		return false;
 	}
+
+	public List<WvSignalTraceCSVRow> GetAsCsvRow()
+	{
+		var result = new List<WvSignalTraceCSVRow>();
+		var generalDataRow = new WvSignalTraceCSVRow
+		{
+			SignalName = SignalName,
+		};
+
+		foreach (var trace in TraceList)
+		{
+			var traceRow = generalDataRow with
+			{
+				SendOn = trace.SendOn.ToString("yyyy-MMM-dd HH:mm:ss:ffff"),
+				ModuleName = trace.ModuleName,
+				ComponentName = trace.ComponentName,
+				ComponentFullName = trace.ComponentFullName,
+				InstanceTag = trace.InstanceTag,
+				MethodName = trace.MethodName,
+				CustomData = trace.CustomData
+			};
+			result.Add(traceRow);
+		}
+
+
+		return result;
+	}
 }
 

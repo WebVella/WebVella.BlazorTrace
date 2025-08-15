@@ -17,4 +17,10 @@
 	/// the background color of the 'heart button'
 	/// </summary>
 	[Parameter] public string ButtonColor { get; set; } = "#be123c";
+
+
+	protected override void OnAfterRender(bool firstRender)
+	{
+		base.OnAfterRender(firstRender);
+	}
 }

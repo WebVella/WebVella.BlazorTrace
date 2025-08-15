@@ -85,4 +85,25 @@
 
 		return keys;
 	},
+	copyToClipboard: function (text) {
+		if (window.isSecureContext) {
+			navigator.clipboard.writeText(text).then(function () { })
+				.catch(function (error) {
+					log.error(error);
+				});
+		}
+		else {
+			const textArea = document.createElement("textarea");
+			textArea.value = text;
+			document.body.appendChild(textArea);
+			textArea.focus();
+			textArea.select();
+			try {
+				document.execCommand('copy');
+			} catch (err) {
+				console.error('Unable to copy to clipboard', err);
+			}
+			document.body.removeChild(textArea);
+		}
+	},
 }

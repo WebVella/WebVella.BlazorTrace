@@ -1,0 +1,58 @@
+﻿@namespace WebVella.BlazorTrace
+@using WebVella.BlazorTrace.Utility
+@inherits WvBlazorTraceComponentBase
+@if (_modalVisible)
+{
+
+	var style = $"z-index:{(20000 + (2 * NestLevel))}";
+	<WvBlazorTraceModalOverlay NestLevel="@NestLevel" OnHide="@(() => Hide(false))" />
+	<div class="wv-trace-modal medium" style="@style">
+		<div class="wv-trace-modal__header">
+			<div class="wv-trace-modal__header__left" style="flex:1 1 auto;">Export data</div>
+			<div class="wv-trace-modal__header__right">
+				<button title="Close [Esc]" type="button" class="circle icon" @onclick=@(() => Hide(false))>X</button>
+			</div>
+		</div>
+		<div class="wv-trace-modal__body">
+			@if (!String.IsNullOrWhiteSpace(_csv) || !String.IsNullOrWhiteSpace(_json))
+			{
+				<div class="wv-trace-modal__subheader">
+					<div class="wv-trace-modal__subheader__left">
+						<ul class="wv-trace-nav">
+							<li>
+								<span>Export type:</span>
+							</li>
+							<li class="@(_mode == WvBlazorTraceExportModalMode.Csv ? "active" : "")">
+								<a href="#" @onclick=@(() => _setMode(WvBlazorTraceExportModalMode.Csv)) @onclick:preventDefault>CSV</a>
+							</li>
+							<li class="@(_mode == WvBlazorTraceExportModalMode.Json ? "active" : "")">
+								<a href="#" @onclick=@(() => _setMode(WvBlazorTraceExportModalMode.Json)) @onclick:preventDefault>JSON</a>
+							</li>
+						</ul>
+					</div>
+					<div class="wv-trace-modal__subheader__right">
+						<div class="wv-trace-modal__subheader__right__button">
+							<button class="@_copyBtnClass" type="button" @onclick=@_copyClipboard>
+								@_copyBtnText
+							</button>
+						</div>
+					</div>
+				</div>
+				<div class="wv-trace-textarea-wrapper">
+					<textarea class="wv-trace-textarea" readonly>@((MarkupString)_content)</textarea>
+				</div>
+			}
+			else
+			{
+				<div class="wv-trace-alert">There is not data to export on this screen</div>
+			}
+		</div>
+		<div class="wv-trace-modal__footer">
+			<button title="Close [Esc]" type="button" @onclick=@(() => Hide(false))>Close [Esc]</button>
+		</div>
+	</div>
+}
+
+
+
+
