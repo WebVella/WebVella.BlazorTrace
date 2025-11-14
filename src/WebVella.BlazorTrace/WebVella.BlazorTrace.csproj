@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
 	<PropertyGroup>
-		<TargetFrameworks>net9.0;net8.0</TargetFrameworks>
+		<TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Title>WebVella.BlazorTrace</Title>
-		<Version>1.1.0</Version>
+		<Version>1.2.0</Version>
 		<Authors>WebVella</Authors>
 		<Company>WebVella</Company>
 		<Description>Easy to plugin library for tracing most common problems when building a Blazor application like unnecessary renders, memory leaks, slow components</Description>
@@ -55,15 +55,17 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Fody" Version="6.9.2" PrivateAssets="none"/>
+		<PackageReference Include="Fody" Version="6.9.3" PrivateAssets="none" />
 		<PackageReference Include="MethodDecorator.Fody" Version="1.1.1" PrivateAssets="none" />
 		<PackageReference Include="Nito.AsyncEx" Version="5.1.2" />
 	</ItemGroup>
 
+	<ItemGroup Condition="'$(TargetFramework)'=='net10.0'">
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.0" />
+	</ItemGroup>
 	<ItemGroup Condition="'$(TargetFramework)'=='net9.0'">
 		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.8" />
 	</ItemGroup>
-
 	<ItemGroup Condition="'$(TargetFramework)'=='net8.0'">
 		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="[8.0.17]" />
 	</ItemGroup>
